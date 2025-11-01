@@ -1,0 +1,211 @@
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  color: #605e5c;
+  text-align: center;
+}
+
+.empty-state i {
+  font-size: 64px;
+  color: #d2d0ce;
+  margin-bottom: 20px;
+}
+
+.empty-state h3 {
+  font-size: 20px;
+  margin-bottom: 8px;
+  color: #323130;
+}
+
+.empty-state p {
+  font-size: 14px;
+}
+
+/* Grid View */
+.file-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 20px;
+}
+
+.file-card {
+  background: white;
+  border: 1px solid #edebe9;
+  border-radius: 6px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.file-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-color: #d2d0ce;
+}
+
+.file-card.selected {
+  border-color: #0078d4;
+  background-color: #f3f9fd;
+}
+
+.file-card-checkbox {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.file-card:hover .file-card-checkbox,
+.file-card.selected .file-card-checkbox {
+  opacity: 1;
+}
+
+.file-card-checkbox input {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+.file-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100px;
+  margin-bottom: 12px;
+}
+
+.file-card-icon i {
+  font-size: 48px;
+}
+
+.file-card-icon img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.file-card-info {
+  text-align: center;
+}
+
+.file-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #323130;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-meta {
+  font-size: 12px;
+  color: #605e5c;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.file-card-download {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: white;
+  border: 1px solid #d2d0ce;
+  border-radius: 4px;
+  padding: 6px 10px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: #0078d4;
+}
+
+.file-card:hover .file-card-download {
+  opacity: 1;
+}
+
+.file-card-download:hover {
+  background-color: #f3f2f1;
+}
+
+/* List View */
+.file-list {
+  padding: 20px;
+}
+
+.file-list-header {
+  display: grid;
+  grid-template-columns: 1fr 180px 120px 80px;
+  gap: 16px;
+  padding: 12px 16px;
+  background-color: #faf9f8;
+  border-bottom: 1px solid #edebe9;
+  font-weight: 600;
+  font-size: 13px;
+  color: #323130;
+}
+
+.file-list-row {
+  display: grid;
+  grid-template-columns: 1fr 180px 120px 80px;
+  gap: 16px;
+  padding: 12px 16px;
+  background: white;
+  border-bottom: 1px solid #edebe9;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.file-list-row:hover {
+  background-color: #f3f2f1;
+}
+
+.file-list-row.selected {
+  background-color: #f3f9fd;
+  border-left: 3px solid #0078d4;
+}
+
+.file-list-col {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #323130;
+}
+
+.col-name {
+  gap: 12px;
+}
+
+.col-name input {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+.col-name i {
+  font-size: 18px;
+}
+
+.col-actions {
+  justify-content: flex-end;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  color: #0078d4;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.btn-icon:hover {
+  background-color: #e1dfdd;
+}

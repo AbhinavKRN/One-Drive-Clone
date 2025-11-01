@@ -1,0 +1,139 @@
+.dashboard {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f3f2f1;
+}
+
+.dashboard-content {
+  display: flex;
+  flex: 1;
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  background-color: white;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #edebe9;
+  background-color: #faf9f8;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  flex-wrap: wrap;
+}
+
+.breadcrumb {
+  color: #0078d4;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.breadcrumb:hover {
+  background-color: #e1dfdd;
+  text-decoration: underline;
+}
+
+.separator {
+  color: #605e5c;
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-upload,
+.btn-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #0078d4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-upload:hover,
+.btn-action:hover {
+  background-color: #106ebe;
+}
+
+.btn-action {
+  background-color: #f3f2f1;
+  color: #323130;
+  border: 1px solid #d2d0ce;
+}
+
+.btn-action:hover {
+  background-color: #e1dfdd;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 4px;
+  margin-left: 8px;
+  border: 1px solid #d2d0ce;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.view-toggle button {
+  background: white;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  color: #605e5c;
+  transition: all 0.2s;
+}
+
+.view-toggle button:hover {
+  background-color: #f3f2f1;
+}
+
+.view-toggle button.active {
+  background-color: #0078d4;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .dashboard-content {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .toolbar-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
