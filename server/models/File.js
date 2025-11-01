@@ -1,35 +1,37 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
-const fileSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true
+const fileSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    type: {
+      type: String,
+      required: true,
+    },
+    size: {
+      type: Number,
+      required: true,
+    },
+    path: {
+      type: String,
+      required: true,
+    },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    folderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Folder",
+      default: null,
+    },
   },
-  type: {
-    type: String,
-    required: true
-  },
-  size: {
-    type: Number,
-    required: true
-  },
-  path: {
-    type: String,
-    required: true
-  },
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  folderId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Folder',
-    default: null
+  {
+    timestamps: true,
   }
-}, {
-  timestamps: true
-})
+);
 
-module.exports = mongoose.model('File', fileSchema)
-
+module.exports = mongoose.model("File", fileSchema);
