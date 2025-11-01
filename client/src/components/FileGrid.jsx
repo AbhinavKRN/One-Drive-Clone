@@ -62,14 +62,14 @@ const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemCli
   if (files.length === 0) {
     return (
       <div className="empty-state">
+        <h3>Your recent files will show up here</h3>
         <div className="empty-state-illustration">
-          <img 
-            src="/images/image.png" 
-            alt="Recent files illustration" 
+          <img
+            src="/images/image.png"
+            alt="Recent files illustration"
             className="empty-state-image"
           />
         </div>
-        <h3>Your recent files will show up here</h3>
       </div>
     )
   }

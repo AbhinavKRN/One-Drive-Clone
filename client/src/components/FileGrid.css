@@ -13,21 +13,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
+  margin-top: 12px;
 }
 
 .empty-state-image {
-  width: 150px;
+  width: 250px;
   height: auto;
   max-width: 100%;
 }
 
 .empty-state h3 {
-  font-size: 16px;
+  font-size: 20px;
   margin-bottom: 0;
-  color: #323130;
-  font-weight: 400;
-  margin-top: 8px;
+  color: #605e5c;
+  font-weight: 600;
+  margin-top: 0;
 }
 
 .empty-state p {

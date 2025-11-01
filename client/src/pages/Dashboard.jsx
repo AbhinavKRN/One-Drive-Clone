@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import Navbar from '../components/Navbar'
 import Sidebar from '../components/Sidebar'
 import FileGrid from '../components/FileGrid'
+import SharedView from '../components/SharedView'
 import FilePreview from '../components/FilePreview'
 import CreateFolderModal from '../components/CreateFolderModal'
 import RenameModal from '../components/RenameModal'
@@ -111,93 +112,106 @@ const Dashboard = () => {
         />
 
         <div className="main-content">
-          <div className="toolbar">
-            <div className="breadcrumbs">
-              {breadcrumbs.map((crumb, index) => (
-                <React.Fragment key={crumb.id}>
-                  <span
-                    className="breadcrumb"
-                    onClick={() => navigateToPath(crumb.id)}
-                  >
-                    {crumb.name}
-                  </span>
-                  {index < breadcrumbs.length - 1 && <span className="separator">/</span>}
-                </React.Fragment>
-              ))}
-            </div>
+          {filterType === 'shared' ? (
+            <SharedView
+              files={files}
+              viewMode={viewMode}
+              selectedItems={selectedItems}
+              onSelectionChange={setSelectedItems}
+              onItemClick={handleItemClick}
+              onDownload={handleDownload}
+            />
+          ) : (
+            <>
+              <div className="toolbar">
+                <div className="breadcrumbs">
+                  {breadcrumbs.map((crumb, index) => (
+                    <React.Fragment key={crumb.id}>
+                      <span
+                        className="breadcrumb"
+                        onClick={() => navigateToPath(crumb.id)}
+                      >
+                        {crumb.name}
+                      </span>
+                      {index < breadcrumbs.length - 1 && <span className="separator">/</span>}
+                    </React.Fragment>
+                  ))}
+                </div>
 
-            <div className="toolbar-actions">
-              <label className="btn-upload">
-                <i className="fas fa-upload"></i>
-                Upload
-                <input
-                  type="file"
-                  multiple
-                  onChange={handleFileUpload}
-                  style={{ display: 'none' }}
-                />
-              </label>
+                <div className="toolbar-actions">
+                  <label className="btn-upload">
+                    <i className="fas fa-upload"></i>
+                    Upload
+                    <input
+                      type="file"
+                      multiple
+                      onChange={handleFileUpload}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
 
-              <button
-                className="btn-action"
-                onClick={() => setShowCreateFolder(true)}
-              >
-                <i className="fas fa-folder-plus"></i>
-                New folder
-              </button>
-
-              {selectedItems.length > 0 && (
-                <>
                   <button
                     className="btn-action"
-                    onClick={handleDelete}
+                    onClick={() => setShowCreateFolder(true)}
                   >
-                    <i className="fas fa-trash"></i>
-                    Delete
+                    <i className="fas fa-folder-plus"></i>
+                    New folder
                   </button>
 
-                  {selectedItems.length === 1 && (
-                    <button
-                      className="btn-action"
-                      onClick={() => {
-                        const item = files.find(f => f.id === selectedItems[0])
-                        setRenameItem(item)
-                      }}
-                    >
-                      <i className="fas fa-edit"></i>
-                      Rename
-                    </button>
+                  {selectedItems.length > 0 && (
+                    <>
+                      <button
+                        className="btn-action"
+                        onClick={handleDelete}
+                      >
+                        <i className="fas fa-trash"></i>
+                        Delete
+                      </button>
+
+                      {selectedItems.length === 1 && (
+                        <button
+                          className="btn-action"
+                          onClick={() => {
+                            const item = files.find(f => f.id === selectedItems[0])
+                            setRenameItem(item)
+                          }}
+                        >
+                          <i className="fas fa-edit"></i>
+                          Rename
+                        </button>
+                      )}
+                    </>
                   )}
-                </>
-              )}
 
-              <div className="view-toggle">
-                <button
-                  className={viewMode === 'grid' ? 'active' : ''}
-                  onClick={() => setViewMode('grid')}
-                  title="Grid view"
-                >
-                  <i className="fas fa-th"></i>
-                </button>
-                <button
-                  className={viewMode === 'list' ? 'active' : ''}
-                  onClick={() => setViewMode('list')}
-                  title="List view"
-                >
-                  <i className="fas fa-list"></i>
-                </button>
+                  <div className="view-toggle">
+                    <button
+                      className={viewMode === 'grid' ? 'active' : ''}
+                      onClick={() => setViewMode('grid')}
+                      title="Grid view"
+                    >
+                      <i className="fas fa-th"></i>
+                    </button>
+                    <button
+                      className={viewMode === 'list' ? 'active' : ''}
+                      onClick={() => setViewMode('list')}
+                      title="List view"
+                    >
+                      <i className="fas fa-list"></i>
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          <FileGrid
-            files={filteredFiles}
-            viewMode={viewMode}
-            selectedItems={selectedItems}
-            onSelectionChange={setSelectedItems}
-            onItemClick={handleItemClick}
-            onDownload={handleDownload}
-          />
+              <FileGrid
+                files={filteredFiles}
+                viewMode={viewMode}
+                selectedItems={selectedItems}
+                onSelectionChange={setSelectedItems}
+                onItemClick={handleItemClick}
+                onDownload={handleDownload}
+              />
+            </>
+          )}
         </div>
       </div>
 
