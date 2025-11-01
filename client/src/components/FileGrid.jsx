@@ -1,36 +1,32 @@
 import React from 'react'
+import {
+  FolderRegular,
+  ImageRegular,
+  DocumentRegular,
+  VideoRegular,
+  MusicNote2Regular,
+  ArchiveRegular
+} from '@fluentui/react-icons'
 import './FileGrid.css'
 
 const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemClick, onDownload }) => {
   const getFileIcon = (file) => {
     if (file.type === 'folder') {
-      return 'fas fa-folder'
+      return <FolderRegular />
     }
     if (file.type.startsWith('image/')) {
-      return 'fas fa-file-image'
-    }
-    if (file.type.includes('pdf')) {
-      return 'fas fa-file-pdf'
-    }
-    if (file.type.includes('word') || file.type.includes('document')) {
-      return 'fas fa-file-word'
-    }
-    if (file.type.includes('excel') || file.type.includes('spreadsheet')) {
-      return 'fas fa-file-excel'
-    }
-    if (file.type.includes('powerpoint') || file.type.includes('presentation')) {
-      return 'fas fa-file-powerpoint'
+      return <ImageRegular />
     }
     if (file.type.includes('video')) {
-      return 'fas fa-file-video'
+      return <VideoRegular />
     }
     if (file.type.includes('audio')) {
-      return 'fas fa-file-audio'
+      return <MusicNote2Regular />
     }
     if (file.type.includes('zip') || file.type.includes('rar') || file.type.includes('7z')) {
-      return 'fas fa-file-archive'
+      return <ArchiveRegular />
     }
-    return 'fas fa-file'
+    return <DocumentRegular />
   }
 
   const formatBytes = (bytes) => {
@@ -66,9 +62,14 @@ const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemCli
   if (files.length === 0) {
     return (
       <div className="empty-state">
-        <i className="fas fa-folder-open"></i>
-        <h3>This folder is empty</h3>
-        <p>Upload files or create a new folder to get started</p>
+        <div className="empty-state-illustration">
+          <img 
+            src="/images/image.png" 
+            alt="Recent files illustration" 
+            className="empty-state-image"
+          />
+        </div>
+        <h3>Your recent files will show up here</h3>
       </div>
     )
   }
@@ -94,11 +95,11 @@ const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemCli
 
             <div className="file-card-icon">
               {file.type === 'folder' ? (
-                <i className={getFileIcon(file)} style={{ color: '#ffb900' }}></i>
+                <div style={{ color: '#ffb900' }}>{getFileIcon(file)}</div>
               ) : file.type.startsWith('image/') && file.data ? (
                 <img src={file.data} alt={file.name} />
               ) : (
-                <i className={getFileIcon(file)} style={{ color: '#0078d4' }}></i>
+                <div style={{ color: '#0078d4' }}>{getFileIcon(file)}</div>
               )}
             </div>
 
@@ -119,7 +120,11 @@ const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemCli
                 }}
                 title="Download"
               >
-                <i className="fas fa-download"></i>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
               </button>
             )}
           </div>
@@ -151,7 +156,7 @@ const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemCli
               onChange={(e) => handleSelection(file.id, e)}
               onClick={(e) => e.stopPropagation()}
             />
-            <i className={getFileIcon(file)} style={{ color: file.type === 'folder' ? '#ffb900' : '#0078d4' }}></i>
+            <div style={{ color: file.type === 'folder' ? '#ffb900' : '#0078d4' }}>{getFileIcon(file)}</div>
             <span className="file-name">{file.name}</span>
           </div>
 
@@ -173,7 +178,11 @@ const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemCli
                 }}
                 title="Download"
               >
-                <i className="fas fa-download"></i>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
               </button>
             )}
           </div>

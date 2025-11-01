@@ -107,6 +107,7 @@ const Dashboard = () => {
           storageTotal={storageTotal}
           filterType={filterType}
           onFilterChange={setFilterType}
+          onCreateClick={() => setShowCreateFolder(true)}
         />
 
         <div className="main-content">

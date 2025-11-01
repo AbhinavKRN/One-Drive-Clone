@@ -3,40 +3,53 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 80px 20px;
+  padding: 40px 20px;
   color: #605e5c;
   text-align: center;
+  height: 100%;
 }
 
-.empty-state i {
-  font-size: 64px;
-  color: #d2d0ce;
-  margin-bottom: 20px;
+.empty-state-illustration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.empty-state-image {
+  width: 150px;
+  height: auto;
+  max-width: 100%;
 }
 
 .empty-state h3 {
-  font-size: 20px;
-  margin-bottom: 8px;
+  font-size: 16px;
+  margin-bottom: 0;
   color: #323130;
+  font-weight: 400;
+  margin-top: 8px;
 }
 
 .empty-state p {
   font-size: 14px;
+  color: #605e5c;
+  display: none;
 }
 
 /* Grid View */
 .file-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 16px;
-  padding: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  padding: 16px;
+  background-color: #faf9f8;
 }
 
 .file-card {
-  background: white;
+  background: #ffffff;
   border: 1px solid #edebe9;
-  border-radius: 6px;
-  padding: 16px;
+  border-radius: 4px;
+  padding: 12px;
   cursor: pointer;
   transition: all 0.2s;
   position: relative;
@@ -75,12 +88,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100px;
-  margin-bottom: 12px;
+  height: 80px;
+  margin-bottom: 8px;
+}
+
+.file-card-icon svg {
+  width: 40px;
+  height: 40px;
 }
 
 .file-card-icon i {
-  font-size: 48px;
+  font-size: 40px;
 }
 
 .file-card-icon img {
@@ -124,6 +142,15 @@
   opacity: 0;
   transition: opacity 0.2s;
   color: #0078d4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-card-download svg {
+  width: 16px;
+  height: 16px;
+  color: inherit;
 }
 
 .file-card:hover .file-card-download {
@@ -136,7 +163,8 @@
 
 /* List View */
 .file-list {
-  padding: 20px;
+  padding: 16px;
+  background-color: #faf9f8;
 }
 
 .file-list-header {
@@ -188,6 +216,11 @@
   height: 18px;
 }
 
+.col-name svg {
+  width: 18px;
+  height: 18px;
+}
+
 .col-name i {
   font-size: 18px;
 }
@@ -204,6 +237,15 @@
   padding: 6px 10px;
   border-radius: 4px;
   transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon svg {
+  width: 16px;
+  height: 16px;
+  color: inherit;
 }
 
 .btn-icon:hover {
