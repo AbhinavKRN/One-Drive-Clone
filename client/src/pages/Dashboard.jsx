@@ -32,7 +32,7 @@ const Dashboard = () => {
     navigateToFolder,
     navigateToPath,
     downloadFile
-  } = useFileManager(user?.email)
+  } = useFileManager()
 
   // Filter files based on search and filter type
   const filteredFiles = files.filter(file => {

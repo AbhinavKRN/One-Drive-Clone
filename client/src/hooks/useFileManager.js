@@ -1,267 +1,290 @@
 import { useState, useEffect } from 'react'
+import { useAuth } from '../context/AuthContext'
+import API_BASE_URL from '../config/api'
 
-export const useFileManager = (userEmail) => {
+export const useFileManager = () => {
+  const { getToken } = useAuth()
   const [files, setFiles] = useState([])
-  const [currentPath, setCurrentPath] = useState('root')
-  const [breadcrumbs, setBreadcrumbs] = useState([{ id: 'root', name: 'My Files' }])
+  const [folders, setFolders] = useState([])
+  const [currentFolderId, setCurrentFolderId] = useState(null)
+  const [breadcrumbs, setBreadcrumbs] = useState([{ id: null, name: 'My Files' }])
   const storageTotal = 5 * 1024 * 1024 * 1024 // 5GB in bytes
   const [storageUsed, setStorageUsed] = useState(0)
+  const [loading, setLoading] = useState(false)
 
-  // Storage key for this user
-  const storageKey = `onedrive_files_${userEmail}`
+  // Load files and folders
+  const loadData = async () => {
+    setLoading(true)
+    try {
+      const token = getToken()
+      if (!token) return
 
-  // Load files from localStorage
-  useEffect(() => {
-    if (userEmail) {
-      const savedData = localStorage.getItem(storageKey)
-      if (savedData) {
-        const { fileSystem, currentPath: savedPath } = JSON.parse(savedData)
-        loadCurrentFolder(fileSystem, savedPath)
-        calculateStorage(fileSystem)
-      } else {
-        // Initialize with empty root
-        const initialData = {
-          fileSystem: {
-            root: {
-              id: 'root',
-              name: 'My Files',
-              type: 'folder',
-              children: [],
-              parent: null,
-              modified: new Date().toISOString()
-            }
-          },
-          currentPath: 'root'
+      // Load files
+      const filesResponse = await fetch(`${API_BASE_URL}/files`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
         }
-        localStorage.setItem(storageKey, JSON.stringify(initialData))
-      }
-    }
-  }, [userEmail])
+      })
+      const filesData = await filesResponse.json()
 
-  // Load current folder contents
-  const loadCurrentFolder = (fileSystem, pathId) => {
-    const folder = fileSystem[pathId]
-    if (folder && folder.type === 'folder') {
-      const folderFiles = folder.children
-        .map(childId => fileSystem[childId])
-        .filter(Boolean)
-        .sort((a, b) => {
+      // Load folders
+      const foldersResponse = await fetch(`${API_BASE_URL}/folders`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      const foldersData = await foldersResponse.json()
+
+      if (filesData.status === 'success' && foldersData.status === 'success') {
+        const allFiles = filesData.data.files || []
+        const allFolders = foldersData.data.folders || []
+
+        // Filter files and folders by current folder
+        const currentFiles = allFiles.filter(file => 
+          (currentFolderId === null && !file.folder_id) || 
+          file.folder_id === currentFolderId
+        )
+        const currentFoldersList = allFolders.filter(folder => 
+          (currentFolderId === null && !folder.parentId) || 
+          folder.parentId === currentFolderId
+        )
+
+        // Combine and sort
+        const combined = [
+          ...currentFoldersList.map(folder => ({
+            ...folder,
+            id: folder.id,
+            name: folder.name,
+            type: 'folder',
+            modified: folder.createdAt
+          })),
+          ...currentFiles.map(file => ({
+            ...file,
+            id: file.id,
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            modified: file.updated_at
+          }))
+        ].sort((a, b) => {
           // Folders first, then alphabetically
           if (a.type === 'folder' && b.type !== 'folder') return -1
           if (a.type !== 'folder' && b.type === 'folder') return 1
           return a.name.localeCompare(b.name)
         })
 
-      setFiles(folderFiles)
-      setCurrentPath(pathId)
+        setFiles(combined)
+        setFolders(allFolders)
 
-      // Build breadcrumbs
-      const crumbs = []
-      let currentId = pathId
-      while (currentId) {
-        const current = fileSystem[currentId]
-        if (current) {
-          crumbs.unshift({ id: current.id, name: current.name })
-          currentId = current.parent
+        // Calculate storage
+        const totalSize = allFiles.reduce((sum, file) => sum + file.size, 0)
+        setStorageUsed(totalSize)
+
+        // Build breadcrumbs
+        if (currentFolderId) {
+          const path = buildPathToFolder(currentFolderId, allFolders)
+          setBreadcrumbs([{ id: null, name: 'My Files' }, ...path])
         } else {
-          break
+          setBreadcrumbs([{ id: null, name: 'My Files' }])
         }
       }
-      setBreadcrumbs(crumbs)
+    } catch (error) {
+      console.error('Error loading data:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
-  // Calculate total storage used
-  const calculateStorage = (fileSystem) => {
-    let total = 0
-    Object.values(fileSystem).forEach(item => {
-      if (item.type !== 'folder' && item.size) {
-        total += item.size
+  // Build path to folder for breadcrumbs
+  const buildPathToFolder = (folderId, allFolders) => {
+    const path = []
+    let currentId = folderId
+
+    while (currentId) {
+      const folder = allFolders.find(f => f.id === currentId)
+      if (folder) {
+        path.unshift({ id: folder.id, name: folder.name })
+        currentId = folder.parentId
+      } else {
+        break
       }
-    })
-    setStorageUsed(total)
-  }
-
-  // Save to localStorage
-  const saveToStorage = (fileSystem, path) => {
-    localStorage.setItem(storageKey, JSON.stringify({
-      fileSystem,
-      currentPath: path
-    }))
-    loadCurrentFolder(fileSystem, path)
-    calculateStorage(fileSystem)
-  }
-
-  // Get current file system
-  const getFileSystem = () => {
-    const savedData = localStorage.getItem(storageKey)
-    if (savedData) {
-      return JSON.parse(savedData).fileSystem
     }
-    return {}
+
+    return path
   }
+
+  useEffect(() => {
+    loadData()
+  }, [currentFolderId])
 
   // Upload file
-  const uploadFile = (file) => {
-    const reader = new FileReader()
+  const uploadFile = async (file) => {
+    try {
+      const token = getToken()
+      if (!token) return
 
-    reader.onload = (e) => {
-      const fileSystem = getFileSystem()
-      const fileId = `file_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-
-      const newFile = {
-        id: fileId,
-        name: file.name,
-        type: file.type || 'application/octet-stream',
-        size: file.size,
-        data: e.target.result,
-        parent: currentPath,
-        modified: new Date().toISOString()
+      const formData = new FormData()
+      formData.append('file', file)
+      if (currentFolderId) {
+        formData.append('folder_id', currentFolderId)
       }
 
-      fileSystem[fileId] = newFile
+      const response = await fetch(`${API_BASE_URL}/files/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      })
 
-      // Add to parent's children
-      if (!fileSystem[currentPath].children.includes(fileId)) {
-        fileSystem[currentPath].children.push(fileId)
-        fileSystem[currentPath].modified = new Date().toISOString()
+      const data = await response.json()
+      if (data.status === 'success') {
+        loadData()
+      } else {
+        alert(data.error || 'Failed to upload file')
       }
-
-      saveToStorage(fileSystem, currentPath)
-    }
-
-    // Read file based on type
-    if (file.type.startsWith('image/')) {
-      reader.readAsDataURL(file)
-    } else if (file.type.startsWith('text/')) {
-      reader.readAsText(file)
-    } else {
-      reader.readAsDataURL(file)
+    } catch (error) {
+      console.error('Upload error:', error)
+      alert('Failed to upload file')
     }
   }
 
   // Create folder
-  const createFolder = (folderName) => {
-    const fileSystem = getFileSystem()
-    const folderId = `folder_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  const createFolder = async (folderName) => {
+    try {
+      const token = getToken()
+      if (!token) return
 
-    // Check if folder with same name exists
-    const existingFolder = files.find(f => f.name === folderName && f.type === 'folder')
-    if (existingFolder) {
-      alert('A folder with this name already exists')
-      return
+      const response = await fetch(`${API_BASE_URL}/folders`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: folderName,
+          parent_id: currentFolderId || null
+        })
+      })
+
+      const data = await response.json()
+      if (data.status === 'success') {
+        loadData()
+      } else {
+        alert(data.error || 'Failed to create folder')
+      }
+    } catch (error) {
+      console.error('Create folder error:', error)
+      alert('Failed to create folder')
     }
-
-    const newFolder = {
-      id: folderId,
-      name: folderName,
-      type: 'folder',
-      children: [],
-      parent: currentPath,
-      modified: new Date().toISOString()
-    }
-
-    fileSystem[folderId] = newFolder
-
-    // Add to parent's children
-    if (!fileSystem[currentPath].children.includes(folderId)) {
-      fileSystem[currentPath].children.push(folderId)
-      fileSystem[currentPath].modified = new Date().toISOString()
-    }
-
-    saveToStorage(fileSystem, currentPath)
   }
 
   // Delete items
-  const deleteItems = (itemIds) => {
-    const fileSystem = getFileSystem()
+  const deleteItems = async (itemIds) => {
+    try {
+      const token = getToken()
+      if (!token) return
 
-    const deleteRecursive = (itemId) => {
-      const item = fileSystem[itemId]
-      if (!item) return
+      const deletePromises = itemIds.map(async (itemId) => {
+        const item = files.find(f => f.id === itemId)
+        const endpoint = item?.type === 'folder' 
+          ? `${API_BASE_URL}/folders/${itemId}`
+          : `${API_BASE_URL}/files/${itemId}`
 
-      // If folder, delete all children
-      if (item.type === 'folder' && item.children) {
-        item.children.forEach(childId => deleteRecursive(childId))
-      }
+        const response = await fetch(endpoint, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
 
-      // Remove from parent's children
-      if (item.parent && fileSystem[item.parent]) {
-        fileSystem[item.parent].children = fileSystem[item.parent].children.filter(
-          id => id !== itemId
-        )
-        fileSystem[item.parent].modified = new Date().toISOString()
-      }
+        return response.json()
+      })
 
-      // Delete the item
-      delete fileSystem[itemId]
+      await Promise.all(deletePromises)
+      loadData()
+    } catch (error) {
+      console.error('Delete error:', error)
+      alert('Failed to delete items')
     }
-
-    itemIds.forEach(itemId => deleteRecursive(itemId))
-    saveToStorage(fileSystem, currentPath)
   }
 
   // Rename item
-  const renameItem = (itemId, newName) => {
-    const fileSystem = getFileSystem()
-    const item = fileSystem[itemId]
+  const renameItem = async (itemId, newName) => {
+    try {
+      const token = getToken()
+      if (!token) return
 
-    if (item) {
-      // Check if item with same name exists in same folder
-      const parent = fileSystem[item.parent]
-      if (parent) {
-        const siblings = parent.children.map(id => fileSystem[id]).filter(Boolean)
-        const existingItem = siblings.find(s => s.name === newName && s.id !== itemId)
-        if (existingItem) {
-          alert('An item with this name already exists')
-          return
-        }
+      const item = files.find(f => f.id === itemId)
+      const endpoint = item?.type === 'folder'
+        ? `${API_BASE_URL}/folders/${itemId}/rename`
+        : `${API_BASE_URL}/files/${itemId}/rename`
+
+      const response = await fetch(endpoint, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: newName })
+      })
+
+      const data = await response.json()
+      if (data.status === 'success') {
+        loadData()
+      } else {
+        alert(data.error || 'Failed to rename item')
       }
-
-      item.name = newName
-      item.modified = new Date().toISOString()
-
-      if (item.parent && fileSystem[item.parent]) {
-        fileSystem[item.parent].modified = new Date().toISOString()
-      }
-
-      saveToStorage(fileSystem, currentPath)
+    } catch (error) {
+      console.error('Rename error:', error)
+      alert('Failed to rename item')
     }
   }
 
   // Navigate to folder
   const navigateToFolder = (folderId) => {
-    const fileSystem = getFileSystem()
-    const folder = fileSystem[folderId]
-
-    if (folder && folder.type === 'folder') {
-      saveToStorage(fileSystem, folderId)
-    }
+    setCurrentFolderId(folderId)
   }
 
   // Navigate to specific path (for breadcrumbs)
   const navigateToPath = (pathId) => {
-    navigateToFolder(pathId)
+    setCurrentFolderId(pathId)
   }
 
   // Download file
-  const downloadFile = (file) => {
-    if (!file.data) {
-      alert('File data not available')
-      return
-    }
+  const downloadFile = async (file) => {
+    try {
+      const token = getToken()
+      if (!token) return
 
-    const link = document.createElement('a')
-    link.href = file.data
-    link.download = file.name
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+      const response = await fetch(`${API_BASE_URL}/files/${file.id}/download`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (response.ok) {
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = file.name
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      } else {
+        alert('Failed to download file')
+      }
+    } catch (error) {
+      console.error('Download error:', error)
+      alert('Failed to download file')
+    }
   }
 
   return {
     files,
-    currentPath,
+    currentPath: currentFolderId,
     breadcrumbs,
     storageUsed,
     storageTotal,
@@ -271,6 +294,7 @@ export const useFileManager = (userEmail) => {
     renameItem,
     navigateToFolder,
     navigateToPath,
-    downloadFile
+    downloadFile,
+    loading
   }
 }
