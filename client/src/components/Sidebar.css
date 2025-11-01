@@ -1,5 +1,6 @@
+/* ─────────────── Main Sidebar (Expanded) ─────────────── */
 .sidebar {
-  width: 240px;
+  width: 300px;
   background-color: #faf9f8;
   border-right: none;
   padding: 12px 8px;
@@ -7,7 +8,59 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  transition: width 0.5s ease, padding 0.5s ease;
 }
+
+/* ─────────────── Collapsed Sidebar ─────────────── */
+.sidebar-closed {
+  width: 70px;
+  background-color: #faf9f8;
+  border-right: none;
+  padding: 12px 4px;
+  overflow-y: auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: width 0.5s ease, padding 0.3s ease;
+}
+
+/* Hide text labels and reduce padding in collapsed mode */
+.sidebar-closed span,
+.sidebar-closed .sidebar-heading,
+.sidebar-closed .storage-promo-text {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* Center items in collapsed mode */
+.sidebar-closed .sidebar-menu li {
+  justify-content: center;
+  padding: 8px;
+}
+
+.sidebar-closed .sidebar-menu li svg {
+  margin: 0;
+}
+
+/* Create button in collapsed mode */
+.sidebar-closed .sidebar-create-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  padding: 0;
+  justify-content: center;
+  gap: 0;
+  background: linear-gradient(90deg, #0078D4, #5C2D91);
+  transition: all 0.3s ease;
+}
+
+.sidebar-closed .sidebar-create-btn span {
+  display: none;
+}
+
+/* ─────────────── Common Styles (From your CSS) ─────────────── */
 
 .sidebar-section {
   margin-bottom: 12px;
@@ -21,14 +74,6 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   padding: 0 8px;
-}
-
-.sidebar-heading.browse-heading {
-  text-transform: uppercase;
-}
-
-.sidebar-heading.storage-heading {
-  text-transform: uppercase;
 }
 
 .sidebar-user-heading {
@@ -56,14 +101,8 @@
   border-radius: 2px;
   padding: 2px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
   flex-shrink: 0;
-}
-
-.user-account-icon svg {
-  width: 12px;
-  height: 12px;
-  color: #605e5c;
 }
 
 .user-account-icon:hover {
@@ -95,16 +134,6 @@
   filter: brightness(1.1);
 }
 
-.sidebar-create-btn svg {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}
-
-.sidebar-create-btn i {
-  font-size: 14px;
-}
-
 .sidebar-menu {
   list-style: none;
   padding: 0;
@@ -118,11 +147,10 @@
   padding: 6px 8px;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease;
   color: #323130;
   font-size: 13px;
   position: relative;
-  margin-bottom: 0;
 }
 
 .sidebar-menu li:hover {
@@ -147,29 +175,18 @@
 }
 
 .sidebar-menu li svg {
-  width: 18px;
+  width: 21px;
   min-width: 18px;
-  height: 18px;
+  height: 21px;
   color: #605e5c;
   flex-shrink: 0;
 }
 
-.sidebar-menu li:not(.active) svg {
-  color: #605e5c;
-}
-
-.sidebar-menu li i {
-  width: 20px;
-  min-width: 20px;
-  color: #605e5c;
-  text-align: center;
-  font-size: 16px;
-}
-
-.sidebar-menu li.active svg,
-.sidebar-menu li.active i {
+.sidebar-menu li.active svg {
   color: #0078d4;
 }
+
+/* ─────────────── Storage Section ─────────────── */
 
 .storage-section {
   margin-top: auto;
@@ -216,12 +233,15 @@
   color: #106ebe;
 }
 
+/* ─────────────── Promo Section ─────────────── */
+
 .sidebar-promo {
   background-color: #ffffff;
   border: 1px solid #edebe9;
   border-radius: 4px;
   padding: 10px;
   margin-bottom: 12px;
+  transition: opacity 0.3s ease;
 }
 
 .storage-promo-text {
@@ -256,9 +276,4 @@
   color: #ffffff;
   width: 14px;
   height: 14px;
-}
-
-.storage-promo-btn i {
-  color: #0078d4;
-  font-size: 14px;
 }
