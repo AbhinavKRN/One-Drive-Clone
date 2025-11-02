@@ -216,15 +216,50 @@ export const useFileManager = () => {
     }
   }
 
-  // Delete items
+  // Delete items (soft delete - moves to recycle bin)
   const deleteItems = async (itemIds) => {
     try {
       const token = getToken()
       if (!token) return
 
+      // Combine files and allFilesRaw to find items from any view (Recent, My Files, etc.)
+      const allItems = [...files, ...allFilesRaw]
+      // Remove duplicates by ID
+      const uniqueItems = Array.from(new Map(allItems.map(item => [item.id, item])).values())
+
       const deletePromises = itemIds.map(async (itemId) => {
-        const item = files.find(f => f.id === itemId)
-        const endpoint = item?.type === 'folder' 
+        // Find item in combined list (covers both Recent and My Files views)
+        const item = uniqueItems.find(f => f.id === itemId)
+        if (!item) {
+          console.error('Item not found:', itemId)
+          // If item not found, try to delete anyway (might be in a different location)
+          // Determine type from endpoint or try both
+          const endpoints = [
+            `${API_BASE_URL}/files/${itemId}`,
+            `${API_BASE_URL}/folders/${itemId}`
+          ]
+          
+          // Try file first, then folder
+          for (const endpoint of endpoints) {
+            try {
+              const response = await fetch(endpoint, {
+                method: 'DELETE',
+                headers: {
+                  'Authorization': `Bearer ${token}`
+                }
+              })
+              const data = await response.json()
+              if (data.status === 'success') {
+                return data
+              }
+            } catch (err) {
+              continue
+            }
+          }
+          return { status: 'error', error: 'Item not found' }
+        }
+
+        const endpoint = item.type === 'folder' 
           ? `${API_BASE_URL}/folders/${itemId}`
           : `${API_BASE_URL}/files/${itemId}`
 
@@ -235,10 +270,27 @@ export const useFileManager = () => {
           }
         })
 
-        return response.json()
+        const data = await response.json()
+        if (data.status !== 'success') {
+          console.error('Delete failed for item:', itemId, data.error)
+          return data
+        }
+        return data
       })
 
-      await Promise.all(deletePromises)
+      const results = await Promise.all(deletePromises)
+      const hasError = results.some(r => r.status !== 'success')
+      
+      if (hasError) {
+        alert('Some items could not be deleted. Please try again.')
+      } else {
+        // Show success message
+        const itemCount = itemIds.length
+        const itemText = itemCount === 1 ? 'item' : 'items'
+        console.log(`Successfully deleted ${itemCount} ${itemText}`)
+      }
+      
+      // Refresh the file list to update all views (Recent, My Files, etc.)
       loadData()
     } catch (error) {
       console.error('Delete error:', error)
@@ -253,7 +305,12 @@ export const useFileManager = () => {
       if (!token) return
 
       const item = files.find(f => f.id === itemId)
-      const endpoint = item?.type === 'folder'
+      if (!item) {
+        alert('Item not found')
+        return
+      }
+
+      const endpoint = item.type === 'folder'
         ? `${API_BASE_URL}/folders/${itemId}/rename`
         : `${API_BASE_URL}/files/${itemId}/rename`
 
@@ -268,7 +325,7 @@ export const useFileManager = () => {
 
       const data = await response.json()
       if (data.status === 'success') {
-        loadData()
+        loadData() // Refresh the file list
       } else {
         alert(data.error || 'Failed to rename item')
       }

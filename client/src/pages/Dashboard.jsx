@@ -231,10 +231,12 @@ const Dashboard = () => {
     alert("Text document creation feature will be implemented by backend team");
   };
 
-  const handleDelete = () => {
-    if (selectedItems.length > 0) {
-      if (window.confirm(`Delete ${selectedItems.length} item(s)?`)) {
-        deleteItems(selectedItems);
+  const handleDelete = (itemIds = null) => {
+    const itemsToDelete = itemIds || selectedItems;
+    if (itemsToDelete.length > 0) {
+      const itemCount = itemsToDelete.length;
+      if (window.confirm(`Delete ${itemCount} item(s)?`)) {
+        deleteItems(itemsToDelete);
         setSelectedItems([]);
       }
     }
@@ -517,6 +519,7 @@ const Dashboard = () => {
                     onSelectionChange={setSelectedItems}
                     onItemClick={handleItemClick}
                     onDownload={handleDownload}
+                    onDelete={handleDelete}
                   />
                 </div>
               </div>

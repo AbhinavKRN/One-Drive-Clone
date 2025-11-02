@@ -148,18 +148,28 @@
   transition: color var(--transition-base);
 }
 
-.file-card-download {
+.file-card-actions {
   position: absolute;
   top: 8px;
   right: 8px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.file-card:hover .file-card-actions {
+  opacity: 1;
+}
+
+.file-card-download,
+.file-card-delete {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color-medium);
   border-radius: 4px;
   padding: 6px 10px;
   cursor: pointer;
-  opacity: 0;
-  transition: opacity var(--transition-fast),
-              background-color var(--transition-base),
+  transition: background-color var(--transition-fast),
               border-color var(--transition-base),
               color var(--transition-base);
   color: var(--accent-primary);
@@ -168,18 +178,24 @@
   justify-content: center;
 }
 
-.file-card-download svg {
+.file-card-delete {
+  color: #d13438;
+}
+
+.file-card-download svg,
+.file-card-delete svg {
   width: 16px;
   height: 16px;
   color: inherit;
 }
 
-.file-card:hover .file-card-download {
-  opacity: 1;
-}
-
 .file-card-download:hover {
   background-color: var(--bg-hover);
+}
+
+.file-card-delete:hover {
+  background-color: rgba(209, 52, 56, 0.1);
+  border-color: #d13438;
 }
 
 /* List View */
@@ -248,6 +264,15 @@
 .file-list-row:hover .action-icon {
   opacity: 1;
   visibility: visible;
+}
+
+.file-list-row .action-icon.delete-icon {
+  color: #d13438;
+}
+
+.file-list-row .action-icon.delete-icon:hover {
+  color: #a4262c;
+  background-color: rgba(209, 52, 56, 0.1);
 }
 
 .file-list-col {
