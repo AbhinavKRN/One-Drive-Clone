@@ -13,6 +13,7 @@ import {
   ClockRegular,
   QuestionCircleRegular,
   PersonFeedbackRegular,
+  DiamondRegular,
 } from "@fluentui/react-icons";
 import "./Navbar.css";
 
@@ -47,62 +48,77 @@ const Navbar = ({
     {
       name: "Microsoft 365 Copilot",
       icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/M365_24x_da036bc4.svg",
+      url: "https://copilot.microsoft.com",
     },
     {
       name: "Outlook",
       icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/outlook_24x1_16f15926.svg",
+      url: "https://outlook.office.com",
     },
     {
       name: "OneDrive",
       icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/onedrive_24x1_3dca28ce.svg",
+      url: "https://onedrive.live.com",
     },
     {
       name: "Teams",
       icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/teams_24x1_737122d8.svg",
+      url: "https://teams.microsoft.com",
     },
     {
       name: "Word",
       icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/word_24x1_4f14d4f1.svg",
+      url: "https://office.com/launch/word",
     },
     {
       name: "Excel",
       icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/excel_24x1_ef67616b.svg",
+      url: "https://office.com/launch/excel",
     },
     {
       name: "PowerPoint",
       icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/powerpoint_24x1_088c0a01.svg",
+      url: "https://office.com/launch/powerpoint",
     },
     {
       name: "OneNote",
       icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/onenote_24x1_917c6a51.svg",
+      url: "https://www.onenote.com",
     },
     {
       name: "To Do",
       icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/todo_24x1_22d5b93f.svg",
+      url: "https://to-do.office.com",
     },
     {
       name: "Family Safety",
       icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/FamilySafety_24x_449a71b9.svg",
+      url: "https://account.microsoft.com/family",
     },
     {
       name: "Calendar",
       icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/Calendar_24x_e50a5ecb.svg",
+      url: "https://outlook.office.com/calendar",
     },
     {
       name: "Clipchamp",
       icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/clipchamp_24x1_2eb14be3.svg",
+      url: "https://clipchamp.com",
     },
     {
       name: "Designer",
       icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/Designer_24x_ac7eb4e6.svg",
+      url: "https://designer.microsoft.com",
     },
     {
       name: "Skype",
       icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/Skype_24x_905a0e94.svg",
+      url: "https://web.skype.com",
     },
     {
       name: "More apps",
       icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/MoreAppsDark_50f3694f.svg",
+      url: "https://office.com",
     },
   ];
 
@@ -266,16 +282,18 @@ const Navbar = ({
               </div>
             </div>
 
-            {/* Apps Grid */}
+            {/* Apps Grid - First 15 apps (3 rows of 5) */}
             <div className="apps-grid-wrapper">
               <div className="apps-grid">
-                {filteredApps.length > 0 ? (
-                  filteredApps.map((app, index) => (
+                {filteredApps.slice(0, 15).length > 0 ? (
+                  filteredApps.slice(0, 15).map((app, index) => (
                     <a
                       key={index}
-                      href="#"
+                      href={app.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="app-item"
-                      onClick={(e) => e.preventDefault()}
+                      onClick={() => setShowAppsLauncher(false)}
                     >
                       <div className="app-icon-container">
                         <img
@@ -299,9 +317,11 @@ const Navbar = ({
             <div className="apps-create-wrapper">
               <div className="apps-create-section">
                 <a
-                  href="#"
+                  href="https://office.com/launch/word"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="app-item"
-                  onClick={(e) => e.preventDefault()}
+                  onClick={() => setShowAppsLauncher(false)}
                 >
                   <div className="app-icon-container">
                     <img
@@ -313,9 +333,11 @@ const Navbar = ({
                   <span className="app-label">Document</span>
                 </a>
                 <a
-                  href="#"
+                  href="https://office.com/launch/excel"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="app-item"
-                  onClick={(e) => e.preventDefault()}
+                  onClick={() => setShowAppsLauncher(false)}
                 >
                   <div className="app-icon-container">
                     <img
@@ -327,9 +349,11 @@ const Navbar = ({
                   <span className="app-label">Workbook</span>
                 </a>
                 <a
-                  href="#"
+                  href="https://office.com/launch/powerpoint"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="app-item"
-                  onClick={(e) => e.preventDefault()}
+                  onClick={() => setShowAppsLauncher(false)}
                 >
                   <div className="app-icon-container">
                     <img
@@ -341,9 +365,11 @@ const Navbar = ({
                   <span className="app-label">Presentation</span>
                 </a>
                 <a
-                  href="#"
+                  href="https://forms.office.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="app-item"
-                  onClick={(e) => e.preventDefault()}
+                  onClick={() => setShowAppsLauncher(false)}
                 >
                   <div className="app-icon-container">
                     <img
@@ -355,9 +381,11 @@ const Navbar = ({
                   <span className="app-label">Survey</span>
                 </a>
                 <a
-                  href="#"
+                  href="https://office.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="app-item"
-                  onClick={(e) => e.preventDefault()}
+                  onClick={() => setShowAppsLauncher(false)}
                 >
                   <div className="app-icon-container">
                     <img
@@ -369,6 +397,14 @@ const Navbar = ({
                   <span className="app-label">Create more</span>
                 </a>
               </div>
+            </div>
+
+            {/* Buy Storage Button */}
+            <div className="apps-launcher-footer">
+              <button className="apps-buy-storage-btn">
+                <DiamondRegular className="buy-storage-icon" />
+                <span>Buy storage</span>
+              </button>
             </div>
           </div>
         )}
@@ -456,11 +492,11 @@ const Navbar = ({
         </button>
         <button
           ref={settingsButtonRef}
-          className="navbar-icon-btn"
+          className="navbar-icon-btn settings-icon-btn"
           title="Settings"
           onClick={handleSettingsClick}
         >
-          <SettingsRegular />
+          <SettingsRegular className="settings-icon" />
         </button>
 
         {showSettingsDropdown && (
@@ -565,13 +601,25 @@ const Navbar = ({
               <div className="profile-user-info">
                 <div className="profile-user-name">{getFormattedName()}</div>
                 <div className="profile-user-email">{user?.email || ""}</div>
-                <a href="#" onClick={(e) => e.preventDefault()}>
+                <a 
+                  href="https://account.microsoft.com" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="profile-view-account"
+                  onClick={() => setShowProfilePopup(false)}
+                >
                   View account
                 </a>
               </div>
             </div>
 
-            <div className="profile-popup-footer">
+            <div 
+              className="profile-popup-footer"
+              onClick={() => {
+                window.open("https://login.live.com", "_blank");
+                setShowProfilePopup(false);
+              }}
+            >
               <PersonAddRegular />
               <span>Sign in with a different account</span>
             </div>
