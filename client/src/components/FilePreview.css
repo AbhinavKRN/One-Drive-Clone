@@ -120,7 +120,7 @@
 }
 
 .preview-text pre {
-  font-family: 'Courier New', monospace;
+  font-family: inherit;
   font-size: 14px;
   line-height: 1.6;
   color: var(--text-primary);

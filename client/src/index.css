@@ -95,6 +95,10 @@ body {
   transition: background-color var(--transition-slow), color var(--transition-slow);
 }
 
+* {
+  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
+}
+
 #root {
   min-height: 100vh;
   background-color: var(--bg-primary);
