@@ -1501,3 +1501,287 @@
 .navbar.photos-mode .apps-separator {
   background: var(--border-color);
 }
+
+/* ===== Responsive Design ===== */
+
+/* Tablet and below */
+@media (max-width: 1024px) {
+  .navbar-left {
+    gap: 12px;
+  }
+
+  .search-bar {
+    width: 260px;
+  }
+
+  .navbar-storage-btn span {
+    display: none;
+  }
+
+  .navbar-storage-btn {
+    padding: 5px 8px;
+    min-width: auto;
+  }
+
+  .photos-nav-item {
+    width: 56px;
+    min-width: 56px;
+    font-size: 11px;
+    padding: 6px 0;
+  }
+
+  .photos-nav-item svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .apps-launcher {
+    width: 450px;
+    height: 400px;
+  }
+
+  .apps-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-rows: repeat(3, 80px);
+    height: 240px;
+  }
+
+  .apps-create-section {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    height: 80px;
+  }
+
+  .profile-popup {
+    width: 300px;
+  }
+
+  .settings-dropdown {
+    width: 280px;
+    right: 60px;
+  }
+}
+
+/* Mobile and below */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 6px 12px;
+    height: 56px;
+  }
+
+  .navbar-left {
+    gap: 8px;
+  }
+
+  .onedrive-logo {
+    height: 50px;
+  }
+
+  .navbar-tabs {
+    width: 120px;
+    height: 28px;
+  }
+
+  .navbar-tab {
+    font-size: 12px;
+  }
+
+  .search-bar {
+    width: 200px;
+    padding: 4px 8px;
+  }
+
+  .search-bar input {
+    font-size: 13px;
+    margin-left: 6px;
+  }
+
+  .photos-nav {
+    gap: 4px;
+  }
+
+  .photos-nav-item {
+    width: 48px;
+    min-width: 48px;
+    font-size: 10px;
+    padding: 4px 0;
+  }
+
+  .photos-nav-item svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .photos-nav-item.active::after {
+    width: 36px;
+  }
+
+  .navbar-right {
+    gap: 8px;
+  }
+
+  .navbar-storage-btn {
+    display: none;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+  }
+
+  .navbar-icon-btn {
+    padding: 6px;
+  }
+
+  .navbar-icon-btn.settings-icon-btn .settings-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .profile-popup {
+    width: calc(100vw - 40px);
+    max-width: 320px;
+    right: 10px;
+    top: 60px;
+  }
+
+  .settings-dropdown {
+    width: calc(100vw - 40px);
+    max-width: 300px;
+    right: 10px;
+    top: 60px;
+  }
+
+  .apps-launcher {
+    width: calc(100vw - 20px);
+    max-width: 500px;
+    height: auto;
+    max-height: 80vh;
+    left: 10px;
+    top: 66px;
+  }
+
+  .apps-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: repeat(auto-fit, 90px);
+    height: auto;
+    padding: 0 12px;
+  }
+
+  .apps-create-section {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: 0 12px;
+  }
+}
+
+/* Mobile Menu Toggle Button */
+.menu-toggle-btn {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .menu-toggle-btn {
+    display: flex;
+  }
+}
+
+.menu-toggle-btn svg {
+  width: 24px;
+  height: 24px;
+  color: var(--text-primary);
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .navbar {
+    padding: 6px 8px;
+  }
+
+  .navbar-left {
+    gap: 6px;
+  }
+
+  .onedrive-logo {
+    height: 40px;
+  }
+
+  .navbar-tabs {
+    width: 100px;
+    height: 26px;
+  }
+
+  .navbar-tab {
+    font-size: 11px;
+  }
+
+  .search-bar {
+    width: 150px;
+    padding: 3px 6px;
+  }
+
+  .search-bar svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .search-bar input {
+    font-size: 12px;
+    margin-left: 4px;
+  }
+
+  .photos-nav-item {
+    width: 40px;
+    min-width: 40px;
+    font-size: 9px;
+    padding: 3px 0;
+  }
+
+  .photos-nav-item svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .photos-nav-item span {
+    font-size: 9px;
+  }
+
+  .user-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  .navbar-icon-btn {
+    padding: 4px;
+  }
+
+  .navbar-icon-btn.settings-icon-btn .settings-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .profile-popup {
+    width: calc(100vw - 20px);
+    right: 10px;
+  }
+
+  .settings-dropdown {
+    width: calc(100vw - 20px);
+    right: 10px;
+  }
+
+  .apps-launcher {
+    width: calc(100vw - 10px);
+    left: 5px;
+  }
+
+  .apps-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 0 8px;
+  }
+
+  .apps-create-section {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 0 8px;
+  }
+}

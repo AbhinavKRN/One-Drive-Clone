@@ -340,22 +340,167 @@
   color: var(--photos-search-placeholder);
 }
 
-@media (max-width: 768px) {
+/* Tablet and below */
+@media (max-width: 1024px) {
+  .album-page {
+    padding: 16px;
+  }
+
+  .album-header {
+    font-size: 2.2rem;
+    left: 10%;
+  }
+
+  .album-hero {
+    padding-top: 40px;
+  }
+
   .album-image-container {
-    max-width: 250px;
+    max-width: 280px;
+  }
+
+  .album-actions {
+    gap: 1.5rem;
+  }
+
+  .album-action-card {
+    padding: 10px 16px;
+  }
+
+  .album-action-text span {
+    font-size: 13px;
+  }
+}
+
+/* Mobile and below */
+@media (max-width: 768px) {
+  .album-page {
+    padding: 12px;
+    height: calc(100vh - 56px);
+  }
+
+  .album-header {
+    font-size: 1.75rem;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  .album-hero {
+    padding-top: 20px;
+  }
+
+  .album-image-container {
+    max-width: 220px;
+    margin: 0 auto 1.5rem;
+  }
+
+  .album-image-container img {
+    max-height: 200px;
+  }
+
+  .album-subtitle {
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+
+  .album-description {
+    font-size: 0.9rem;
+    margin-bottom: 16px;
   }
 
   .album-actions {
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
+    align-items: center;
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 1rem;
   }
 
-  .album-search-bar {
-    width: 80%;
+  .album-action-card {
+    width: 100%;
+    max-width: 280px;
+    padding: 10px 16px;
+    justify-content: center;
+  }
+
+  .album-action-text {
+    align-items: center;
+    text-align: center;
   }
 
   .album-search-container {
-    bottom: 20px;
-    gap: 16px;
+    width: 100%;
+    max-width: 280px;
+    min-width: auto;
+    max-width: auto;
+    position: relative;
+    margin-top: 0.5rem;
+  }
+
+  .album-search-container:hover {
+    min-width: 100%;
+    max-width: 100%;
+  }
+
+  .album-search-bar {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .album-page {
+    padding: 10px;
+  }
+
+  .album-header {
+    font-size: 1.5rem;
+    margin-bottom: 16px;
+  }
+
+  .album-image-container {
+    max-width: 180px;
+    margin: 0 auto 1rem;
+  }
+
+  .album-image-container img {
+    max-height: 150px;
+  }
+
+  .album-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .album-description {
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+  }
+
+  .album-actions {
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .album-action-card {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .album-action-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .album-action-text span {
+    font-size: 12px;
+  }
+
+  .album-search-container {
+    max-width: 240px;
   }
 }

@@ -148,14 +148,29 @@
 
   .command-bar-primary {
     gap: 2px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .command-bar-primary::-webkit-scrollbar {
+    display: none;
   }
 
   .command-bar-secondary {
     gap: 2px;
+    flex-shrink: 0;
   }
 
   .command-bar-btn {
     padding: 6px;
+    white-space: nowrap;
+  }
+
+  .command-bar-btn span {
+    display: none;
   }
 
   .selection-btn {
@@ -164,6 +179,48 @@
 
   .selection-btn::before {
     right: -8px;
+  }
+
+  .selection-btn span {
+    display: inline;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .command-bar {
+    padding: 0 4px;
+    height: 48px;
+  }
+
+  .command-bar-wrapper {
+    height: 48px;
+    padding: 0 12px;
+  }
+
+  .command-bar-btn {
+    padding: 4px;
+    min-width: 32px;
+  }
+
+  .command-bar-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .selection-btn {
+    padding: 6px 8px;
+    margin-right: 8px;
+  }
+
+  .selection-btn svg {
+    width: 10px;
+    height: 10px;
+  }
+
+  .selection-btn::before {
+    right: -6px;
+    height: 20px;
   }
 }
 

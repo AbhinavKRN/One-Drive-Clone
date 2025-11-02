@@ -177,3 +177,25 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--scrollbar-thumb-hover);
 }
+
+/* ===== Responsive Base Styles ===== */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Ensure body doesn't overflow on small screens */
+body {
+  overflow-x: hidden;
+}
+
+#root {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Fix for iOS viewport height */
+@supports (-webkit-touch-callout: none) {
+  .dashboard {
+    min-height: -webkit-fill-available;
+  }
+}

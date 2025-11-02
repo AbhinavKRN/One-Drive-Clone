@@ -40,6 +40,7 @@ const Dashboard = () => {
   const navigateToFolderBySlugRef = useRef(null);
   const [photoTab, setPhotoTab] = useState("Moments");
   const [documentFilter, setDocumentFilter] = useState("all");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Set filter type based on URL path
   useEffect(() => {
@@ -361,6 +362,18 @@ const Dashboard = () => {
     alert("Details pane feature will be implemented");
   };
 
+  // Prevent body scroll when sidebar is open on mobile
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.classList.add('dashboard-sidebar-open');
+    } else {
+      document.body.classList.remove('dashboard-sidebar-open');
+    }
+    return () => {
+      document.body.classList.remove('dashboard-sidebar-open');
+    };
+  }, [isSidebarOpen]);
+
   return (
     <div className="dashboard">
       <Navbar
@@ -373,6 +386,8 @@ const Dashboard = () => {
         storageTotal={storageTotal}
         photoTab={photoTab}
         setPhotoTab={setPhotoTab}
+        onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+        isSidebarOpen={isSidebarOpen}
       />
 
       {/* --- Conditionally Render Tabs --- */}
@@ -388,6 +403,14 @@ const Dashboard = () => {
         ) : null
       ) : (
         <div className="dashboard-content">
+          {/* Mobile Backdrop */}
+          {isSidebarOpen && (
+            <div 
+              className="sidebar-backdrop" 
+              onClick={() => setIsSidebarOpen(false)}
+            />
+          )}
+
           {/* Sidebar */}
           <Sidebar
             storageUsed={storageUsed}
@@ -405,6 +428,8 @@ const Dashboard = () => {
             onOneNoteNotebook={handleOneNoteNotebook}
             onExcelSurvey={handleExcelSurvey}
             onTextDocument={handleTextDocument}
+            isMobileOpen={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(false)}
           />
 
           <div className="main-content">
@@ -475,15 +500,6 @@ const Dashboard = () => {
                          filterType === "folders" ? "Folders" : "Files"}
                       </h1>
                     )}
-                    <h1 className="files-title-inline">
-                      {filterType === "all"
-                        ? "Recent"
-                        : filterType === "myfiles"
-                        ? "My files"
-                        : filterType === "folders"
-                        ? "Folders"
-                        : "Files"}
-                    </h1>
                     <div className="top-bar-controls">
                       <div className="sort-dropdown" ref={sortMenuRef}>
                         <button

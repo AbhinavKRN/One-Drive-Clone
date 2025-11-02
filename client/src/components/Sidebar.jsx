@@ -41,7 +41,9 @@ const Sidebar = ({
   onPowerPointPresentation,
   onOneNoteNotebook,
   onExcelSurvey,
-  onTextDocument
+  onTextDocument,
+  isMobileOpen = false,
+  onClose
 }) => {
   const { user } = useAuth()
   const [openCloseArrow, setOpenCloseArrow] = useState(false)
@@ -127,7 +129,7 @@ const Sidebar = ({
     <>
       {openCloseArrow ? (
         // 🔹 Collapsed Sidebar
-        <aside className="sidebar-closed">
+        <aside className={`sidebar-closed ${isMobileOpen ? 'sidebar-open' : ''}`}>
           <div className="sidebar-section">
             <div className="sidebar-create-btn-wrapper">
               <button 
@@ -209,16 +211,28 @@ const Sidebar = ({
               <ArrowRightRegular className="user-account-icon" onClick={() => setOpenCloseArrow(!openCloseArrow)} />
             </div>
             <ul className="sidebar-menu">
-              <li className={filterType === 'all' ? 'active' : ''} onClick={() => onFilterChange('all')}>
+              <li className={filterType === 'all' ? 'active' : ''} onClick={() => {
+                onFilterChange('all');
+                if (onClose) onClose();
+              }}>
                 {filterType === 'all' ? <HomeFilled /> : <HomeRegular />}
               </li>
-              <li className={filterType === 'folders' ? 'active' : ''} onClick={() => onFilterChange('folders')}>
+              <li className={filterType === 'folders' ? 'active' : ''} onClick={() => {
+                onFilterChange('folders');
+                if (onClose) onClose();
+              }}>
                 {filterType === 'folders' ? <FolderFilled /> : <FolderRegular />}
               </li>
-              <li className={filterType === 'shared' ? 'active' : ''} onClick={() => onFilterChange('shared')}>
+              <li className={filterType === 'shared' ? 'active' : ''} onClick={() => {
+                onFilterChange('shared');
+                if (onClose) onClose();
+              }}>
                 {filterType === 'shared' ? <PeopleFilled /> : <PeopleRegular />}
               </li>
-              <li className={filterType === 'recycle' ? 'active' : ''} onClick={() => onFilterChange('recycle')}>
+              <li className={filterType === 'recycle' ? 'active' : ''} onClick={() => {
+                onFilterChange('recycle');
+                if (onClose) onClose();
+              }}>
                 {filterType === 'recycle' ? <DeleteFilled /> : <DeleteRegular />}
               </li>
             </ul>
@@ -235,7 +249,10 @@ const Sidebar = ({
             </div>
             {isBrowseFilesExpanded && (
               <ul className="sidebar-menu">
-                <li className={filterType === 'people' ? 'active' : ''} onClick={() => onFilterChange('people')}>
+                <li className={filterType === 'people' ? 'active' : ''} onClick={() => {
+                  onFilterChange('people');
+                  if (onClose) onClose();
+                }}>
                   {filterType === 'people' ? <PersonFilled /> : <PersonRegular />}
                 </li>
               </ul>
@@ -267,7 +284,7 @@ const Sidebar = ({
         </aside>
       ) : (
         // 🔹 Expanded Sidebar
-        <aside className="sidebar">
+        <aside className={`sidebar ${isMobileOpen ? 'sidebar-open' : ''}`}>
           <div className="sidebar-section">
             <div className="sidebar-create-btn-wrapper">
               <button 
@@ -351,19 +368,31 @@ const Sidebar = ({
               <ArrowLeftRegular className="user-account-icon" onClick={() => setOpenCloseArrow(!openCloseArrow)} />
             </div>
             <ul className="sidebar-menu">
-              <li className={filterType === 'all' ? 'active' : ''} onClick={() => onFilterChange('all')}>
+              <li className={filterType === 'all' ? 'active' : ''} onClick={() => {
+                onFilterChange('all');
+                if (onClose) onClose();
+              }}>
                 {filterType === 'all' ? <HomeFilled /> : <HomeRegular />}
                 <span>Home</span>
               </li>
-              <li className={filterType === 'myfiles' ? 'active' : ''} onClick={() => onFilterChange('myfiles')}>
+              <li className={filterType === 'myfiles' ? 'active' : ''} onClick={() => {
+                onFilterChange('myfiles');
+                if (onClose) onClose();
+              }}>
                 {filterType === 'myfiles' ? <FolderFilled /> : <FolderRegular />}
                 <span>My files</span>
               </li>
-              <li className={filterType === 'shared' ? 'active' : ''} onClick={() => onFilterChange('shared')}>
+              <li className={filterType === 'shared' ? 'active' : ''} onClick={() => {
+                onFilterChange('shared');
+                if (onClose) onClose();
+              }}>
                 {filterType === 'shared' ? <PeopleFilled /> : <PeopleRegular />}
                 <span>Shared</span>
               </li>
-              <li className={filterType === 'recycle' ? 'active' : ''} onClick={() => onFilterChange('recycle')}>
+              <li className={filterType === 'recycle' ? 'active' : ''} onClick={() => {
+                onFilterChange('recycle');
+                if (onClose) onClose();
+              }}>
                 {filterType === 'recycle' ? <DeleteFilled /> : <DeleteRegular />}
                 <span>Recycle bin</span>
               </li>
@@ -385,13 +414,19 @@ const Sidebar = ({
                   <li
                     key={folder.id}
                     className={filterType === folder.name.toLowerCase() ? 'active' : ''}
-                    onClick={() => onFolderClick ? onFolderClick(folder.id) : null}
+                    onClick={() => {
+                      if (onFolderClick) onFolderClick(folder.id);
+                      if (onClose) onClose();
+                    }}
                   >
                     {filterType === folder.name.toLowerCase() ? <FolderFilled /> : <FolderRegular />}
                     <span>{folder.name}</span>
                   </li>
                 ))}
-                <li className={filterType === 'people' ? 'active' : ''} onClick={() => onFilterChange('people')}>
+                <li className={filterType === 'people' ? 'active' : ''} onClick={() => {
+                  onFilterChange('people');
+                  if (onClose) onClose();
+                }}>
                   {filterType === 'people' ? <PersonFilled /> : <PersonRegular />}
                   <span>People</span>
                 </li>

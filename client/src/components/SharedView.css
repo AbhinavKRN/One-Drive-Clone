@@ -175,19 +175,179 @@
   transition: background-color var(--transition-base);
 }
 
-/* Responsive Design */
+/* ===== Responsive Design ===== */
+
+/* Tablet and below */
+@media (max-width: 1024px) {
+  .shared-header {
+    padding: 14px 24px;
+    gap: 12px;
+  }
+
+  .shared-tab {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+
+  .shared-tab.active {
+    font-size: 14px;
+  }
+
+  .filter-btn {
+    padding: 5px 12px;
+    font-size: 13px;
+  }
+
+  .shared-search {
+    min-width: 240px;
+    max-width: 350px;
+    padding: 6px 14px;
+  }
+
+  .shared-search input {
+    font-size: 13px;
+  }
+
+  .shared-empty-state {
+    padding: 50px 16px;
+  }
+
+  .shared-empty-state h3 {
+    font-size: 17px;
+  }
+
+  .shared-empty-state img {
+    width: 240px;
+  }
+}
+
+/* Mobile and below */
 @media (max-width: 768px) {
   .shared-header {
     padding: 12px 16px;
     flex-direction: column;
     align-items: stretch;
+    gap: 10px;
   }
 
   .shared-tabs {
     flex-wrap: wrap;
+    gap: 6px;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 4px;
+  }
+
+  .shared-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .shared-tab {
+    padding: 6px 10px;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .shared-tab.active {
+    font-size: 13px;
+  }
+
+  .filter-btn {
+    padding: 5px 10px;
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .filter-btn svg {
+    width: 14px;
+    height: 14px;
   }
 
   .shared-search {
+    min-width: 100%;
     max-width: 100%;
+    padding: 6px 12px;
+  }
+
+  .shared-search svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .shared-search input {
+    font-size: 13px;
+  }
+
+  .shared-empty-state {
+    padding: 40px 16px;
+  }
+
+  .shared-empty-state h3 {
+    font-size: 16px;
+  }
+
+  .shared-empty-state img {
+    width: 200px;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .shared-header {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .shared-tabs {
+    gap: 4px;
+  }
+
+  .shared-tab {
+    padding: 5px 8px;
+    font-size: 12px;
+  }
+
+  .shared-tab.active {
+    font-size: 12px;
+  }
+
+  .filter-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+    gap: 3px;
+  }
+
+  .filter-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .shared-search {
+    padding: 5px 10px;
+  }
+
+  .shared-search svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .shared-search input {
+    font-size: 12px;
+  }
+
+  .shared-empty-state {
+    padding: 30px 12px;
+  }
+
+  .shared-empty-state h3 {
+    font-size: 15px;
+  }
+
+  .shared-empty-state img {
+    width: 180px;
   }
 }

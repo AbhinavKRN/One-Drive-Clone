@@ -14,6 +14,7 @@ import {
   QuestionCircleRegular,
   PersonFeedbackRegular,
   DiamondRegular,
+  PanelLeftRegular,
 } from "@fluentui/react-icons";
 import "./Navbar.css";
 
@@ -27,6 +28,8 @@ const Navbar = ({
   storageTotal = 5 * 1024 * 1024 * 1024,
   photoTab,
   setPhotoTab,
+  onMenuToggle,
+  isSidebarOpen,
 }) => {
   const { logout } = useAuth();
   const { theme, changeTheme } = useTheme();
@@ -209,6 +212,18 @@ const Navbar = ({
   return (
     <nav className={`navbar ${activeTab === "Photos" ? "photos-mode" : ""}`}>
       <div className="navbar-left">
+        {/* Mobile Menu Button */}
+        {activeTab !== "Photos" && onMenuToggle && (
+          <button
+            className="navbar-icon-btn menu-toggle-btn"
+            title="Menu"
+            onClick={onMenuToggle}
+            aria-label="Toggle menu"
+          >
+            <PanelLeftRegular />
+          </button>
+        )}
+
         <button
           ref={appsButtonRef}
           className="navbar-icon-btn apps-icon"
