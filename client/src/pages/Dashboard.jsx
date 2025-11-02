@@ -25,7 +25,7 @@ const Dashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const params = useParams();
-  
+
   const [viewMode, setViewMode] = useState("list");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("all");
@@ -44,11 +44,12 @@ const Dashboard = () => {
   // Set filter type based on URL path
   useEffect(() => {
     const path = location.pathname;
-    if (path.includes('/home')) setFilterType('all');
-    else if (path.includes('/myfiles')) setFilterType('myfiles');
-    else if (path.includes('/shared')) setFilterType('shared');
-    else if (path.includes('/recycle')) setFilterType('recycle');
-    else if (path === '/dashboard' || path === '/dashboard/') setFilterType('all'); // default to home
+    if (path.includes("/home")) setFilterType("all");
+    else if (path.includes("/myfiles")) setFilterType("myfiles");
+    else if (path.includes("/shared")) setFilterType("shared");
+    else if (path.includes("/recycle")) setFilterType("recycle");
+    else if (path === "/dashboard" || path === "/dashboard/")
+      setFilterType("all"); // default to home
   }, [location.pathname]);
 
   const {
@@ -78,21 +79,25 @@ const Dashboard = () => {
   useEffect(() => {
     const path = location.pathname;
     // If URL is like /dashboard/myfiles/documents, extract the slug
-    if (path.includes('/myfiles/')) {
-      const slug = path.split('/myfiles/')[1];
+    if (path.includes("/myfiles/")) {
+      const slug = path.split("/myfiles/")[1];
       if (slug && navigateToFolderBySlugRef.current) {
         navigateToFolderBySlugRef.current(slug);
         // Clear selection when navigating to a new folder
         setSelectedItems([]);
       }
-    } else if (path.includes('/home') || path === '/dashboard' || path === '/dashboard/') {
+    } else if (
+      path.includes("/home") ||
+      path === "/dashboard" ||
+      path === "/dashboard/"
+    ) {
       // Reset to root when navigating to home
       if (navigateToFolderBySlugRef.current) {
         navigateToFolderBySlugRef.current(null);
       }
       // Clear selection when navigating away
       setSelectedItems([]);
-    } else if (path === '/dashboard/myfiles') {
+    } else if (path === "/dashboard/myfiles") {
       // Reset to root when navigating to My Files root
       if (navigateToFolderBySlugRef.current) {
         navigateToFolderBySlugRef.current(null);
@@ -125,16 +130,16 @@ const Dashboard = () => {
 
   // Handle navigation from sidebar
   const handleFilterChange = (newFilterType) => {
-    if (newFilterType === 'all') navigate('/dashboard/home');
-    else if (newFilterType === 'myfiles') navigate('/dashboard/myfiles');
-    else if (newFilterType === 'shared') navigate('/dashboard/shared');
-    else if (newFilterType === 'recycle') navigate('/dashboard/recycle');
+    if (newFilterType === "all") navigate("/dashboard/home");
+    else if (newFilterType === "myfiles") navigate("/dashboard/myfiles");
+    else if (newFilterType === "shared") navigate("/dashboard/shared");
+    else if (newFilterType === "recycle") navigate("/dashboard/recycle");
     else setFilterType(newFilterType);
   };
 
   // Handle folder navigation from sidebar
   const handleFolderNavigation = (folderId) => {
-    const folder = folders.find(f => f.id === folderId);
+    const folder = folders.find((f) => f.id === folderId);
     if (folder) {
       const slug = nameToSlug(folder.name);
       navigate(`/dashboard/myfiles/${slug}`);
@@ -144,9 +149,9 @@ const Dashboard = () => {
   // Handle breadcrumb navigation
   const handleBreadcrumbClick = (folderId) => {
     if (folderId === null) {
-      navigate('/dashboard/myfiles');
+      navigate("/dashboard/myfiles");
     } else {
-      const folder = folders.find(f => f.id === folderId);
+      const folder = folders.find((f) => f.id === folderId);
       if (folder) {
         const slug = nameToSlug(folder.name);
         navigate(`/dashboard/myfiles/${slug}`);
@@ -155,81 +160,89 @@ const Dashboard = () => {
   };
 
   // Filtered files
-  const filteredFiles = (filterType === "all" ? allFilesRaw : files).filter((file) => {
-    const matchesSearch = file.name
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
+  const filteredFiles = (filterType === "all" ? allFilesRaw : files).filter(
+    (file) => {
+      const matchesSearch = file.name
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
 
-    if (filterType === "all") {
-      // Home: files only, no folders
-      if (file.type === "folder") return false;
-      if (!matchesSearch) return false;
+      if (filterType === "all") {
+        // Home: files only, no folders
+        if (file.type === "folder") return false;
+        if (!matchesSearch) return false;
 
-      // Apply document type filter
-      if (documentFilter === "all") return true;
+        // Apply document type filter
+        if (documentFilter === "all") return true;
 
-      if (documentFilter === "word") {
-        return (
-          file.type.includes("word") ||
-          file.type.includes("application/vnd.openxmlformats-officedocument.wordprocessingml") ||
-          file.name.endsWith(".doc") ||
-          file.name.endsWith(".docx")
-        );
+        if (documentFilter === "word") {
+          return (
+            file.type.includes("word") ||
+            file.type.includes(
+              "application/vnd.openxmlformats-officedocument.wordprocessingml"
+            ) ||
+            file.name.endsWith(".doc") ||
+            file.name.endsWith(".docx")
+          );
+        }
+
+        if (documentFilter === "excel") {
+          return (
+            file.type.includes("excel") ||
+            file.type.includes("spreadsheet") ||
+            file.type.includes(
+              "application/vnd.openxmlformats-officedocument.spreadsheetml"
+            ) ||
+            file.name.endsWith(".xls") ||
+            file.name.endsWith(".xlsx")
+          );
+        }
+
+        if (documentFilter === "powerpoint") {
+          return (
+            file.type.includes("powerpoint") ||
+            file.type.includes("presentation") ||
+            file.type.includes(
+              "application/vnd.openxmlformats-officedocument.presentationml"
+            ) ||
+            file.name.endsWith(".ppt") ||
+            file.name.endsWith(".pptx")
+          );
+        }
+
+        if (documentFilter === "onenote") {
+          return (
+            file.type.includes("onenote") ||
+            file.name.endsWith(".one") ||
+            file.name.endsWith(".onepkg")
+          );
+        }
+
+        return true;
       }
 
-      if (documentFilter === "excel") {
+      if (filterType === "myfiles") {
+        // If we're inside a folder (currentPath is set), show all items, otherwise show folders only
+        if (currentPath) return matchesSearch; // Inside folder: show files and folders
+        return matchesSearch && file.type === "folder"; // My Files root: folders only
+      }
+      if (filterType === "folders")
+        return matchesSearch && file.type === "folder";
+      if (filterType === "images")
+        return matchesSearch && file.type.startsWith("image/");
+      if (filterType === "documents") {
         return (
-          file.type.includes("excel") ||
-          file.type.includes("spreadsheet") ||
-          file.type.includes("application/vnd.openxmlformats-officedocument.spreadsheetml") ||
-          file.name.endsWith(".xls") ||
-          file.name.endsWith(".xlsx")
+          matchesSearch &&
+          (file.type.includes("pdf") ||
+            file.type.includes("document") ||
+            file.type.includes("text") ||
+            file.type.includes("word") ||
+            file.type.includes("excel") ||
+            file.type.includes("powerpoint"))
         );
       }
-
-      if (documentFilter === "powerpoint") {
-        return (
-          file.type.includes("powerpoint") ||
-          file.type.includes("presentation") ||
-          file.type.includes("application/vnd.openxmlformats-officedocument.presentationml") ||
-          file.name.endsWith(".ppt") ||
-          file.name.endsWith(".pptx")
-        );
-      }
-
-      if (documentFilter === "onenote") {
-        return (
-          file.type.includes("onenote") ||
-          file.name.endsWith(".one") ||
-          file.name.endsWith(".onepkg")
-        );
-      }
-
-      return true;
+      return matchesSearch;
     }
-
-    if (filterType === "myfiles") {
-      // If we're inside a folder (currentPath is set), show all items, otherwise show folders only
-      if (currentPath) return matchesSearch; // Inside folder: show files and folders
-      return matchesSearch && file.type === "folder"; // My Files root: folders only
-    }
-    if (filterType === "folders")
-      return matchesSearch && file.type === "folder";
-    if (filterType === "images")
-      return matchesSearch && file.type.startsWith("image/");
-    if (filterType === "documents") {
-      return (
-        matchesSearch &&
-        (file.type.includes("pdf") ||
-          file.type.includes("document") ||
-          file.type.includes("text") ||
-          file.type.includes("word") ||
-          file.type.includes("excel") ||
-          file.type.includes("powerpoint"))
-      );
-    }
-    return matchesSearch;
-  });
+  );
 
   const handleFilesUpload = (files) => {
     files.forEach((file) => uploadFile(file));
@@ -319,33 +332,33 @@ const Dashboard = () => {
   };
 
   const handleCommandBarDownload = () => {
-    selectedItems.forEach(itemId => {
-      const file = files.find(f => f.id === itemId);
-      if (file && file.type !== 'folder') {
+    selectedItems.forEach((itemId) => {
+      const file = files.find((f) => f.id === itemId);
+      if (file && file.type !== "folder") {
         handleDownload(file);
       }
     });
   };
 
   const handleShare = () => {
-    alert('Share feature will be implemented');
+    alert("Share feature will be implemented");
   };
 
   const handleCopyLink = () => {
-    alert('Copy link feature will be implemented');
+    alert("Copy link feature will be implemented");
   };
 
   const handleMoveTo = () => {
-    alert('Move to feature will be implemented');
+    alert("Move to feature will be implemented");
   };
 
   const handleCopyTo = () => {
-    alert('Copy to feature will be implemented');
+    alert("Copy to feature will be implemented");
   };
 
   const handleCommandBarRename = () => {
     if (selectedItems.length === 1) {
-      const item = files.find(f => f.id === selectedItems[0]);
+      const item = files.find((f) => f.id === selectedItems[0]);
       setRenameItem(item);
     }
   };
@@ -416,8 +429,12 @@ const Dashboard = () => {
                 onSelectionChange={setSelectedItems}
                 onItemClick={handleItemClick}
                 onDownload={handleDownload}
+                onFilesUpload={handleFilesUpload}
+                onFolderUpload={handleFolderUpload}
               />
-            ) : filterType === "all" || filterType === "myfiles" || filterType === "folders" ? (
+            ) : filterType === "all" ||
+              filterType === "myfiles" ||
+              filterType === "folders" ? (
               <div className="files-container">
                 {/* Top Bar - Shows CommandBar when items selected, or normal controls when not */}
                 {filterType === "myfiles" && selectedItems.length > 0 ? (
@@ -469,6 +486,15 @@ const Dashboard = () => {
                          filterType === "folders" ? "Folders" : "Files"}
                       </h1>
                     )}
+                    <h1 className="files-title-inline">
+                      {filterType === "all"
+                        ? "Recent"
+                        : filterType === "myfiles"
+                        ? "My files"
+                        : filterType === "folders"
+                        ? "Folders"
+                        : "Files"}
+                    </h1>
                     <div className="top-bar-controls">
                       <div className="sort-dropdown" ref={sortMenuRef}>
                         <button
@@ -539,12 +565,59 @@ const Dashboard = () => {
                           </div>
                         )}
                       </div>
-                      <button className="view-btn" onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}>
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <rect x="2" y="2" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none" />
-                          <rect x="9" y="2" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none" />
-                          <rect x="2" y="9" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none" />
-                          <rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none" />
+                      <button
+                        className="view-btn"
+                        onClick={() =>
+                          setViewMode(viewMode === "grid" ? "list" : "grid")
+                        }
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <rect
+                            x="2"
+                            y="2"
+                            width="6"
+                            height="6"
+                            rx="1"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            fill="none"
+                          />
+                          <rect
+                            x="9"
+                            y="2"
+                            width="6"
+                            height="6"
+                            rx="1"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            fill="none"
+                          />
+                          <rect
+                            x="2"
+                            y="9"
+                            width="6"
+                            height="6"
+                            rx="1"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            fill="none"
+                          />
+                          <rect
+                            x="9"
+                            y="9"
+                            width="6"
+                            height="6"
+                            rx="1"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            fill="none"
+                          />
                         </svg>
                         <span>View</span>
                       </button>
@@ -584,7 +657,17 @@ const Dashboard = () => {
                   </div>
                 )}
 
-
+                {filterType !== "all" && (
+                  <h1 className="files-title">
+                    {filterType === "all"
+                      ? "Recent"
+                      : filterType === "myfiles"
+                      ? "My files"
+                      : filterType === "folders"
+                      ? "Folders"
+                      : "Files"}
+                  </h1>
+                )}
 
                 <div className="files-white-box">
                   <FileGrid
@@ -600,6 +683,8 @@ const Dashboard = () => {
                     currentPath={currentPath}
                     user={user}
                     onSortChange={handleSort}
+                    onFilesUpload={handleFilesUpload}
+                    onFolderUpload={handleFolderUpload}
                   />
                 </div>
               </div>
