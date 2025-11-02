@@ -22,14 +22,6 @@ const Dashboard = () => {
   const [renameItem, setRenameItem] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
   const [activeTab, setActiveTab] = useState("Files");
-  const { user } = useAuth()
-  const [viewMode, setViewMode] = useState('list') // 'grid' or 'list'
-  const [searchQuery, setSearchQuery] = useState('')
-  const [filterType, setFilterType] = useState('all') // 'all', 'folders', 'images', 'documents'
-  const [previewFile, setPreviewFile] = useState(null)
-  const [showCreateFolder, setShowCreateFolder] = useState(false)
-  const [renameItem, setRenameItem] = useState(null)
-  const [selectedItems, setSelectedItems] = useState([])
 
   const {
     files,
@@ -65,22 +57,6 @@ const Dashboard = () => {
           file.type.includes("excel") ||
           file.type.includes("powerpoint"))
       );
-  // Filter files based on search and filter type
-  const filteredFiles = files.filter(file => {
-    const matchesSearch = file.name.toLowerCase().includes(searchQuery.toLowerCase())
-
-    if (filterType === 'all') return matchesSearch
-    if (filterType === 'folders') return matchesSearch // Show all files and folders in "My files" view
-    if (filterType === 'images') return matchesSearch && file.type.startsWith('image/')
-    if (filterType === 'documents') {
-      return matchesSearch && (
-        file.type.includes('pdf') ||
-        file.type.includes('document') ||
-        file.type.includes('text') ||
-        file.type.includes('word') ||
-        file.type.includes('excel') ||
-        file.type.includes('powerpoint')
-      )
     }
     return matchesSearch;
   });
@@ -223,13 +199,6 @@ const Dashboard = () => {
                       <i className="fas fa-folder-plus"></i>
                       New folder
                     </button>
-                    <button
-                      className="btn-action"
-                      onClick={() => setShowCreateFolder(true)}
-                    >
-                      <i className="fas fa-folder-plus"></i>
-                      New folder
-                    </button>
 
                     {selectedItems.length > 0 && (
                       <>
@@ -281,7 +250,8 @@ const Dashboard = () => {
             </div>
           )}
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Modals & Preview */}
       {previewFile && (
