@@ -1,0 +1,232 @@
+/* Toast Container - Fixed position at top-right */
+.toast-container {
+  position: fixed;
+  top: 80px;
+  right: 24px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+  max-width: 420px;
+}
+
+/* Individual Toast */
+.toast {
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-width: 320px;
+  max-width: 420px;
+  pointer-events: auto;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-left: 4px solid;
+}
+
+/* Toast Types - Border Colors */
+.toast-success {
+  border-left-color: #107c10;
+}
+
+.toast-error {
+  border-left-color: #d13438;
+}
+
+.toast-warning {
+  border-left-color: #f7630c;
+}
+
+.toast-info {
+  border-left-color: #0078d4;
+}
+
+/* Toast Content */
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  color: var(--text-primary);
+}
+
+/* Toast Icons */
+.toast-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.toast-icon-success {
+  color: #107c10;
+}
+
+.toast-icon-error {
+  color: #d13438;
+}
+
+.toast-icon-warning {
+  color: #f7630c;
+}
+
+.toast-icon-info {
+  color: #0078d4;
+}
+
+/* Toast Message */
+.toast-message {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.5;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', sans-serif;
+  word-break: break-word;
+}
+
+/* Toast Close Button */
+.toast-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.toast-close:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.toast-close svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Progress Bar */
+.toast-progress-bar {
+  height: 3px;
+  background-color: rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.toast-progress-fill {
+  height: 100%;
+  transition: width 0.1s linear;
+}
+
+.toast-success .toast-progress-fill {
+  background-color: #107c10;
+}
+
+.toast-error .toast-progress-fill {
+  background-color: #d13438;
+}
+
+.toast-warning .toast-progress-fill {
+  background-color: #f7630c;
+}
+
+.toast-info .toast-progress-fill {
+  background-color: #0078d4;
+}
+
+/* Animations */
+@keyframes toastSlideIn {
+  from {
+    transform: translateX(calc(100% + 24px));
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes toastSlideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+    max-height: 200px;
+    margin-bottom: 12px;
+  }
+  to {
+    transform: translateX(calc(100% + 24px));
+    opacity: 0;
+    max-height: 0;
+    margin-bottom: 0;
+  }
+}
+
+.toast-enter {
+  animation: toastSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.toast-exit {
+  animation: toastSlideOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Dark Theme Support */
+[data-theme="dark"] .toast {
+  background-color: #2d2d2d;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .toast-progress-bar {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .toast-container {
+    top: 70px;
+    right: 16px;
+    left: 16px;
+    max-width: none;
+  }
+
+  .toast {
+    min-width: auto;
+    max-width: none;
+    width: 100%;
+  }
+}
+
+/* Hover Effects */
+.toast:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2), 0 3px 6px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.toast:hover .toast-progress-fill {
+  animation-play-state: paused;
+}
+
+/* Multiple Toasts Stacking */
+.toast-container > .toast:not(:last-child) {
+  margin-bottom: 12px;
+}
+
+/* Accessibility */
+.toast:focus-within {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .toast-enter,
+  .toast-exit {
+    animation: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .toast:hover {
+    transform: none;
+  }
+}
+

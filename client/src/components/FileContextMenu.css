@@ -1,0 +1,141 @@
+/* Context Menu Backdrop */
+.context-menu-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9998;
+  background: transparent;
+}
+
+/* Context Menu Container */
+.file-context-menu {
+  position: fixed;
+  z-index: 9999;
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-width: 220px;
+  padding: 4px;
+  animation: contextMenuFadeIn 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+@keyframes contextMenuFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Context Menu Item */
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  height: 36px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.1s ease;
+  font-size: 14px;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', sans-serif;
+  color: var(--text-primary);
+  user-select: none;
+}
+
+.context-menu-item:hover {
+  background-color: var(--bg-hover);
+}
+
+.context-menu-item:active {
+  background-color: var(--bg-active);
+}
+
+/* Context Menu Icon */
+.context-menu-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--text-primary);
+  flex-shrink: 0;
+  transition: color var(--transition-base);
+}
+
+/* Context Menu Text */
+.context-menu-item span {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+}
+
+/* Context Menu Separator */
+.context-menu-separator {
+  height: 1px;
+  background-color: var(--border-color-light);
+  margin: 4px 0;
+  transition: background-color var(--transition-base);
+}
+
+/* Dark Theme Support */
+[data-theme="dark"] .file-context-menu {
+  background-color: #2d2d2d;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Prevent menu from going off-screen */
+.file-context-menu {
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+
+/* Custom scrollbar for context menu */
+.file-context-menu::-webkit-scrollbar {
+  width: 8px;
+}
+
+.file-context-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.file-context-menu::-webkit-scrollbar-thumb {
+  background-color: var(--border-color-light);
+  border-radius: 4px;
+}
+
+.file-context-menu::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-secondary);
+}
+
+/* Accessibility - Focus States */
+.context-menu-item:focus {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: -2px;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .file-context-menu {
+    animation: none;
+    transition: none;
+  }
+  
+  .context-menu-item {
+    transition: none;
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .file-context-menu {
+    min-width: 200px;
+    max-width: calc(100vw - 32px);
+  }
+}
+
