@@ -281,3 +281,13 @@
     gap: 16px;
   }
 }
+ .mojj{
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    align-items: center;
+    color: white;
+    font-size: 14px;
+    margin-top: 5px;
+  }
+ 
