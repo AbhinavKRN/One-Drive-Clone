@@ -85,14 +85,28 @@ const Sidebar = ({
     setShowCreateDropdown(false)
   }
 
-  const handleFilesUploadClick = () => {
-    fileInputRef.current?.click()
+  const handleFilesUploadClick = (e) => {
+    e?.stopPropagation()
+    e?.preventDefault()
     setShowCreateDropdown(false)
+    // Small delay to ensure dropdown closes before triggering file input
+    setTimeout(() => {
+      if (fileInputRef.current) {
+        fileInputRef.current.click()
+      }
+    }, 100)
   }
 
-  const handleFolderUploadClick = () => {
-    folderInputRef.current?.click()
+  const handleFolderUploadClick = (e) => {
+    e?.stopPropagation()
+    e?.preventDefault()
     setShowCreateDropdown(false)
+    // Small delay to ensure dropdown closes before triggering file input
+    setTimeout(() => {
+      if (folderInputRef.current) {
+        folderInputRef.current.click()
+      }
+    }, 100)
   }
 
   const handleFileInputChange = (e) => {
@@ -199,8 +213,6 @@ const Sidebar = ({
                   </div>
                 </div>
               )}
-              <input ref={fileInputRef} type="file" multiple onChange={handleFileInputChange} style={{ display: "none" }} />
-              <input ref={folderInputRef} type="file" webkitdirectory="" directory="" multiple onChange={handleFolderInputChange} style={{ display: "none" }} />
             </div>
           </div>
 
@@ -340,8 +352,6 @@ const Sidebar = ({
                   </div>
                 </div>
               )}
-              <input ref={fileInputRef} type="file" multiple onChange={handleFileInputChange} style={{ display: "none" }} />
-              <input ref={folderInputRef} type="file" webkitdirectory="" directory="" multiple onChange={handleFolderInputChange} style={{ display: "none" }} />
             </div>
           </div>
 
@@ -425,6 +435,9 @@ const Sidebar = ({
           </div>
         </aside>
       )}
+      {/* File inputs placed outside conditional rendering to always be accessible */}
+      <input ref={fileInputRef} type="file" multiple onChange={handleFileInputChange} style={{ display: "none" }} />
+      <input ref={folderInputRef} type="file" webkitdirectory="" directory="" multiple onChange={handleFolderInputChange} style={{ display: "none" }} />
     </>
   )
 }
