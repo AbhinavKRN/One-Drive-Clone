@@ -11,6 +11,7 @@ const SharedView = ({
   onDownload,
   onFilesUpload,
   onFolderUpload,
+  onMoveFileToFolder,
 }) => {
   const [activeTab, setActiveTab] = useState("withYou"); // 'withYou' or 'byYou'
   const [fileTypeFilter, setFileTypeFilter] = useState("all");
@@ -540,6 +541,7 @@ const SharedView = ({
             onDownload={onDownload}
             onFilesUpload={onFilesUpload}
             onFolderUpload={onFolderUpload}
+            onMoveFileToFolder={onMoveFileToFolder}
           />
         </div>
       )}

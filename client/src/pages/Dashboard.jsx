@@ -72,6 +72,7 @@ const Dashboard = () => {
     navigateToPath,
     downloadFile,
     createEmptyFile,
+    moveFileToFolder,
   } = useFileManager(toast);
 
   // Store navigateToFolderBySlug in ref for stable reference
@@ -367,12 +368,12 @@ const Dashboard = () => {
   // Prevent body scroll when sidebar is open on mobile
   useEffect(() => {
     if (isSidebarOpen) {
-      document.body.classList.add('dashboard-sidebar-open');
+      document.body.classList.add("dashboard-sidebar-open");
     } else {
-      document.body.classList.remove('dashboard-sidebar-open');
+      document.body.classList.remove("dashboard-sidebar-open");
     }
     return () => {
-      document.body.classList.remove('dashboard-sidebar-open');
+      document.body.classList.remove("dashboard-sidebar-open");
     };
   }, [isSidebarOpen]);
 
@@ -407,8 +408,8 @@ const Dashboard = () => {
         <div className="dashboard-content">
           {/* Mobile Backdrop */}
           {isSidebarOpen && (
-            <div 
-              className="sidebar-backdrop" 
+            <div
+              className="sidebar-backdrop"
               onClick={() => setIsSidebarOpen(false)}
             />
           )}
@@ -447,6 +448,7 @@ const Dashboard = () => {
                 onDownload={handleDownload}
                 onFilesUpload={handleFilesUpload}
                 onFolderUpload={handleFolderUpload}
+                onMoveFileToFolder={moveFileToFolder}
               />
             ) : filterType === "all" ||
               filterType === "myfiles" ||
@@ -699,6 +701,7 @@ const Dashboard = () => {
                     onSortChange={handleSort}
                     onFilesUpload={handleFilesUpload}
                     onFolderUpload={handleFolderUpload}
+                    onMoveFileToFolder={moveFileToFolder}
                     onShare={handleShare}
                     onCopyLink={handleCopyLink}
                     onMoveTo={handleMoveTo}
