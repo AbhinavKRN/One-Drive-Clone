@@ -1,5 +1,5 @@
 import React from "react";
-import { AddRegular, SearchRegular, PhoneRegular } from "@fluentui/react-icons";
+import { AddRegular, SearchRegular } from "@fluentui/react-icons";
 import "./AlbumsPage.css";
 
 const AlbumPage = () => {
@@ -20,22 +20,26 @@ const AlbumPage = () => {
         <div className="album-actions">
           <div className="album-action-card">
             <div className="album-action-icon">
-              <PhoneRegular />
+              <div className="album-stack-icon">
+                <div className="album-card-back"></div>
+                <div className="album-card-front"></div>
+              </div>
+              <AddRegular className="album-icon-plus" />
             </div>
             <div className="album-action-text">
-              <span>Create Album</span>
+              <span>Create album</span>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="album-search-container">
-        <button className="album-add-btn">
-          <AddRegular />
-        </button>
-        <div className="album-search-bar">
-          <SearchRegular />
-          <input type="text" placeholder="Search your photos" />
+        <div className="album-search-container">
+          <button className="album-add-btn">
+            <AddRegular />
+          </button>
+          <div className="album-search-bar">
+            <SearchRegular />
+            <input type="text" placeholder="Search your photos" />
+          </div>
         </div>
       </div>
     </div>

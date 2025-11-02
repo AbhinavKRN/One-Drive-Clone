@@ -475,6 +475,15 @@ const Dashboard = () => {
                          filterType === "folders" ? "Folders" : "Files"}
                       </h1>
                     )}
+                    <h1 className="files-title-inline">
+                      {filterType === "all"
+                        ? "Recent"
+                        : filterType === "myfiles"
+                        ? "My files"
+                        : filterType === "folders"
+                        ? "Folders"
+                        : "Files"}
+                    </h1>
                     <div className="top-bar-controls">
                       <div className="sort-dropdown" ref={sortMenuRef}>
                         <button
