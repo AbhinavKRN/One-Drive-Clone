@@ -169,7 +169,7 @@
 }
 
 .action-card:hover {
-  background-color: var(--photos-card-hover);
+  background-color: transparent;
 }
 
 .action-icon {
@@ -238,13 +238,13 @@
   width: auto;
   justify-content: center;
   margin-top: 1rem;
-  padding: 6px;
+  padding: 0;
   border-radius: 10000px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: var(--shadow-md);
-  overflow: hidden;
-  min-width: 56px;
-  max-width: 56px;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+  min-width: 44px;
+  max-width: 44px;
   transition: min-width 0.25s ease-in-out, max-width 0.25s ease-in-out, padding 0.25s ease-in-out;
 }
 
@@ -252,9 +252,16 @@
   min-width: 324px;
   max-width: 324px;
   padding: 6px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
 }
 
 :root.dark-theme .photos-search-container {
+  background: transparent;
+}
+
+:root.dark-theme .photos-search-container:hover {
   background: rgba(45, 45, 48, 0.95);
 }
 
@@ -273,10 +280,18 @@
   transition: all 0.2s ease;
   flex-shrink: 0;
   z-index: 2;
+  margin: 0;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.photos-search-container:hover .add-photo-btn {
+  margin: 0;
 }
 
 .add-photo-btn:hover {
   transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .add-photo-btn svg {
