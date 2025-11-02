@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fluentui/react-components": "^9.72.4",
     "@fluentui/react-icons": "^2.0.313",
     "@fluentui/svg-icons": "^1.1.313",
     "react": "^18.2.0",
@@ -17,6 +18,9 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.0",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.18",
     "vite": "^5.0.0"
   }
 }

@@ -1,16 +1,27 @@
-import React, { useState, useEffect } from 'react'
-import { useAuth } from '../context/AuthContext'
-import Navbar from '../components/Navbar'
-import Sidebar from '../components/Sidebar'
-import FileGrid from '../components/FileGrid'
-import SharedView from '../components/SharedView'
-import FilePreview from '../components/FilePreview'
-import CreateFolderModal from '../components/CreateFolderModal'
-import RenameModal from '../components/RenameModal'
-import { useFileManager } from '../hooks/useFileManager'
-import './Dashboard.css'
+import React, { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
+import FileGrid from "../components/FileGrid";
+import SharedView from "../components/SharedView";
+import FilePreview from "../components/FilePreview";
+import RecycleBin from "../components/RecycleBin";
+import CreateFolderModal from "../components/CreateFolderModal";
+import RenameModal from "../components/RenameModal";
+import { useFileManager } from "../hooks/useFileManager";
+import PhotosPage from "./PhotosPage"; // 👈 new Photos page component
+import "./Dashboard.css";
 
 const Dashboard = () => {
+  const { user } = useAuth();
+  const [viewMode, setViewMode] = useState("grid");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState("all");
+  const [previewFile, setPreviewFile] = useState(null);
+  const [showCreateFolder, setShowCreateFolder] = useState(false);
+  const [renameItem, setRenameItem] = useState(null);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [activeTab, setActiveTab] = useState("Files");
   const { user } = useAuth()
   const [viewMode, setViewMode] = useState('list') // 'grid' or 'list'
   const [searchQuery, setSearchQuery] = useState('')
@@ -22,7 +33,6 @@ const Dashboard = () => {
 
   const {
     files,
-    currentPath,
     breadcrumbs,
     storageUsed,
     storageTotal,
@@ -32,9 +42,29 @@ const Dashboard = () => {
     renameItem: renameFileOrFolder,
     navigateToFolder,
     navigateToPath,
-    downloadFile
-  } = useFileManager()
+    downloadFile,
+  } = useFileManager();
 
+  // Filtered files
+  const filteredFiles = files.filter((file) => {
+    const matchesSearch = file.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    if (filterType === "all") return matchesSearch;
+    if (filterType === "folders")
+      return matchesSearch && file.type === "folder";
+    if (filterType === "images")
+      return matchesSearch && file.type.startsWith("image/");
+    if (filterType === "documents") {
+      return (
+        matchesSearch &&
+        (file.type.includes("pdf") ||
+          file.type.includes("document") ||
+          file.type.includes("text") ||
+          file.type.includes("word") ||
+          file.type.includes("excel") ||
+          file.type.includes("powerpoint"))
+      );
   // Filter files based on search and filter type
   const filteredFiles = files.filter(file => {
     const matchesSearch = file.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -52,47 +82,45 @@ const Dashboard = () => {
         file.type.includes('powerpoint')
       )
     }
-    return matchesSearch
-  })
+    return matchesSearch;
+  });
 
   const handleFileUpload = (e) => {
-    const uploadedFiles = Array.from(e.target.files)
-    uploadedFiles.forEach(file => uploadFile(file))
-  }
+    const uploadedFiles = Array.from(e.target.files);
+    uploadedFiles.forEach((file) => uploadFile(file));
+  };
 
   const handleCreateFolder = (folderName) => {
-    createFolder(folderName)
-    setShowCreateFolder(false)
-  }
+    createFolder(folderName);
+    setShowCreateFolder(false);
+  };
 
   const handleDelete = () => {
     if (selectedItems.length > 0) {
-      if (confirm(`Delete ${selectedItems.length} item(s)?`)) {
-        deleteItems(selectedItems)
-        setSelectedItems([])
+      if (window.confirm(`Delete ${selectedItems.length} item(s)?`)) {
+        deleteItems(selectedItems);
+        setSelectedItems([]);
       }
     }
-  }
+  };
 
   const handleRename = (newName) => {
     if (renameItem) {
-      renameFileOrFolder(renameItem.id, newName)
-      setRenameItem(null)
+      renameFileOrFolder(renameItem.id, newName);
+      setRenameItem(null);
     }
-  }
+  };
 
   const handleItemClick = (file) => {
-    if (file.type === 'folder') {
-      navigateToFolder(file.id)
-      setSelectedItems([])
+    if (file.type === "folder") {
+      navigateToFolder(file.id);
+      setSelectedItems([]);
     } else {
-      setPreviewFile(file)
+      setPreviewFile(file);
     }
-  }
+  };
 
-  const handleDownload = (file) => {
-    downloadFile(file)
-  }
+  const handleDownload = (file) => downloadFile(file);
 
   return (
     <div className="dashboard">
@@ -100,16 +128,23 @@ const Dashboard = () => {
         user={user}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        setActiveTab={setActiveTab}
+        activeTab={activeTab}
       />
 
-      <div className="dashboard-content">
-        <Sidebar
-          storageUsed={storageUsed}
-          storageTotal={storageTotal}
-          filterType={filterType}
-          onFilterChange={setFilterType}
-          onCreateClick={() => setShowCreateFolder(true)}
-        />
+      {/* --- Conditionally Render Tabs --- */}
+      {activeTab === "Photos" ? (
+        <PhotosPage />
+      ) : (
+        <div className="dashboard-content">
+          {/* Sidebar */}
+          <Sidebar
+            storageUsed={storageUsed}
+            storageTotal={storageTotal}
+            filterType={filterType}
+            onFilterChange={setFilterType}
+            onCreateClick={() => setShowCreateFolder(true)}
+          />
 
         <div className="main-content">
           {filterType === 'shared' ? (
@@ -188,6 +223,13 @@ const Dashboard = () => {
                       <i className="fas fa-folder-plus"></i>
                       New folder
                     </button>
+                    <button
+                      className="btn-action"
+                      onClick={() => setShowCreateFolder(true)}
+                    >
+                      <i className="fas fa-folder-plus"></i>
+                      New folder
+                    </button>
 
                     {selectedItems.length > 0 && (
                       <>
@@ -241,6 +283,7 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Modals & Preview */}
       {previewFile && (
         <FilePreview
           file={previewFile}
@@ -264,7 +307,7 @@ const Dashboard = () => {
         />
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Dashboard
+export default Dashboard;
