@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ShareRegular,
   LinkRegular,
@@ -24,6 +24,49 @@ const FileContextMenu = ({
   onDetails,
   onClose,
 }) => {
+  const menuRef = useRef(null);
+  const [adjustedPosition, setAdjustedPosition] = useState(position);
+
+  useEffect(() => {
+    if (!menuRef.current || !position) return;
+
+    const menu = menuRef.current;
+    const menuRect = menu.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    let newX = position.x;
+    let newY = position.y;
+
+    // Check if menu goes off the right edge
+    if (newX + menuRect.width > viewportWidth) {
+      newX = viewportWidth - menuRect.width - 10; // 10px padding from edge
+    }
+
+    // Check if menu goes off the left edge
+    if (newX < 10) {
+      newX = 10;
+    }
+
+    // Check if menu goes off the bottom edge
+    if (newY + menuRect.height > viewportHeight) {
+      // Position above the trigger point instead
+      newY = position.y - menuRect.height - 8; // 8px gap above
+      
+      // If it still goes off the top, position at the top with padding
+      if (newY < 10) {
+        newY = 10;
+      }
+    }
+
+    // Check if menu goes off the top edge
+    if (newY < 10) {
+      newY = 10;
+    }
+
+    setAdjustedPosition({ x: newX, y: newY });
+  }, [position]);
+
   if (!file || !position) return null;
 
   const handleAction = (action) => {
@@ -38,10 +81,11 @@ const FileContextMenu = ({
       
       {/* Context Menu */}
       <div
+        ref={menuRef}
         className="file-context-menu"
         style={{
-          top: `${position.y}px`,
-          left: `${position.x}px`,
+          top: `${adjustedPosition.y}px`,
+          left: `${adjustedPosition.x}px`,
         }}
         onClick={(e) => e.stopPropagation()}
       >
