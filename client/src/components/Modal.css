@@ -22,6 +22,12 @@
   transition: background-color var(--transition-base), box-shadow var(--transition-base);
 }
 
+/* Create Folder Modal - Center Position */
+.modal-overlay.create-folder-overlay {
+  align-items: center;
+  justify-content: center;
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -219,4 +225,60 @@
 .rename-modal .form-group input {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
+}
+
+/* Create Folder Modal Specific Styles */
+.create-folder-modal {
+  max-width: 520px;
+}
+
+.create-folder-modal .modal-header {
+  border-bottom: none;
+  padding: 24px 24px 20px;
+}
+
+.create-folder-modal .modal-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #000000;
+}
+
+.create-folder-modal .btn-close {
+  color: #000000;
+}
+
+.create-folder-modal .modal-body {
+  padding: 0 24px 24px;
+}
+
+.create-folder-modal .form-group {
+  margin-bottom: 0;
+}
+
+.create-folder-modal .form-group input {
+  background-color: #ffffff;
+  border: 2px solid #0078d4;
+  border-radius: 2px;
+  color: #000000;
+  padding: 12px 16px;
+  font-size: 15px;
+}
+
+.create-folder-modal .form-group input:focus {
+  border-color: #0078d4;
+  border-width: 2px;
+  padding: 12px 16px;
+}
+
+.create-folder-modal .modal-footer {
+  border-top: none;
+  padding: 0 24px 24px;
+  justify-content: flex-end;
+}
+
+.create-folder-modal .btn-primary {
+  padding: 8px 20px;
+  font-size: 14px;
+  border-radius: 2px;
+  min-width: auto;
 }

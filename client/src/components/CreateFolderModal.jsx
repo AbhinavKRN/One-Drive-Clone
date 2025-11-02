@@ -23,10 +23,10 @@ const CreateFolderModal = ({ onClose, onCreate }) => {
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay create-folder-overlay" onClick={onClose}>
+      <div className="modal create-folder-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Create new folder</h2>
+          <h2>Create a folder</h2>
           <button className="btn-close" onClick={onClose}>
             <i className="fas fa-times"></i>
           </button>
@@ -37,22 +37,18 @@ const CreateFolderModal = ({ onClose, onCreate }) => {
             {error && <div className="error-message">{error}</div>}
 
             <div className="form-group">
-              <label htmlFor="folderName">Folder name</label>
               <input
                 type="text"
                 id="folderName"
                 value={folderName}
                 onChange={(e) => setFolderName(e.target.value)}
-                placeholder="Enter folder name"
+                placeholder="f"
                 autoFocus
               />
             </div>
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="btn-secondary" onClick={onClose}>
-              Cancel
-            </button>
             <button type="submit" className="btn-primary">
               Create
             </button>

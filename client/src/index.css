@@ -45,6 +45,33 @@
   --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-fast: 0.2s ease;
   --transition-slow: 0.4s ease;
+
+  /* Photos Section Colors */
+  --photos-bg-gradient-start: #f3f2f1;
+  --photos-bg-gradient-mid: #faf9f8;
+  --photos-bg-gradient-end: #f3f2f1;
+  --photos-text-primary: #323130;
+  --photos-text-secondary: #605e5c;
+  --photos-text-muted: #8a8886;
+  --photos-card-bg: rgba(255, 255, 255, 0.5);
+  --photos-card-hover: rgba(255, 255, 255, 0.7);
+  --photos-search-bg: #ffffff;
+  --photos-search-text: #323130;
+  --photos-search-placeholder: #8a8886;
+  --photos-search-border: rgba(0, 0, 0, 0.1);
+  --photos-glow: rgba(139, 92, 246, 0.08);
+
+  /* Navbar Photos Mode Colors */
+  --navbar-photos-bg-start: #f3f2f1;
+  --navbar-photos-bg-mid: #faf9f8;
+  --navbar-photos-bg-end: #f3f2f1;
+  --navbar-photos-text: #323130;
+  --navbar-photos-text-secondary: #605e5c;
+  --navbar-photos-tab-inactive: #8a8886;
+  --navbar-photos-tab-active: #323130;
+  --navbar-photos-slider-bg: #ffffff;
+  --navbar-photos-tabs-bg: rgba(0, 0, 0, 0.05);
+  --navbar-photos-hover: rgba(0, 0, 0, 0.05);
 }
 
 :root.dark-theme {
@@ -79,6 +106,33 @@
   --scrollbar-track: #2d2d30;
   --scrollbar-thumb: #555;
   --scrollbar-thumb-hover: #777;
+
+  /* Photos Section Colors */
+  --photos-bg-gradient-start: #0d0e13;
+  --photos-bg-gradient-mid: #181a29;
+  --photos-bg-gradient-end: #0d0e13;
+  --photos-text-primary: #ffffff;
+  --photos-text-secondary: #cccccc;
+  --photos-text-muted: #b0b3c1;
+  --photos-card-bg: rgba(255, 255, 255, 0.05);
+  --photos-card-hover: rgba(255, 255, 255, 0.1);
+  --photos-search-bg: #1d1e2f;
+  --photos-search-text: #ffffff;
+  --photos-search-placeholder: #b0b3c1;
+  --photos-search-border: rgba(255, 255, 255, 0.1);
+  --photos-glow: rgba(139, 92, 246, 0.15);
+
+  /* Navbar Photos Mode Colors */
+  --navbar-photos-bg-start: #0d0e13;
+  --navbar-photos-bg-mid: #181a29;
+  --navbar-photos-bg-end: #0d0e13;
+  --navbar-photos-text: #ffffff;
+  --navbar-photos-text-secondary: #cccccc;
+  --navbar-photos-tab-inactive: #dce9ff;
+  --navbar-photos-tab-active: #ffffff;
+  --navbar-photos-slider-bg: #0a66c2;
+  --navbar-photos-tabs-bg: rgba(255, 255, 255, 0.15);
+  --navbar-photos-hover: rgba(255, 255, 255, 0.1);
 }
 
 * {

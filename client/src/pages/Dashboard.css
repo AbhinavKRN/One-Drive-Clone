@@ -101,6 +101,14 @@
   transition: color var(--transition-base);
 }
 
+.breadcrumbs-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  flex-wrap: wrap;
+}
+
 .top-bar-controls {
   display: flex;
   align-items: center;
@@ -200,11 +208,11 @@
 }
 
 .files-title {
-  font-size: 28px;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 700;
+  color: #000000;
   margin: 0;
-  padding: 20px 0 0 0;
+  padding: 20px 0 12px 0;
   line-height: 1.2;
   font-family: inherit;
   transition: color var(--transition-base);
@@ -283,6 +291,7 @@
               border-color var(--transition-base);
 }
 
+/* Hide toolbar since buttons removed */
 .files-white-box .toolbar {
   display: none;
 }
@@ -291,27 +300,41 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-size: inherit;
   flex-wrap: wrap;
+  font-weight: inherit;
 }
 
 .breadcrumb {
-  color: var(--accent-primary);
+  color: #000000;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 2px 4px;
   border-radius: 4px;
   transition: background-color var(--transition-fast),
               color var(--transition-base);
+  text-decoration: none;
+  font-weight: 400 !important;
 }
 
 .breadcrumb:hover {
   background-color: var(--bg-hover);
-  text-decoration: underline;
+}
+
+.breadcrumb-current {
+  font-weight: 700 !important;
+  cursor: default;
+}
+
+.breadcrumb-current:hover {
+  background-color: transparent;
 }
 
 .separator {
-  color: var(--text-secondary);
+  color: #000000;
   transition: color var(--transition-base);
+  user-select: none;
+  font-weight: 400 !important;
+  margin: 0 4px;
 }
 
 .toolbar-actions {
