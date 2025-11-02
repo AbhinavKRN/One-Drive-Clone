@@ -216,21 +216,6 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-              <div className="files-white-box">
-                <div className="toolbar">
-                  <div className="breadcrumbs">
-                    {breadcrumbs.map((crumb, index) => (
-                      <React.Fragment key={crumb.id}>
-                        <span
-                          className="breadcrumb"
-                          onClick={() => navigateToPath(crumb.id)}
-                        >
-                          {crumb.name}
-                        </span>
-                        {index < breadcrumbs.length - 1 && <span className="separator">/</span>}
-                      </React.Fragment>
-                    ))}
-                  </div>
                 <div className="files-white-box">
                   <div className="toolbar">
                     <div className="breadcrumbs">
@@ -298,29 +283,6 @@ const Dashboard = () => {
                     </div>
                   </div>
 
-                <FileGrid
-                  files={filteredFiles}
-                  viewMode={viewMode}
-                  selectedItems={selectedItems}
-                  onSelectionChange={setSelectedItems}
-                  onItemClick={handleItemClick}
-                  onDownload={handleDownload}
-                />
-              </div>
-            </div>
-          ) : (
-            <div className="home-empty-state">
-              <h3>Your recent files will show up here</h3>
-              <div className="home-empty-illustration">
-                <img
-                  src="/images/image.png"
-                  alt="Recent files illustration"
-                  className="home-empty-image"
-                />
-              </div>
-            </div>
-          )}
-        </div>
                   <FileGrid
                     files={filteredFiles}
                     viewMode={viewMode}
