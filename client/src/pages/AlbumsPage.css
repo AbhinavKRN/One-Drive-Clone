@@ -1,0 +1,207 @@
+.album-page {
+  min-height: calc(100vh - 80px);
+  background: linear-gradient(180deg, #0d0e13 0%, #181a29 50%, #0d0e13 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 80px 20px 120px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.album-page::before {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 300px;
+  height: 100%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.album-header {
+  position: absolute;
+  top: 30px;
+  left: 12%;
+  transform: translateX(-50%);
+  font-size: 2.67rem;
+  font-weight: 900;
+}
+
+.album-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  max-width: 900px;
+  width: 100%;
+  z-index: 1;
+}
+
+.album-image-container {
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto 2.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.album-image-container img {
+  width: 100%;
+  max-height: 250px;
+  object-fit: contain;
+  border-radius: 16px;
+}
+
+.album-subtitle {
+  margin-bottom: 10px;
+}
+
+.album-description {
+  margin-bottom: 20px;
+}
+
+.album-actions {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.album-action-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 20px;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.album-action-card:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.album-action-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.album-action-icon svg {
+  width: 28px;
+  height: 28px;
+  color: #fff;
+}
+
+.album-action-text span {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.album-search-container {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 100;
+  width: calc(100% - 40px);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.album-add-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+  transition: all 0.3s ease;
+}
+
+.album-add-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 30px rgba(139, 92, 246, 0.6);
+}
+
+.album-add-btn svg {
+  width: 24px;
+  height: 24px;
+  color: #fff;
+}
+
+.album-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1d1e2f;
+  padding: 14px 24px;
+  border-radius: 50px;
+  min-width: 300px;
+  max-width: 90vw;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.album-search-bar svg {
+  width: 20px;
+  height: 20px;
+  color: #b0b3c1;
+}
+
+.album-search-bar input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.album-search-bar input::placeholder {
+  color: #b0b3c1;
+}
+
+@media (max-width: 768px) {
+  .album-image-container {
+    max-width: 250px;
+  }
+
+  .album-actions {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .album-search-bar {
+    width: 80%;
+  }
+
+  .album-search-container {
+    bottom: 20px;
+    gap: 16px;
+  }
+}

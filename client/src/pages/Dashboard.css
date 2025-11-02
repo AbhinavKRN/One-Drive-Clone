@@ -96,7 +96,7 @@
   transition: background-color var(--transition-fast),
               color var(--transition-base);
   border-radius: 4px;
-  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  font-family: inherit;
 }
 
 .sort-btn-top:hover,
@@ -156,7 +156,7 @@
   cursor: pointer;
   transition: background-color var(--transition-fast),
               color var(--transition-base);
-  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  font-family: inherit;
 }
 
 .sort-menu button:hover {
@@ -179,7 +179,7 @@
   margin: 0;
   padding: 20px 0 0 0;
   line-height: 1.2;
-  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  font-family: inherit;
   transition: color var(--transition-base);
 }
 

@@ -5,7 +5,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  font-family: inherit;
   transition: background-color var(--transition-base);
 }
 
@@ -75,7 +75,7 @@
   transition: background-color var(--transition-fast),
               color var(--transition-base);
   border-radius: 4px;
-  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  font-family: inherit;
 }
 
 .sort-btn-top:hover,
@@ -110,7 +110,7 @@
   margin: 0;
   padding: 20px 32px 0 32px;
   line-height: 1.2;
-  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  font-family: inherit;
   transition: color var(--transition-base);
 }
 
@@ -179,7 +179,7 @@
   color: var(--text-primary);
   border-bottom: none;
   white-space: nowrap;
-  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  font-family: inherit;
   vertical-align: middle;
   transition: color var(--transition-base);
 }
@@ -229,7 +229,7 @@
   font-size: 14px;
   color: var(--text-primary);
   vertical-align: middle;
-  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  font-family: inherit;
   transition: color var(--transition-base);
 }
 
@@ -266,7 +266,7 @@
   color: var(--text-secondary);
   margin: 0;
   font-weight: 400;
-  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  font-family: inherit;
   transition: color var(--transition-base);
 }
 
@@ -303,7 +303,7 @@
   cursor: pointer;
   transition: background-color var(--transition-fast),
               color var(--transition-base);
-  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  font-family: inherit;
 }
 
 .sort-menu button:hover {
