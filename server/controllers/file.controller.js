@@ -173,6 +173,7 @@ const getAllFiles = async (req, res) => {
         folders:folder_id (id, name)
       `)
       .eq('user_id', userId)
+      .is('deleted_at', null) // Exclude deleted files from regular listing
       .order('created_at', { ascending: false })
 
     console.log('📊 Files query result:', { 
@@ -316,6 +317,7 @@ const downloadFile = async (req, res) => {
 const deleteFile = async (req, res) => {
   try {
     const { id } = req.params
+    const { permanent } = req.query // If permanent=true, delete permanently
     const userId = req.user.id
 
     const { data: file, error } = await supabase
@@ -334,25 +336,54 @@ const deleteFile = async (req, res) => {
       })
     }
 
-    // Delete file from database
-    await supabase
+    // If permanent deletion (from recycle bin) or if deleted_at already exists
+    if (permanent === 'true' || file.deleted_at) {
+      // Permanently delete file from database
+      await supabase
+        .from('files')
+        .delete()
+        .eq('id', id)
+
+      // Delete file from disk
+      try {
+        await fs.unlink(file.path)
+      } catch (fsError) {
+        console.error('File deletion error (disk):', fsError)
+        // Continue even if file deletion fails
+      }
+
+      return res.json({
+        status: 'success',
+        action: 'delete_file',
+        data: { file_id: id },
+        message: 'File permanently deleted'
+      })
+    }
+
+    // Soft delete: Move to recycle bin
+    // Store original folder_id before deletion
+    const originalFolderId = file.folder_id
+    const deletedAt = new Date().toISOString()
+
+    // Update file with deleted_at timestamp and clear folder_id
+    const { error: updateError } = await supabase
       .from('files')
-      .delete()
+      .update({ 
+        deleted_at: deletedAt,
+        original_folder_id: originalFolderId,
+        folder_id: null 
+      })
       .eq('id', id)
 
-    // Delete file from disk
-    try {
-      await fs.unlink(file.path)
-    } catch (fsError) {
-      console.error('File deletion error (disk):', fsError)
-      // Continue even if file deletion fails
+    if (updateError) {
+      throw updateError
     }
 
     return res.json({
       status: 'success',
       action: 'delete_file',
       data: { file_id: id },
-      message: 'File deleted successfully'
+      message: 'File moved to recycle bin'
     })
   } catch (error) {
     console.error('Delete file error:', error)
@@ -385,6 +416,7 @@ const renameFile = async (req, res) => {
       .select('*')
       .eq('id', id)
       .eq('user_id', userId)
+      .is('deleted_at', null) // Cannot rename deleted files
       .single()
 
     if (!file) {
@@ -403,6 +435,7 @@ const renameFile = async (req, res) => {
       .eq('name', name)
       .eq('user_id', userId)
       .eq('folder_id', file.folder_id)
+      .is('deleted_at', null) // Only check non-deleted files
       .neq('id', id)
       .single()
 
@@ -439,11 +472,207 @@ const renameFile = async (req, res) => {
   }
 }
 
+// Get recycle bin items
+const getRecycleBinItems = async (req, res) => {
+  try {
+    const userId = req.user.id
+
+    const { data: deletedFiles, error: filesError } = await supabase
+      .from('files')
+      .select(`
+        *,
+        folders:original_folder_id (id, name)
+      `)
+      .eq('user_id', userId)
+      .not('deleted_at', 'is', null)
+      .order('deleted_at', { ascending: false })
+
+    const { data: deletedFolders, error: foldersError } = await supabase
+      .from('folders')
+      .select(`
+        *,
+        parent_folder:parent_id (id, name),
+        original_parent:original_parent_id (id, name)
+      `)
+      .eq('user_id', userId)
+      .not('deleted_at', 'is', null)
+      .order('deleted_at', { ascending: false })
+
+    if (filesError || foldersError) {
+      throw filesError || foldersError
+    }
+
+    // Format the response
+    const items = [
+      ...(deletedFiles || []).map(file => ({
+        id: file.id,
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        deleted_at: file.deleted_at,
+        original_location: file.folders?.name || 'My Files',
+        item_type: 'file'
+      })),
+      ...(deletedFolders || []).map(folder => ({
+        id: folder.id,
+        name: folder.name,
+        type: 'folder',
+        size: 0,
+        deleted_at: folder.deleted_at,
+        original_location: folder.original_parent?.name || 'My Files',
+        item_type: 'folder'
+      }))
+    ].sort((a, b) => new Date(b.deleted_at) - new Date(a.deleted_at))
+
+    return res.json({
+      status: 'success',
+      action: 'get_recycle_bin',
+      data: { items },
+      message: 'Recycle bin items retrieved successfully'
+    })
+  } catch (error) {
+    console.error('Get recycle bin error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'get_recycle_bin',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Restore item from recycle bin
+const restoreItem = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { item_type } = req.query // 'file' or 'folder'
+    const userId = req.user.id
+
+    if (item_type === 'file') {
+      const { data: file, error } = await supabase
+        .from('files')
+        .select('*')
+        .eq('id', id)
+        .eq('user_id', userId)
+        .not('deleted_at', 'is', null)
+        .single()
+
+      if (error || !file) {
+        return res.status(404).json({
+          status: 'error',
+          action: 'restore_item',
+          error: 'File not found in recycle bin',
+          code: 404
+        })
+      }
+
+      // Restore file to original folder
+      const { error: updateError } = await supabase
+        .from('files')
+        .update({ 
+          deleted_at: null,
+          folder_id: file.original_folder_id,
+          original_folder_id: null
+        })
+        .eq('id', id)
+
+      if (updateError) {
+        throw updateError
+      }
+
+      return res.json({
+        status: 'success',
+        action: 'restore_item',
+        data: { item_id: id },
+        message: 'File restored successfully'
+      })
+    } else if (item_type === 'folder') {
+      const { data: folder, error } = await supabase
+        .from('folders')
+        .select('*')
+        .eq('id', id)
+        .eq('user_id', userId)
+        .not('deleted_at', 'is', null)
+        .single()
+
+      if (error || !folder) {
+        return res.status(404).json({
+          status: 'error',
+          action: 'restore_item',
+          error: 'Folder not found in recycle bin',
+          code: 404
+        })
+      }
+
+      // Recursively restore folder and its contents
+      const restoreRecursive = async (folderId, originalParentId) => {
+        // Restore files in this folder
+        await supabase
+          .from('files')
+          .update({ 
+            deleted_at: null,
+            folder_id: folderId,
+            original_folder_id: null
+          })
+          .eq('original_folder_id', folderId)
+          .not('deleted_at', 'is', null)
+
+        // Restore subfolders
+        const { data: subfolders } = await supabase
+          .from('folders')
+          .select('*')
+          .eq('original_parent_id', folderId)
+          .not('deleted_at', 'is', null)
+
+        for (const subfolder of subfolders || []) {
+          await restoreRecursive(subfolder.id, subfolder.original_parent_id)
+        }
+
+        // Restore this folder
+        await supabase
+          .from('folders')
+          .update({ 
+            deleted_at: null,
+            parent_id: originalParentId,
+            original_parent_id: null
+          })
+          .eq('id', folderId)
+      }
+
+      await restoreRecursive(id, folder.original_parent_id)
+
+      return res.json({
+        status: 'success',
+        action: 'restore_item',
+        data: { item_id: id },
+        message: 'Folder restored successfully'
+      })
+    } else {
+      return res.status(400).json({
+        status: 'error',
+        action: 'restore_item',
+        error: 'Invalid item_type. Must be "file" or "folder"',
+        code: 400
+      })
+    }
+  } catch (error) {
+    console.error('Restore item error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'restore_item',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
 module.exports = {
   uploadFile,
   getAllFiles,
   getFile,
   downloadFile,
   deleteFile,
-  renameFile
+  renameFile,
+  getRecycleBinItems,
+  restoreItem
 }

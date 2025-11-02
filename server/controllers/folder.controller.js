@@ -97,6 +97,7 @@ const getAllFolders = async (req, res) => {
       .from('folders')
       .select('*')
       .eq('user_id', userId)
+      .is('deleted_at', null) // Exclude deleted folders from regular listing
       .order('created_at', { ascending: false })
 
     console.log('📊 Folders query result:', { 
@@ -233,6 +234,7 @@ const getFolderFiles = async (req, res) => {
 const deleteFolder = async (req, res) => {
   try {
     const { id } = req.params
+    const { permanent } = req.query // If permanent=true, delete permanently
     const userId = req.user.id
 
     const { data: folder } = await supabase
@@ -251,35 +253,102 @@ const deleteFolder = async (req, res) => {
       })
     }
 
-    // Recursively delete all subfolders and files
-    const deleteRecursive = async (folderId) => {
-      const { data: subfolders } = await supabase
-        .from('folders')
-        .select('id')
-        .eq('parent_id', folderId)
+    // If permanent deletion (from recycle bin) or if deleted_at already exists
+    if (permanent === 'true' || folder.deleted_at) {
+      // Recursively permanently delete all subfolders and files
+      const deleteRecursive = async (folderId) => {
+        const { data: subfolders } = await supabase
+          .from('folders')
+          .select('id')
+          .eq('parent_id', folderId)
 
-      for (const subfolder of subfolders || []) {
-        await deleteRecursive(subfolder.id)
+        for (const subfolder of subfolders || []) {
+          await deleteRecursive(subfolder.id)
+        }
+
+        await supabase
+          .from('folders')
+          .delete()
+          .eq('id', folderId)
+
+        // Get files in this folder to delete from disk
+        const { data: files } = await supabase
+          .from('files')
+          .select('path')
+          .eq('folder_id', folderId)
+
+        // Delete files from database
+        await supabase
+          .from('files')
+          .delete()
+          .eq('folder_id', folderId)
+
+        // Delete files from disk
+        const fs = require('fs').promises
+        for (const file of files || []) {
+          try {
+            await fs.unlink(file.path)
+          } catch (fsError) {
+            console.error('File deletion error (disk):', fsError)
+          }
+        }
       }
 
-      await supabase
-        .from('folders')
-        .delete()
-        .eq('id', folderId)
+      await deleteRecursive(id)
 
-      await supabase
-        .from('files')
-        .delete()
-        .eq('folder_id', folderId)
+      return res.json({
+        status: 'success',
+        action: 'delete_folder',
+        data: { folder_id: id },
+        message: 'Folder permanently deleted'
+      })
     }
 
-    await deleteRecursive(id)
+    // Soft delete: Move to recycle bin recursively
+    const softDeleteRecursive = async (folderId, originalParentId) => {
+      const deletedAt = new Date().toISOString()
+
+      // Soft delete subfolders first
+      const { data: subfolders } = await supabase
+        .from('folders')
+        .select('*')
+        .eq('parent_id', folderId)
+        .is('deleted_at', null)
+
+      for (const subfolder of subfolders || []) {
+        await softDeleteRecursive(subfolder.id, subfolder.parent_id)
+      }
+
+      // Soft delete files in this folder
+      await supabase
+        .from('files')
+        .update({ 
+          deleted_at: deletedAt,
+          original_folder_id: folderId,
+          folder_id: null 
+        })
+        .eq('folder_id', folderId)
+        .is('deleted_at', null)
+
+      // Soft delete this folder
+      await supabase
+        .from('folders')
+        .update({ 
+          deleted_at: deletedAt,
+          original_parent_id: originalParentId,
+          parent_id: null 
+        })
+        .eq('id', folderId)
+    }
+
+    const originalParentId = folder.parent_id
+    await softDeleteRecursive(id, originalParentId)
 
     return res.json({
       status: 'success',
       action: 'delete_folder',
       data: { folder_id: id },
-      message: 'Folder deleted successfully (recursive)'
+      message: 'Folder moved to recycle bin'
     })
   } catch (error) {
     console.error('Delete folder error:', error)
@@ -312,6 +381,7 @@ const renameFolder = async (req, res) => {
       .select('*')
       .eq('id', id)
       .eq('user_id', userId)
+      .is('deleted_at', null) // Cannot rename deleted folders
       .single()
 
     if (!folder) {
@@ -324,14 +394,21 @@ const renameFolder = async (req, res) => {
     }
 
     // Check if folder with same name exists in same location
-    const { data: existingFolder } = await supabase
+    const query = supabase
       .from('folders')
       .select('*')
       .eq('name', name)
       .eq('user_id', userId)
-      .eq('parent_id', folder.parent_id)
+      .is('deleted_at', null) // Only check non-deleted folders
       .neq('id', id)
-      .single()
+
+    if (folder.parent_id === null || folder.parent_id === undefined) {
+      query.is('parent_id', null)
+    } else {
+      query.eq('parent_id', folder.parent_id)
+    }
+
+    const { data: existingFolder } = await query.single()
 
     if (existingFolder) {
       return res.status(409).json({

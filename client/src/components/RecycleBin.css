@@ -365,3 +365,36 @@
     flex-wrap: wrap;
   }
 }
+
+/* Action Buttons */
+.btn-restore,
+.btn-delete {
+  padding: 4px 12px;
+  font-size: 13px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  transition: background-color var(--transition-fast),
+              color var(--transition-base);
+  white-space: nowrap;
+}
+
+.btn-restore {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.btn-restore:hover {
+  background-color: var(--bg-active);
+}
+
+.btn-delete {
+  background-color: transparent;
+  color: var(--text-secondary);
+}
+
+.btn-delete:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
