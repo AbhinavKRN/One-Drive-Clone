@@ -146,7 +146,13 @@ const Navbar = ({ user, searchQuery, onSearchChange }) => {
           <div ref={profilePopupRef} className="profile-popup">
             <div className="profile-popup-header">
               <div className="profile-popup-logo">
-                <img src="/images/Microsoft.png" alt="Microsoft" />
+                <div className="microsoft-logo-grid">
+                  <div className="microsoft-square microsoft-red"></div>
+                  <div className="microsoft-square microsoft-green"></div>
+                  <div className="microsoft-square microsoft-blue"></div>
+                  <div className="microsoft-square microsoft-yellow"></div>
+                </div>
+                <span className="microsoft-text">Microsoft</span>
               </div>
               <button className="profile-popup-signout" onClick={handleLogout}>
                 Sign out
