@@ -12,7 +12,7 @@ import './Dashboard.css'
 
 const Dashboard = () => {
   const { user } = useAuth()
-  const [viewMode, setViewMode] = useState('grid') // 'grid' or 'list'
+  const [viewMode, setViewMode] = useState('list') // 'grid' or 'list'
   const [searchQuery, setSearchQuery] = useState('')
   const [filterType, setFilterType] = useState('all') // 'all', 'folders', 'images', 'documents'
   const [previewFile, setPreviewFile] = useState(null)
@@ -40,7 +40,7 @@ const Dashboard = () => {
     const matchesSearch = file.name.toLowerCase().includes(searchQuery.toLowerCase())
 
     if (filterType === 'all') return matchesSearch
-    if (filterType === 'folders') return matchesSearch && file.type === 'folder'
+    if (filterType === 'folders') return matchesSearch // Show all files and folders in "My files" view
     if (filterType === 'images') return matchesSearch && file.type.startsWith('image/')
     if (filterType === 'documents') {
       return matchesSearch && (
@@ -121,68 +121,15 @@ const Dashboard = () => {
               onItemClick={handleItemClick}
               onDownload={handleDownload}
             />
-          ) : (
-            <>
-              <div className="toolbar">
-                <div className="breadcrumbs">
-                  {breadcrumbs.map((crumb, index) => (
-                    <React.Fragment key={crumb.id}>
-                      <span
-                        className="breadcrumb"
-                        onClick={() => navigateToPath(crumb.id)}
-                      >
-                        {crumb.name}
-                      </span>
-                      {index < breadcrumbs.length - 1 && <span className="separator">/</span>}
-                    </React.Fragment>
-                  ))}
-                </div>
-
-                <div className="toolbar-actions">
-                  <label className="btn-upload">
-                    <i className="fas fa-upload"></i>
-                    Upload
-                    <input
-                      type="file"
-                      multiple
-                      onChange={handleFileUpload}
-                      style={{ display: 'none' }}
-                    />
-                  </label>
-
-                  <button
-                    className="btn-action"
-                    onClick={() => setShowCreateFolder(true)}
-                  >
-                    <i className="fas fa-folder-plus"></i>
-                    New folder
+          ) : filterType === 'folders' ? (
+            <div className="files-container">
+              <div className="files-header">
+                <h1 className="files-title">My files</h1>
+                <div className="files-header-actions">
+                  <button className="header-btn">
+                    <i className="fas fa-sort"></i>
+                    Sort
                   </button>
-
-                  {selectedItems.length > 0 && (
-                    <>
-                      <button
-                        className="btn-action"
-                        onClick={handleDelete}
-                      >
-                        <i className="fas fa-trash"></i>
-                        Delete
-                      </button>
-
-                      {selectedItems.length === 1 && (
-                        <button
-                          className="btn-action"
-                          onClick={() => {
-                            const item = files.find(f => f.id === selectedItems[0])
-                            setRenameItem(item)
-                          }}
-                        >
-                          <i className="fas fa-edit"></i>
-                          Rename
-                        </button>
-                      )}
-                    </>
-                  )}
-
                   <div className="view-toggle">
                     <button
                       className={viewMode === 'grid' ? 'active' : ''}
@@ -199,18 +146,97 @@ const Dashboard = () => {
                       <i className="fas fa-list"></i>
                     </button>
                   </div>
+                  <button className="header-btn">
+                    <i className="fas fa-info-circle"></i>
+                    Details
+                  </button>
                 </div>
               </div>
 
-              <FileGrid
-                files={filteredFiles}
-                viewMode={viewMode}
-                selectedItems={selectedItems}
-                onSelectionChange={setSelectedItems}
-                onItemClick={handleItemClick}
-                onDownload={handleDownload}
-              />
-            </>
+              <div className="files-white-box">
+                <div className="toolbar">
+                  <div className="breadcrumbs">
+                    {breadcrumbs.map((crumb, index) => (
+                      <React.Fragment key={crumb.id}>
+                        <span
+                          className="breadcrumb"
+                          onClick={() => navigateToPath(crumb.id)}
+                        >
+                          {crumb.name}
+                        </span>
+                        {index < breadcrumbs.length - 1 && <span className="separator">/</span>}
+                      </React.Fragment>
+                    ))}
+                  </div>
+
+                  <div className="toolbar-actions">
+                    <label className="btn-upload">
+                      <i className="fas fa-upload"></i>
+                      Upload
+                      <input
+                        type="file"
+                        multiple
+                        onChange={handleFileUpload}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+
+                    <button
+                      className="btn-action"
+                      onClick={() => setShowCreateFolder(true)}
+                    >
+                      <i className="fas fa-folder-plus"></i>
+                      New folder
+                    </button>
+
+                    {selectedItems.length > 0 && (
+                      <>
+                        <button
+                          className="btn-action"
+                          onClick={handleDelete}
+                        >
+                          <i className="fas fa-trash"></i>
+                          Delete
+                        </button>
+
+                        {selectedItems.length === 1 && (
+                          <button
+                            className="btn-action"
+                            onClick={() => {
+                              const item = files.find(f => f.id === selectedItems[0])
+                              setRenameItem(item)
+                            }}
+                          >
+                            <i className="fas fa-edit"></i>
+                            Rename
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <FileGrid
+                  files={filteredFiles}
+                  viewMode={viewMode}
+                  selectedItems={selectedItems}
+                  onSelectionChange={setSelectedItems}
+                  onItemClick={handleItemClick}
+                  onDownload={handleDownload}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="home-empty-state">
+              <h3>Your recent files will show up here</h3>
+              <div className="home-empty-illustration">
+                <img
+                  src="/images/image.png"
+                  alt="Recent files illustration"
+                  className="home-empty-image"
+                />
+              </div>
+            </div>
           )}
         </div>
       </div>
