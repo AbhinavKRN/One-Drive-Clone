@@ -7,6 +7,12 @@
   color: #605e5c;
   text-align: center;
   height: 100%;
+  background-color: #faf9f8;
+  flex: 1;
+}
+
+.files-white-box .empty-state {
+  background-color: #ffffff;
 }
 
 .empty-state-illustration {
@@ -41,8 +47,14 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 12px;
-  padding: 16px;
+  padding: 20px;
   background-color: #faf9f8;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.files-white-box .file-grid {
+  background-color: #ffffff;
 }
 
 .file-card {
@@ -163,31 +175,43 @@
 
 /* List View */
 .file-list {
-  padding: 16px;
   background-color: #faf9f8;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.files-white-box .file-list {
+  background-color: #ffffff;
 }
 
 .file-list-header {
   display: grid;
-  grid-template-columns: 1fr 180px 120px 80px;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
   gap: 16px;
-  padding: 12px 16px;
-  background-color: #faf9f8;
+  padding: 8px 20px;
+  background-color: #fafafa;
   border-bottom: 1px solid #edebe9;
   font-weight: 600;
-  font-size: 13px;
-  color: #323130;
+  font-size: 12px;
+  color: #605e5c;
+  letter-spacing: 0.5px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .file-list-row {
   display: grid;
-  grid-template-columns: 1fr 180px 120px 80px;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
   gap: 16px;
-  padding: 12px 16px;
-  background: white;
-  border-bottom: 1px solid #edebe9;
+  padding: 8px 20px;
+  background: #ffffff;
+  border-bottom: 1px solid #f3f2f1;
   cursor: pointer;
   transition: background-color 0.2s;
+  position: relative;
 }
 
 .file-list-row:hover {
@@ -195,8 +219,21 @@
 }
 
 .file-list-row.selected {
-  background-color: #f3f9fd;
+  background-color: #e3f2fd;
   border-left: 3px solid #0078d4;
+}
+
+/* Hide action icons by default */
+.file-list-row .action-icon {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+
+/* Show action icons on hover */
+.file-list-row:hover .action-icon {
+  opacity: 1;
+  visibility: visible;
 }
 
 .file-list-col {
@@ -208,6 +245,80 @@
 
 .col-name {
   gap: 12px;
+}
+
+.name-header-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.name-header-text {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.name-header-text:hover {
+  background-color: #e1dfdd;
+}
+
+.name-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  background: white;
+  border: 1px solid #d2d0ce;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  min-width: 180px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.menu-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #323130;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.menu-item:hover {
+  background-color: #f3f2f1;
+}
+
+.menu-item-with-arrow {
+  position: relative;
+}
+
+.column-settings-submenu {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  margin-left: 4px;
+  background: white;
+  border: 1px solid #d2d0ce;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  min-width: 160px;
+  z-index: 1001;
+  overflow: hidden;
+}
+
+.inline-actions {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
 }
 
 .col-name input {
@@ -227,27 +338,29 @@
 
 .col-actions {
   justify-content: flex-end;
+  gap: 4px;
 }
 
 .btn-icon {
   background: none;
   border: none;
-  color: #0078d4;
+  color: #605e5c;
   cursor: pointer;
-  padding: 6px 10px;
+  padding: 6px;
   border-radius: 4px;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, color 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.btn-icon:hover {
+  background-color: #e1dfdd;
+  color: #323130;
 }
 
 .btn-icon svg {
   width: 16px;
   height: 16px;
   color: inherit;
-}
-
-.btn-icon:hover {
-  background-color: #e1dfdd;
 }
