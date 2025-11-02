@@ -172,7 +172,9 @@ const Dashboard = () => {
           />
 
         <div className="main-content">
-          {filterType === 'shared' ? (
+          {filterType === 'recycle' ? (
+            <RecycleBin />
+          ) : filterType === 'shared' ? (
             <SharedView
               files={files}
               viewMode={viewMode}
