@@ -1,182 +1,188 @@
-const supabase = require('../config/database')
-const fs = require('fs').promises
-const path = require('path')
+const supabase = require("../config/database");
+const fs = require("fs").promises;
+const path = require("path");
 
 // Helper function to determine file category
 const getFileCategory = (mimetype, filename) => {
   // Images
-  if (mimetype.startsWith('image/')) {
-    return 'Pictures'
+  if (mimetype.startsWith("image/")) {
+    return "Pictures";
   }
-  
+
   // Videos
-  if (mimetype.startsWith('video/')) {
-    return 'Videos'
+  if (mimetype.startsWith("video/")) {
+    return "Videos";
   }
-  
+
   // Documents (PDF, Word, Excel, PowerPoint, Text, etc.)
   if (
-    mimetype.includes('pdf') ||
-    mimetype.includes('document') ||
-    mimetype.includes('text') ||
-    mimetype.includes('word') ||
-    mimetype.includes('excel') ||
-    mimetype.includes('powerpoint') ||
-    mimetype.includes('spreadsheet') ||
-    mimetype.includes('presentation') ||
-    mimetype.includes('opendocument')
+    mimetype.includes("pdf") ||
+    mimetype.includes("document") ||
+    mimetype.includes("text") ||
+    mimetype.includes("word") ||
+    mimetype.includes("excel") ||
+    mimetype.includes("powerpoint") ||
+    mimetype.includes("spreadsheet") ||
+    mimetype.includes("presentation") ||
+    mimetype.includes("opendocument")
   ) {
-    return 'Documents'
+    return "Documents";
   }
-  
+
   // Default: My Files (no auto-organization)
-  return null
-}
+  return null;
+};
 
 // Helper function to get or create system folder
 const getOrCreateSystemFolder = async (userId, folderName) => {
   // Check if folder exists (use maybeSingle to handle multiple or none)
   const { data: existingFolders } = await supabase
-    .from('folders')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('name', folderName)
-    .is('parent_id', null)
+    .from("folders")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("name", folderName)
+    .is("parent_id", null);
 
   if (existingFolders && existingFolders.length > 0) {
     // Return first existing folder if duplicates exist
-    console.log('📁 Found existing system folder:', folderName)
-    return existingFolders[0]
+    console.log("📁 Found existing system folder:", folderName);
+    return existingFolders[0];
   }
 
   // Create folder if it doesn't exist
   const { data: newFolder, error } = await supabase
-    .from('folders')
-    .insert([{
-      name: folderName,
-      user_id: userId,
-      parent_id: null
-    }])
+    .from("folders")
+    .insert([
+      {
+        name: folderName,
+        user_id: userId,
+        parent_id: null,
+      },
+    ])
     .select()
-    .single()
+    .single();
 
   if (error) {
-    throw error
+    throw error;
   }
 
-  console.log('📁 Created system folder:', folderName)
-  return newFolder
-}
+  console.log("📁 Created system folder:", folderName);
+  return newFolder;
+};
 
 const uploadFile = async (req, res) => {
   try {
-    const userId = req.user.id
-    const folderId = req.body.folder_id || null
+    const userId = req.user.id;
+    const folderId = req.body.folder_id || null;
 
     if (!req.file) {
       return res.status(400).json({
-        status: 'error',
-        action: 'upload_file',
-        error: 'No file provided',
-        code: 400
-      })
+        status: "error",
+        action: "upload_file",
+        error: "No file provided",
+        code: 400,
+      });
     }
 
     // Use folder_id if provided, otherwise upload to root (no auto-organization)
-    let targetFolderId = folderId || null
+    let targetFolderId = folderId || null;
 
     // Validate folder if provided
     if (targetFolderId) {
       const { data: folder } = await supabase
-        .from('folders')
-        .select('*')
-        .eq('id', targetFolderId)
-        .eq('user_id', userId)
-        .single()
+        .from("folders")
+        .select("*")
+        .eq("id", targetFolderId)
+        .eq("user_id", userId)
+        .single();
 
       if (!folder) {
         // Clean up uploaded file
-        await fs.unlink(req.file.path).catch(console.error)
+        await fs.unlink(req.file.path).catch(console.error);
         return res.status(404).json({
-          status: 'error',
-          action: 'upload_file',
-          error: 'Folder not found',
-          code: 404
-        })
+          status: "error",
+          action: "upload_file",
+          error: "Folder not found",
+          code: 404,
+        });
       }
     }
 
     const { data: file, error } = await supabase
-      .from('files')
-      .insert([{
-        name: req.file.originalname,
-        type: req.file.mimetype,
-        size: req.file.size,
-        path: req.file.path,
-        user_id: userId,
-        folder_id: targetFolderId || null
-      }])
+      .from("files")
+      .insert([
+        {
+          name: req.file.originalname,
+          type: req.file.mimetype,
+          size: req.file.size,
+          path: req.file.path,
+          user_id: userId,
+          folder_id: targetFolderId || null,
+        },
+      ])
       .select()
-      .single()
+      .single();
 
     if (error) {
-      throw error
+      throw error;
     }
 
     return res.status(201).json({
-      status: 'success',
-      action: 'upload_file',
+      status: "success",
+      action: "upload_file",
       data: {
         file_id: file.id,
         folder_id: file.folder_id,
         name: file.name,
         size: `${(file.size / 1024).toFixed(2)}KB`,
-        type: file.type
+        type: file.type,
       },
-      message: 'File uploaded successfully'
-    })
+      message: "File uploaded successfully",
+    });
   } catch (error) {
-    console.error('Upload file error:', error)
+    console.error("Upload file error:", error);
     // Clean up file on error
     if (req.file?.path) {
-      await fs.unlink(req.file.path).catch(console.error)
+      await fs.unlink(req.file.path).catch(console.error);
     }
     return res.status(500).json({
-      status: 'error',
-      action: 'upload_file',
+      status: "error",
+      action: "upload_file",
       error: error.message,
-      code: 500
-    })
+      code: 500,
+    });
   }
-}
+};
 
 const getAllFiles = async (req, res) => {
   try {
-    const userId = req.user.id
-    console.log('📥 getAllFiles called for user:', userId)
+    const userId = req.user.id;
+    console.log("📥 getAllFiles called for user:", userId);
 
     const { data: files, error } = await supabase
-      .from('files')
-      .select(`
+      .from("files")
+      .select(
+        `
         *,
         folders:folder_id (id, name)
-      `)
-      .eq('user_id', userId)
-      .is('deleted_at', null) // Exclude deleted files from regular listing
-      .order('created_at', { ascending: false })
+      `
+      )
+      .eq("user_id", userId)
+      .is("deleted_at", null) // Exclude deleted files from regular listing
+      .order("created_at", { ascending: false });
 
-    console.log('📊 Files query result:', { 
-      count: files?.length || 0, 
+    console.log("📊 Files query result:", {
+      count: files?.length || 0,
       error: error?.message || null,
-      files: files?.slice(0, 2).map(f => ({ name: f.name, type: f.type }))
-    })
+      files: files?.slice(0, 2).map((f) => ({ name: f.name, type: f.type })),
+    });
 
     if (error) {
-      throw error
+      throw error;
     }
 
     // Format files for frontend
-    const formattedFiles = files.map(file => ({
+    const formattedFiles = files.map((file) => ({
       id: file.id,
       name: file.name,
       type: file.type,
@@ -185,679 +191,781 @@ const getAllFiles = async (req, res) => {
       folder_name: file.folders?.name || null,
       path: file.path,
       created_at: file.created_at,
-      updated_at: file.updated_at
-    }))
+      updated_at: file.updated_at,
+    }));
 
-    console.log('✅ Returning', formattedFiles.length, 'files to frontend')
+    console.log("✅ Returning", formattedFiles.length, "files to frontend");
 
     return res.json({
-      status: 'success',
-      action: 'get_files',
+      status: "success",
+      action: "get_files",
       data: { files: formattedFiles },
-      message: 'Files retrieved successfully'
-    })
+      message: "Files retrieved successfully",
+    });
   } catch (error) {
-    console.error('❌ Get files error:', error)
+    console.error("❌ Get files error:", error);
     return res.status(500).json({
-      status: 'error',
-      action: 'get_files',
+      status: "error",
+      action: "get_files",
       error: error.message,
-      code: 500
-    })
+      code: 500,
+    });
   }
-}
+};
 
 const getFile = async (req, res) => {
   try {
-    const { id } = req.params
-    const userId = req.user.id
+    const { id } = req.params;
+    const userId = req.user.id;
 
     const { data: file, error } = await supabase
-      .from('files')
-      .select(`
+      .from("files")
+      .select(
+        `
         *,
         folders:folder_id (id, name)
-      `)
-      .eq('id', id)
-      .eq('user_id', userId)
-      .single()
+      `
+      )
+      .eq("id", id)
+      .eq("user_id", userId)
+      .single();
 
     if (error || !file) {
       return res.status(404).json({
-        status: 'error',
-        action: 'get_file',
-        error: 'File not found',
-        code: 404
-      })
+        status: "error",
+        action: "get_file",
+        error: "File not found",
+        code: 404,
+      });
     }
 
     return res.json({
-      status: 'success',
-      action: 'get_file',
+      status: "success",
+      action: "get_file",
       data: { file },
-      message: 'File retrieved successfully'
-    })
+      message: "File retrieved successfully",
+    });
   } catch (error) {
-    console.error('Get file error:', error)
+    console.error("Get file error:", error);
     return res.status(500).json({
-      status: 'error',
-      action: 'get_file',
+      status: "error",
+      action: "get_file",
       error: error.message,
-      code: 500
-    })
+      code: 500,
+    });
   }
-}
+};
 
 // Preview file (for inline display)
 const previewFile = async (req, res) => {
   try {
-    const { id } = req.params
-    const userId = req.user.id
+    const { id } = req.params;
+    const userId = req.user.id;
 
     const { data: file, error } = await supabase
-      .from('files')
-      .select('*')
-      .eq('id', id)
-      .eq('user_id', userId)
-      .single()
+      .from("files")
+      .select("*")
+      .eq("id", id)
+      .eq("user_id", userId)
+      .single();
 
     if (error || !file) {
       return res.status(404).json({
-        status: 'error',
-        action: 'preview_file',
-        error: 'File not found',
-        code: 404
-      })
+        status: "error",
+        action: "preview_file",
+        error: "File not found",
+        code: 404,
+      });
     }
 
     // Check if file exists on disk
     try {
-      await fs.access(file.path)
+      await fs.access(file.path);
     } catch {
       return res.status(404).json({
-        status: 'error',
-        action: 'preview_file',
-        error: 'File not found on disk',
-        code: 404
-      })
+        status: "error",
+        action: "preview_file",
+        error: "File not found on disk",
+        code: 404,
+      });
     }
 
     // Get file stats
-    const stats = await fs.stat(file.path)
-    const fileSize = stats.size
-    
+    const stats = await fs.stat(file.path);
+    const fileSize = stats.size;
+
     // Set headers for inline preview
-    res.setHeader('Content-Type', file.type || 'application/octet-stream')
-    res.setHeader('Content-Length', fileSize)
-    res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(file.name)}"`)
-    res.setHeader('Cache-Control', 'private, max-age=3600')
-    
+    res.setHeader("Content-Type", file.type || "application/octet-stream");
+    res.setHeader("Content-Length", fileSize);
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename="${encodeURIComponent(file.name)}"`
+    );
+    res.setHeader("Cache-Control", "private, max-age=3600");
+
     // Stream the file
-    const fileStream = require('fs').createReadStream(file.path)
-    fileStream.pipe(res)
-    
-    fileStream.on('error', (err) => {
-      console.error('Preview stream error:', err)
+    const fileStream = require("fs").createReadStream(file.path);
+    fileStream.pipe(res);
+
+    fileStream.on("error", (err) => {
+      console.error("Preview stream error:", err);
       if (!res.headersSent) {
         res.status(500).json({
-          status: 'error',
-          action: 'preview_file',
-          error: 'Error reading file',
-          code: 500
-        })
+          status: "error",
+          action: "preview_file",
+          error: "Error reading file",
+          code: 500,
+        });
       }
-    })
+    });
   } catch (error) {
-    console.error('Preview file error:', error)
+    console.error("Preview file error:", error);
     if (!res.headersSent) {
       return res.status(500).json({
-        status: 'error',
-        action: 'preview_file',
+        status: "error",
+        action: "preview_file",
         error: error.message,
-        code: 500
-      })
+        code: 500,
+      });
     }
   }
-}
+};
 
 const downloadFile = async (req, res) => {
   try {
-    const { id } = req.params
-    const userId = req.user.id
+    const { id } = req.params;
+    const userId = req.user.id;
 
     const { data: file, error } = await supabase
-      .from('files')
-      .select('*')
-      .eq('id', id)
-      .eq('user_id', userId)
-      .single()
+      .from("files")
+      .select("*")
+      .eq("id", id)
+      .eq("user_id", userId)
+      .single();
 
     if (error || !file) {
       return res.status(404).json({
-        status: 'error',
-        action: 'download_file',
-        error: 'File not found',
-        code: 404
-      })
+        status: "error",
+        action: "download_file",
+        error: "File not found",
+        code: 404,
+      });
     }
 
     // Check if file exists on disk
     try {
-      await fs.access(file.path)
+      await fs.access(file.path);
     } catch {
       return res.status(404).json({
-        status: 'error',
-        action: 'download_file',
-        error: 'File not found on disk',
-        code: 404
-      })
+        status: "error",
+        action: "download_file",
+        error: "File not found on disk",
+        code: 404,
+      });
     }
 
     res.download(file.path, file.name, (err) => {
       if (err) {
-        console.error('Download error:', err)
+        console.error("Download error:", err);
         return res.status(500).json({
-          status: 'error',
-          action: 'download_file',
-          error: 'Error downloading file',
-          code: 500
-        })
+          status: "error",
+          action: "download_file",
+          error: "Error downloading file",
+          code: 500,
+        });
       }
-    })
+    });
   } catch (error) {
-    console.error('Download file error:', error)
+    console.error("Download file error:", error);
     return res.status(500).json({
-      status: 'error',
-      action: 'download_file',
+      status: "error",
+      action: "download_file",
       error: error.message,
-      code: 500
-    })
+      code: 500,
+    });
   }
-}
+};
 
 const deleteFile = async (req, res) => {
   try {
-    const { id } = req.params
-    const { permanent } = req.query // If permanent=true, delete permanently
-    const userId = req.user.id
+    const { id } = req.params;
+    const { permanent } = req.query; // If permanent=true, delete permanently
+    const userId = req.user.id;
 
     const { data: file, error } = await supabase
-      .from('files')
-      .select('*')
-      .eq('id', id)
-      .eq('user_id', userId)
-      .single()
+      .from("files")
+      .select("*")
+      .eq("id", id)
+      .eq("user_id", userId)
+      .single();
 
     if (error || !file) {
       return res.status(404).json({
-        status: 'error',
-        action: 'delete_file',
-        error: 'File not found',
-        code: 404
-      })
+        status: "error",
+        action: "delete_file",
+        error: "File not found",
+        code: 404,
+      });
     }
 
     // If permanent deletion (from recycle bin) or if deleted_at already exists
-    if (permanent === 'true' || file.deleted_at) {
+    if (permanent === "true" || file.deleted_at) {
       // Permanently delete file from database
-      await supabase
-        .from('files')
-        .delete()
-        .eq('id', id)
+      await supabase.from("files").delete().eq("id", id);
 
       // Delete file from disk
       try {
-        await fs.unlink(file.path)
+        await fs.unlink(file.path);
       } catch (fsError) {
-        console.error('File deletion error (disk):', fsError)
+        console.error("File deletion error (disk):", fsError);
         // Continue even if file deletion fails
       }
 
       return res.json({
-        status: 'success',
-        action: 'delete_file',
+        status: "success",
+        action: "delete_file",
         data: { file_id: id },
-        message: 'File permanently deleted'
-      })
+        message: "File permanently deleted",
+      });
     }
 
     // Soft delete: Move to recycle bin
     // Store original folder_id before deletion
-    const originalFolderId = file.folder_id
-    const deletedAt = new Date().toISOString()
+    const originalFolderId = file.folder_id;
+    const deletedAt = new Date().toISOString();
 
     // Update file with deleted_at timestamp and clear folder_id
     const { error: updateError } = await supabase
-      .from('files')
-      .update({ 
+      .from("files")
+      .update({
         deleted_at: deletedAt,
         original_folder_id: originalFolderId,
-        folder_id: null 
+        folder_id: null,
       })
-      .eq('id', id)
+      .eq("id", id);
 
     if (updateError) {
-      throw updateError
+      throw updateError;
     }
 
     return res.json({
-      status: 'success',
-      action: 'delete_file',
+      status: "success",
+      action: "delete_file",
       data: { file_id: id },
-      message: 'File moved to recycle bin'
-    })
+      message: "File moved to recycle bin",
+    });
   } catch (error) {
-    console.error('Delete file error:', error)
+    console.error("Delete file error:", error);
     return res.status(500).json({
-      status: 'error',
-      action: 'delete_file',
+      status: "error",
+      action: "delete_file",
       error: error.message,
-      code: 500
-    })
+      code: 500,
+    });
   }
-}
+};
 
 const renameFile = async (req, res) => {
   try {
-    const { id } = req.params
-    const { name } = req.body
-    const userId = req.user.id
+    const { id } = req.params;
+    const { name } = req.body;
+    const userId = req.user.id;
 
     if (!name) {
       return res.status(400).json({
-        status: 'error',
-        action: 'rename_file',
-        error: 'File name is required',
-        code: 400
-      })
+        status: "error",
+        action: "rename_file",
+        error: "File name is required",
+        code: 400,
+      });
     }
 
     const { data: file } = await supabase
-      .from('files')
-      .select('*')
-      .eq('id', id)
-      .eq('user_id', userId)
-      .is('deleted_at', null) // Cannot rename deleted files
-      .single()
+      .from("files")
+      .select("*")
+      .eq("id", id)
+      .eq("user_id", userId)
+      .is("deleted_at", null) // Cannot rename deleted files
+      .single();
 
     if (!file) {
       return res.status(404).json({
-        status: 'error',
-        action: 'rename_file',
-        error: 'File not found',
-        code: 404
-      })
+        status: "error",
+        action: "rename_file",
+        error: "File not found",
+        code: 404,
+      });
     }
 
     // Check if file with same name exists in same folder
     const { data: existingFile } = await supabase
-      .from('files')
-      .select('*')
-      .eq('name', name)
-      .eq('user_id', userId)
-      .eq('folder_id', file.folder_id)
-      .is('deleted_at', null) // Only check non-deleted files
-      .neq('id', id)
-      .single()
+      .from("files")
+      .select("*")
+      .eq("name", name)
+      .eq("user_id", userId)
+      .eq("folder_id", file.folder_id)
+      .is("deleted_at", null) // Only check non-deleted files
+      .neq("id", id)
+      .single();
 
     if (existingFile) {
       return res.status(409).json({
-        status: 'error',
-        action: 'rename_file',
-        error: 'File with this name already exists',
-        code: 409
-      })
+        status: "error",
+        action: "rename_file",
+        error: "File with this name already exists",
+        code: 409,
+      });
     }
 
     const { data: updatedFile } = await supabase
-      .from('files')
+      .from("files")
       .update({ name, updated_at: new Date().toISOString() })
-      .eq('id', id)
+      .eq("id", id)
       .select()
-      .single()
+      .single();
 
     return res.json({
-      status: 'success',
-      action: 'rename_file',
+      status: "success",
+      action: "rename_file",
       data: { file: updatedFile },
-      message: 'File renamed successfully'
-    })
+      message: "File renamed successfully",
+    });
   } catch (error) {
-    console.error('Rename file error:', error)
+    console.error("Rename file error:", error);
     return res.status(500).json({
-      status: 'error',
-      action: 'rename_file',
+      status: "error",
+      action: "rename_file",
       error: error.message,
-      code: 500
-    })
+      code: 500,
+    });
   }
-}
+};
+
+const moveFile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { folder_id } = req.body;
+    const userId = req.user.id;
+
+    const { data: file } = await supabase
+      .from("files")
+      .select("*")
+      .eq("id", id)
+      .eq("user_id", userId)
+      .is("deleted_at", null)
+      .single();
+
+    if (!file) {
+      return res.status(404).json({
+        status: "error",
+        action: "move_file",
+        error: "File not found",
+        code: 404,
+      });
+    }
+
+    // If folder_id is provided, validate it exists and belongs to user
+    if (folder_id !== null && folder_id !== undefined) {
+      const { data: folder } = await supabase
+        .from("folders")
+        .select("*")
+        .eq("id", folder_id)
+        .eq("user_id", userId)
+        .is("deleted_at", null)
+        .single();
+
+      if (!folder) {
+        return res.status(404).json({
+          status: "error",
+          action: "move_file",
+          error: "Folder not found",
+          code: 404,
+        });
+      }
+    }
+
+    // Check if file with same name exists in target folder
+    const { data: existingFile } = await supabase
+      .from("files")
+      .select("*")
+      .eq("name", file.name)
+      .eq("user_id", userId)
+      .eq("folder_id", folder_id || null)
+      .is("deleted_at", null)
+      .neq("id", id)
+      .single();
+
+    if (existingFile) {
+      return res.status(409).json({
+        status: "error",
+        action: "move_file",
+        error: "File with this name already exists in the target folder",
+        code: 409,
+      });
+    }
+
+    const { data: updatedFile } = await supabase
+      .from("files")
+      .update({
+        folder_id: folder_id || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id)
+      .select()
+      .single();
+
+    return res.json({
+      status: "success",
+      action: "move_file",
+      data: { file: updatedFile },
+      message: "File moved successfully",
+    });
+  } catch (error) {
+    console.error("Move file error:", error);
+    return res.status(500).json({
+      status: "error",
+      action: "move_file",
+      error: error.message,
+      code: 500,
+    });
+  }
+};
 
 // Get recycle bin items
 const getRecycleBinItems = async (req, res) => {
   try {
-    const userId = req.user.id
+    const userId = req.user.id;
 
     const { data: deletedFiles, error: filesError } = await supabase
-      .from('files')
-      .select(`
+      .from("files")
+      .select(
+        `
         *,
         folders:original_folder_id (id, name)
-      `)
-      .eq('user_id', userId)
-      .not('deleted_at', 'is', null)
-      .order('deleted_at', { ascending: false })
+      `
+      )
+      .eq("user_id", userId)
+      .not("deleted_at", "is", null)
+      .order("deleted_at", { ascending: false });
 
     const { data: deletedFolders, error: foldersError } = await supabase
-      .from('folders')
-      .select(`
+      .from("folders")
+      .select(
+        `
         *,
         parent_folder:parent_id (id, name),
         original_parent:original_parent_id (id, name)
-      `)
-      .eq('user_id', userId)
-      .not('deleted_at', 'is', null)
-      .order('deleted_at', { ascending: false })
+      `
+      )
+      .eq("user_id", userId)
+      .not("deleted_at", "is", null)
+      .order("deleted_at", { ascending: false });
 
     if (filesError || foldersError) {
-      throw filesError || foldersError
+      throw filesError || foldersError;
     }
 
     // Format the response
     const items = [
-      ...(deletedFiles || []).map(file => ({
+      ...(deletedFiles || []).map((file) => ({
         id: file.id,
         name: file.name,
         type: file.type,
         size: file.size,
         deleted_at: file.deleted_at,
-        original_location: file.folders?.name || 'My Files',
-        item_type: 'file'
+        original_location: file.folders?.name || "My Files",
+        item_type: "file",
       })),
-      ...(deletedFolders || []).map(folder => ({
+      ...(deletedFolders || []).map((folder) => ({
         id: folder.id,
         name: folder.name,
-        type: 'folder',
+        type: "folder",
         size: 0,
         deleted_at: folder.deleted_at,
-        original_location: folder.original_parent?.name || 'My Files',
-        item_type: 'folder'
-      }))
-    ].sort((a, b) => new Date(b.deleted_at) - new Date(a.deleted_at))
+        original_location: folder.original_parent?.name || "My Files",
+        item_type: "folder",
+      })),
+    ].sort((a, b) => new Date(b.deleted_at) - new Date(a.deleted_at));
 
     return res.json({
-      status: 'success',
-      action: 'get_recycle_bin',
+      status: "success",
+      action: "get_recycle_bin",
       data: { items },
-      message: 'Recycle bin items retrieved successfully'
-    })
+      message: "Recycle bin items retrieved successfully",
+    });
   } catch (error) {
-    console.error('Get recycle bin error:', error)
+    console.error("Get recycle bin error:", error);
     return res.status(500).json({
-      status: 'error',
-      action: 'get_recycle_bin',
+      status: "error",
+      action: "get_recycle_bin",
       error: error.message,
-      code: 500
-    })
+      code: 500,
+    });
   }
-}
+};
 
 // Restore item from recycle bin
 const restoreItem = async (req, res) => {
   try {
-    const { id } = req.params
-    const { item_type } = req.query // 'file' or 'folder'
-    const userId = req.user.id
+    const { id } = req.params;
+    const { item_type } = req.query; // 'file' or 'folder'
+    const userId = req.user.id;
 
-    if (item_type === 'file') {
+    if (item_type === "file") {
       const { data: file, error } = await supabase
-        .from('files')
-        .select('*')
-        .eq('id', id)
-        .eq('user_id', userId)
-        .not('deleted_at', 'is', null)
-        .single()
+        .from("files")
+        .select("*")
+        .eq("id", id)
+        .eq("user_id", userId)
+        .not("deleted_at", "is", null)
+        .single();
 
       if (error || !file) {
         return res.status(404).json({
-          status: 'error',
-          action: 'restore_item',
-          error: 'File not found in recycle bin',
-          code: 404
-        })
+          status: "error",
+          action: "restore_item",
+          error: "File not found in recycle bin",
+          code: 404,
+        });
       }
 
       // Restore file to original folder
       const { error: updateError } = await supabase
-        .from('files')
-        .update({ 
+        .from("files")
+        .update({
           deleted_at: null,
           folder_id: file.original_folder_id,
-          original_folder_id: null
+          original_folder_id: null,
         })
-        .eq('id', id)
+        .eq("id", id);
 
       if (updateError) {
-        throw updateError
+        throw updateError;
       }
 
       return res.json({
-        status: 'success',
-        action: 'restore_item',
+        status: "success",
+        action: "restore_item",
         data: { item_id: id },
-        message: 'File restored successfully'
-      })
-    } else if (item_type === 'folder') {
+        message: "File restored successfully",
+      });
+    } else if (item_type === "folder") {
       const { data: folder, error } = await supabase
-        .from('folders')
-        .select('*')
-        .eq('id', id)
-        .eq('user_id', userId)
-        .not('deleted_at', 'is', null)
-        .single()
+        .from("folders")
+        .select("*")
+        .eq("id", id)
+        .eq("user_id", userId)
+        .not("deleted_at", "is", null)
+        .single();
 
       if (error || !folder) {
         return res.status(404).json({
-          status: 'error',
-          action: 'restore_item',
-          error: 'Folder not found in recycle bin',
-          code: 404
-        })
+          status: "error",
+          action: "restore_item",
+          error: "Folder not found in recycle bin",
+          code: 404,
+        });
       }
 
       // Recursively restore folder and its contents
       const restoreRecursive = async (folderId, originalParentId) => {
         // Restore files in this folder
         await supabase
-          .from('files')
-          .update({ 
+          .from("files")
+          .update({
             deleted_at: null,
             folder_id: folderId,
-            original_folder_id: null
+            original_folder_id: null,
           })
-          .eq('original_folder_id', folderId)
-          .not('deleted_at', 'is', null)
+          .eq("original_folder_id", folderId)
+          .not("deleted_at", "is", null);
 
         // Restore subfolders
         const { data: subfolders } = await supabase
-          .from('folders')
-          .select('*')
-          .eq('original_parent_id', folderId)
-          .not('deleted_at', 'is', null)
+          .from("folders")
+          .select("*")
+          .eq("original_parent_id", folderId)
+          .not("deleted_at", "is", null);
 
         for (const subfolder of subfolders || []) {
-          await restoreRecursive(subfolder.id, subfolder.original_parent_id)
+          await restoreRecursive(subfolder.id, subfolder.original_parent_id);
         }
 
         // Restore this folder
         await supabase
-          .from('folders')
-          .update({ 
+          .from("folders")
+          .update({
             deleted_at: null,
             parent_id: originalParentId,
-            original_parent_id: null
+            original_parent_id: null,
           })
-          .eq('id', folderId)
-      }
+          .eq("id", folderId);
+      };
 
-      await restoreRecursive(id, folder.original_parent_id)
+      await restoreRecursive(id, folder.original_parent_id);
 
       return res.json({
-        status: 'success',
-        action: 'restore_item',
+        status: "success",
+        action: "restore_item",
         data: { item_id: id },
-        message: 'Folder restored successfully'
-      })
+        message: "Folder restored successfully",
+      });
     } else {
       return res.status(400).json({
-        status: 'error',
-        action: 'restore_item',
+        status: "error",
+        action: "restore_item",
         error: 'Invalid item_type. Must be "file" or "folder"',
-        code: 400
-      })
+        code: 400,
+      });
     }
   } catch (error) {
-    console.error('Restore item error:', error)
+    console.error("Restore item error:", error);
     return res.status(500).json({
-      status: 'error',
-      action: 'restore_item',
+      status: "error",
+      action: "restore_item",
       error: error.message,
-      code: 500
-    })
+      code: 500,
+    });
   }
-}
+};
 
 // Create empty file with specific category
 const createEmptyFile = async (req, res) => {
   try {
-    const userId = req.user.id
-    const { category, folder_id } = req.body
+    const userId = req.user.id;
+    const { category, folder_id } = req.body;
 
     if (!category) {
       return res.status(400).json({
-        status: 'error',
-        action: 'create_file',
-        error: 'Category is required',
-        code: 400
-      })
+        status: "error",
+        action: "create_file",
+        error: "Category is required",
+        code: 400,
+      });
     }
 
     // Map category to file extension and MIME type
     const categoryMap = {
       word: {
-        extension: '.docx',
-        mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        defaultName: 'Document.docx'
+        extension: ".docx",
+        mimetype:
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        defaultName: "Document.docx",
       },
       excel: {
-        extension: '.xlsx',
-        mimetype: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        defaultName: 'Workbook.xlsx'
+        extension: ".xlsx",
+        mimetype:
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        defaultName: "Workbook.xlsx",
       },
       powerpoint: {
-        extension: '.pptx',
-        mimetype: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-        defaultName: 'Presentation.pptx'
+        extension: ".pptx",
+        mimetype:
+          "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        defaultName: "Presentation.pptx",
       },
       onenote: {
-        extension: '.one',
-        mimetype: 'application/msonenote',
-        defaultName: 'Notebook.one'
+        extension: ".one",
+        mimetype: "application/msonenote",
+        defaultName: "Notebook.one",
       },
       text: {
-        extension: '.txt',
-        mimetype: 'text/plain',
-        defaultName: 'Text Document.txt'
-      }
-    }
+        extension: ".txt",
+        mimetype: "text/plain",
+        defaultName: "Text Document.txt",
+      },
+    };
 
-    const fileConfig = categoryMap[category.toLowerCase()]
+    const fileConfig = categoryMap[category.toLowerCase()];
     if (!fileConfig) {
       return res.status(400).json({
-        status: 'error',
-        action: 'create_file',
-        error: 'Invalid category. Must be: word, excel, powerpoint, onenote, or text',
-        code: 400
-      })
+        status: "error",
+        action: "create_file",
+        error:
+          "Invalid category. Must be: word, excel, powerpoint, onenote, or text",
+        code: 400,
+      });
     }
 
     // Generate unique filename
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`
-    const filename = `${uniqueSuffix}-${fileConfig.defaultName}`
-    const filePath = path.join(__dirname, '../uploads', filename)
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    const filename = `${uniqueSuffix}-${fileConfig.defaultName}`;
+    const filePath = path.join(__dirname, "../uploads", filename);
 
     // Create empty file
-    await fs.writeFile(filePath, '', 'utf8')
+    await fs.writeFile(filePath, "", "utf8");
 
     // Get file stats
-    const stats = await fs.stat(filePath)
-    const fileSize = stats.size
+    const stats = await fs.stat(filePath);
+    const fileSize = stats.size;
 
     // Validate folder if provided
-    let targetFolderId = folder_id || null
+    let targetFolderId = folder_id || null;
     if (targetFolderId) {
       const { data: folder } = await supabase
-        .from('folders')
-        .select('*')
-        .eq('id', targetFolderId)
-        .eq('user_id', userId)
-        .single()
+        .from("folders")
+        .select("*")
+        .eq("id", targetFolderId)
+        .eq("user_id", userId)
+        .single();
 
       if (!folder) {
         // Clean up created file
-        await fs.unlink(filePath).catch(console.error)
+        await fs.unlink(filePath).catch(console.error);
         return res.status(404).json({
-          status: 'error',
-          action: 'create_file',
-          error: 'Folder not found',
-          code: 404
-        })
+          status: "error",
+          action: "create_file",
+          error: "Folder not found",
+          code: 404,
+        });
       }
     }
     // If no folder_id provided, file goes to root (no auto-organization)
 
     // Insert file into database
     const { data: file, error } = await supabase
-      .from('files')
-      .insert([{
-        name: fileConfig.defaultName,
-        type: fileConfig.mimetype,
-        size: fileSize,
-        path: filePath,
-        user_id: userId,
-        folder_id: targetFolderId
-      }])
+      .from("files")
+      .insert([
+        {
+          name: fileConfig.defaultName,
+          type: fileConfig.mimetype,
+          size: fileSize,
+          path: filePath,
+          user_id: userId,
+          folder_id: targetFolderId,
+        },
+      ])
       .select()
-      .single()
+      .single();
 
     if (error) {
       // Clean up created file
-      await fs.unlink(filePath).catch(console.error)
-      throw error
+      await fs.unlink(filePath).catch(console.error);
+      throw error;
     }
 
     return res.status(201).json({
-      status: 'success',
-      action: 'create_file',
+      status: "success",
+      action: "create_file",
       data: {
         file_id: file.id,
         folder_id: file.folder_id,
         name: file.name,
         size: `${(file.size / 1024).toFixed(2)}KB`,
-        type: file.type
+        type: file.type,
       },
-      message: 'File created successfully'
-    })
+      message: "File created successfully",
+    });
   } catch (error) {
-    console.error('Create file error:', error)
+    console.error("Create file error:", error);
     return res.status(500).json({
-      status: 'error',
-      action: 'create_file',
+      status: "error",
+      action: "create_file",
       error: error.message,
-      code: 500
-    })
+      code: 500,
+    });
   }
-}
+};
 
 module.exports = {
   uploadFile,
@@ -867,7 +975,8 @@ module.exports = {
   previewFile,
   deleteFile,
   renameFile,
+  moveFile,
   getRecycleBinItems,
   restoreItem,
-  createEmptyFile
-}
+  createEmptyFile,
+};
