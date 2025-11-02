@@ -708,17 +708,23 @@
 
 /* ===== Apps Launcher ===== */
 .apps-launcher {
+  display: flex;
+  flex-direction: column;
   position: fixed;
   top: 70px;
   left: 10px;
-  width: 490px;
+  width: 500px;
+  height: 475px;
   background: var(--bg-secondary);
-  border-radius: 8px;
+  border-radius: 0;
   box-shadow: var(--shadow-md);
   z-index: 2000;
-  padding: 0;
   overflow: hidden;
   animation: fadeIn 0.2s ease;
+  font-family: "Segoe UI Web (West European)", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+  font-size: 16px;
+  color: rgb(173, 173, 173);
+  box-sizing: border-box;
 }
 
 .navbar.photos-mode .apps-launcher {
@@ -843,122 +849,199 @@
 
 /* Search Bar */
 .apps-search-container {
-  padding: 10px 12px;
+  padding: 16px;
+  width: 468px;
 }
 
 .apps-search-bar {
+  position: relative;
   display: flex;
   align-items: center;
-  background: var(--bg-hover);
+  background: rgb(41, 41, 41);
+  border: 1px solid rgb(102, 102, 102);
+  border-bottom: 1px solid rgb(173, 173, 173);
   border-radius: 4px;
-  padding: 6px 10px;
-  gap: 6px;
+  padding: 0 0 0 8px;
+  min-height: 32px;
+  width: 468px;
+  font-family: "Segoe UI", "Segoe UI Web (West European)", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  box-sizing: border-box;
 }
 
-.navbar.photos-mode .apps-search-bar {
-  background: #2c2c2e;
+.apps-search-bar:focus-within::after {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 4px;
+  bottom: -1px;
+  left: -1px;
+  right: -1px;
+  border-bottom: 2px solid rgb(71, 158, 245);
+  border-radius: 0 0 4px 4px;
+  transform: matrix(0, 0, 0, 1, 0, 0);
+  transition: transform 0.05s;
+  clip-path: inset(0 0px 0px);
 }
 
-.apps-search-bar svg {
-  width: 14px;
-  height: 14px;
-  color: var(--text-secondary);
+.apps-search-bar::after {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 4px;
+  bottom: -1px;
+  left: -1px;
+  right: -1px;
+  border-bottom: 2px solid rgb(71, 158, 245);
+  border-radius: 0 0 4px 4px;
+  transform: matrix(0, 0, 0, 1, 0, 0);
+  transition: transform 0.05s;
+  clip-path: inset(calc(100% - 2px) 0px 0px);
+}
+
+.apps-search-icon {
+  display: flex;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  color: rgb(173, 173, 173);
   flex-shrink: 0;
 }
 
-.apps-search-bar input {
+.apps-search-icon svg {
+  width: 20px;
+  height: 20px;
+  color: rgb(173, 173, 173);
+}
+
+.apps-search-input {
   flex: 1;
   border: none;
   outline: none;
   background: none;
-  font-size: 12px;
-  color: var(--text-primary);
+  padding: 0 8px 0 6px;
+  font-size: 14px;
+  line-height: 20px;
+  color: rgb(255, 255, 255);
+  font-family: "Segoe UI", "Segoe UI Web (West European)", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
 }
 
-.navbar.photos-mode .apps-search-bar input {
-  color: #fff;
+.apps-search-input::placeholder {
+  color: rgb(173, 173, 173);
 }
 
 .apps-search-clear {
-  background: none;
-  border: none;
-  font-size: 20px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  padding: 0;
-  width: 20px;
-  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  transition: all 0.2s ease;
+  width: 20px;
+  height: 20px;
+  background: none;
+  border: none;
+  color: rgb(173, 173, 173);
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.apps-search-clear svg {
+  width: 20px;
+  height: 20px;
+  color: rgb(173, 173, 173);
 }
 
 .apps-search-clear:hover {
-  background: var(--bg-hover-light);
-  color: var(--text-primary);
-}
-
-.navbar.photos-mode .apps-search-clear:hover {
-  background: #3a3a3c;
-  color: #fff;
+  color: rgb(173, 173, 173);
 }
 
 /* Apps Grid */
+.apps-grid-wrapper {
+  width: 468px;
+  height: 270px;
+}
+
 .apps-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
-  padding: 10px 12px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: repeat(3, 90px);
+  gap: 0;
+  padding: 0;
+  width: 468px;
+  height: 270px;
+  align-items: stretch;
+}
+
+.apps-create-wrapper {
+  width: 468px;
+  height: 90px;
 }
 
 .apps-create-section {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
-  padding: 10px 12px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: 90px;
+  gap: 0;
+  padding: 0;
+  width: 468px;
+  height: 90px;
+  align-items: stretch;
 }
 
 .app-item {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 6px;
+  align-items: stretch;
+  justify-content: stretch;
   padding: 8px 4px;
   background: none;
   border: none;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 8px;
+  text-decoration: none;
   transition: all 0.2s ease;
+  color: rgb(255, 255, 255);
+  font-family: "Segoe UI Web (West European)", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+  font-size: 12px;
+  line-height: 14px;
+  overflow: hidden;
 }
 
 .app-item:hover {
-  background: var(--bg-hover);
+  background: transparent;
 }
 
-.navbar.photos-mode .app-item:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.app-item span {
-  font-size: 11px;
-  color: var(--text-primary);
-  text-align: center;
-  line-height: 1.2;
-}
-
-.navbar.photos-mode .app-item span {
-  color: #fff;
-}
-
-.app-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 4px;
+.app-icon-container {
   display: flex;
+  flex: 1 1 auto;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  height: 42px;
+  overflow: clip;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.app-icon-img {
+  width: 32px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.app-label {
+  display: block;
+  width: 100%;
+  height: 28px;
+  font-size: 12px;
+  line-height: 14px;
+  text-align: center;
+  color: rgb(255, 255, 255);
+  font-family: "Segoe UI Web (West European)", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Microsoft 365 Copilot */
@@ -1307,10 +1390,7 @@
 /* Separator */
 .apps-separator {
   height: 1px;
-  background: var(--border-color-light);
-  margin: 0 16px;
-}
-
-.navbar.photos-mode .apps-separator {
-  background: #3a3a3c;
+  width: 468px;
+  background: rgb(136, 136, 136);
+  margin: 0;
 }
