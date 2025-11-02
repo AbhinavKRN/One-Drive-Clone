@@ -1,16 +1,20 @@
 import React from "react";
 import { AddRegular, SearchRegular, PhoneRegular } from "@fluentui/react-icons";
-import "./PhotosPage.css";
+import "./FavouritesPage.css";
 
 const FavouritesPage = () => {
   return (
     <div className="photos-page">
+      <h1 className="header">Favourites</h1>
       <div className="photos-hero">
+
         <div className="photos-stack">
           <img src="/images/image_copy2.png" alt="Memories" />
         </div>
-        <h2>No favourite Yet</h2>
-        <h4>mark photos and videos as favourite to see them here</h4>
+        <div >
+          <h2 className="no-favourites-text">No favourite Yet</h2>
+          <h4>mark photos and videos as favourite to see them here</h4>
+        </div>
       </div>
 
       <div className="photos-search-container">

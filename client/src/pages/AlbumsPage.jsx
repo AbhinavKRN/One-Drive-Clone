@@ -1,26 +1,28 @@
 import React from "react";
 import { AddRegular, SearchRegular, PhoneRegular } from "@fluentui/react-icons";
-import "./PhotosPage.css";
+import "./AlbumsPage.css";
 
 const AlbumPage = () => {
   return (
     <div className="photos-page">
+      <h1 className="header">Albums</h1>
       <div className="photos-hero">
         <div className="photos-stack">
           <img src="/images/imageCopy2.png" alt="Memories" />
         </div>
-        <h2>Collect your Best moments</h2>
-        <h4>Captture, save, and share your moments in album for lasting memories</h4>
+        <h2 className="no-favourites-text">Collect your Best moments</h2>
+        <h4>
+          Captture, save, and share your moments in album for lasting memories
+        </h4>
 
         <div className="photos-actions">
-        
-
           <div className="action-card">
-            <div className="action-icon phone-icon mojj">
+            <div className="action-icon phone-icon">
               <PhoneRegular />
+            </div>
+            <div className="action-text">
               <span>Create Album</span>
             </div>
-           
           </div>
         </div>
       </div>

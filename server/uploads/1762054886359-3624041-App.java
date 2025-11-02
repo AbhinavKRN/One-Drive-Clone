@@ -59,14 +59,3 @@ final class Pizza {
   }
 
 }
-
-public class App {
-  public static void main(String[] args) {
-
-    Pizza order = new Pizza.PizzaBuilder("Large")
-        .addCheese(true)
-        .build();
-
-    order.Describe();
-  }
-}
