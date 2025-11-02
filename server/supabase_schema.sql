@@ -55,4 +55,3 @@ CREATE POLICY "Users can manage own folders" ON folders FOR ALL USING (auth.uid(
 
 -- RLS Policies for files
 CREATE POLICY "Users can manage own files" ON files FOR ALL USING (auth.uid()::text = user_id::text);
-

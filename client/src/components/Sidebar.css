@@ -292,9 +292,9 @@
   top: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
-  background-color: #ffffff;
+  background-color: var(--bg-secondary);
   border-radius: 8px;
-  box-shadow: 0 6.4px 14.4px 0 rgba(0, 0, 0, 0.132), 0 1.2px 3.6px 0 rgba(0, 0, 0, 0.108);
+  box-shadow: var(--shadow-md);
   min-width: 248px;
   z-index: 1000;
   padding: 4px;
@@ -343,16 +343,16 @@
   transition: background-color 0.1s ease;
   font-size: 14px;
   font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', sans-serif;
-  color: #424242;
+  color: var(--text-primary);
   position: relative;
 }
 
 .sidebar-dropdown-item:hover {
-  background-color: #f3f2f1;
+  background-color: var(--bg-hover);
 }
 
 .sidebar-dropdown-item:active {
-  background-color: #edebe9;
+  background-color: var(--bg-active);
 }
 
 .sidebar-dropdown-icon {
@@ -375,8 +375,9 @@
 .sidebar-dropdown-icon svg {
   width: 16px;
   height: 16px;
-  color: #424242;
+  color: var(--text-primary);
   display: block;
+  transition: color var(--transition-base);
 }
 
 /* Icon styles - OneDrive-like (no background colors, just icons) */
@@ -394,7 +395,7 @@
 
 .sidebar-dropdown-separator {
   height: 1px;
-  background-color: #f0f0f0;
+  background-color: var(--border-color-light);
   margin: 4px;
   transition: background-color var(--transition-base);
 }

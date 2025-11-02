@@ -20,7 +20,7 @@ import AlbumPage from "./AlbumsPage";
 import FavouritesPage from "./FavouritesPage";
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, getToken } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const params = useParams();
@@ -269,16 +269,6 @@ const Dashboard = () => {
   const handleDownload = (file) => downloadFile(file);
 
   // CommandBar handlers
-  const handleShare = () => {
-    console.log("Share items:", selectedItems);
-    alert("Share feature will be implemented");
-  };
-
-  const handleCopyLink = () => {
-    console.log("Copy link for items:", selectedItems);
-    alert("Copy link feature will be implemented");
-  };
-
   const handleCommandBarDelete = () => {
     handleDelete(selectedItems);
   };
@@ -292,14 +282,20 @@ const Dashboard = () => {
     });
   };
 
+  const handleShare = () => {
+    alert('Share feature will be implemented');
+  };
+
+  const handleCopyLink = () => {
+    alert('Copy link feature will be implemented');
+  };
+
   const handleMoveTo = () => {
-    console.log("Move to for items:", selectedItems);
-    alert("Move to feature will be implemented");
+    alert('Move to feature will be implemented');
   };
 
   const handleCopyTo = () => {
-    console.log("Copy to for items:", selectedItems);
-    alert("Copy to feature will be implemented");
+    alert('Copy to feature will be implemented');
   };
 
   const handleCommandBarRename = () => {

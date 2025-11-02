@@ -217,5 +217,6 @@
 }
 
 .rename-modal .form-group input {
-  background-color: #ffffff;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
 }

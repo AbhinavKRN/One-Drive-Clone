@@ -392,6 +392,11 @@ export const useFileManager = () => {
     }
   }, [])
 
+  // Refresh files and folders
+  const refreshFiles = useCallback(() => {
+    loadData()
+  }, [loadData])
+
   return {
     files,
     folders,
@@ -408,6 +413,7 @@ export const useFileManager = () => {
     navigateToFolderBySlug,
     navigateToPath,
     downloadFile,
+    refreshFiles,
     loading,
     nameToSlug // Export helper for Dashboard
   }

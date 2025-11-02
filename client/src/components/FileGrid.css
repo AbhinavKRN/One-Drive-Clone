@@ -230,13 +230,19 @@
               color var(--transition-base);
 }
 
+:root.dark-theme .file-list-header {
+  background-color: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
 .file-list-row {
   display: grid;
   grid-template-columns: 48px 2fr 1fr 1fr 1fr;
   gap: 16px;
   padding: 12px 24px;
-  background: #ffffff;
-  border-bottom: 1px solid #f0f0f0;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color-light);
   cursor: pointer;
   transition: background-color var(--transition-fast),
               border-color var(--transition-base);
@@ -249,19 +255,50 @@
 }
 
 .file-list-row:hover {
-  background-color: #fafafa;
+  background-color: var(--bg-hover);
 }
 
 .file-list-row.selected {
-  background-color: #f0f7ff;
+  background-color: var(--bg-active);
   border-left: 3px solid var(--accent-primary);
 }
 
 /* My Files Folder View - Light Blue Selection (OneDrive style) */
 .file-list-row.my-files-selected {
-  background-color: #e8f4fd !important;
+  background-color: var(--bg-active) !important;
   border-left: none;
   border-radius: 0;
+}
+
+/* Ensure text remains visible in dark mode for selected/hovered rows */
+:root.dark-theme .file-list-row:hover .file-list-col,
+:root.dark-theme .file-list-row:hover .file-name,
+:root.dark-theme .file-list-row.selected .file-list-col,
+:root.dark-theme .file-list-row.selected .file-name,
+:root.dark-theme .file-list-row.my-files-selected .file-list-col,
+:root.dark-theme .file-list-row.my-files-selected .file-name {
+  color: var(--text-primary) !important;
+}
+
+:root.dark-theme .file-list-row:hover .col-modified,
+:root.dark-theme .file-list-row:hover .col-size,
+:root.dark-theme .file-list-row:hover .col-sharing,
+:root.dark-theme .file-list-row.selected .col-modified,
+:root.dark-theme .file-list-row.selected .col-size,
+:root.dark-theme .file-list-row.selected .col-sharing {
+  color: var(--text-secondary) !important;
+}
+
+:root:not(.dark-theme) .file-list-row.selected {
+  background-color: #f0f7ff;
+}
+
+:root:not(.dark-theme) .file-list-row.my-files-selected {
+  background-color: #e8f4fd !important;
+}
+
+:root:not(.dark-theme) .file-list-row:hover {
+  background-color: #fafafa;
 }
 
 /* Keep text colors normal when using selection background */
@@ -282,6 +319,12 @@
 .file-list-row.my-files-selected .col-size,
 .file-list-row.my-files-selected .col-sharing {
   color: #795548 !important;
+}
+
+:root.dark-theme .file-list-row.my-files-selected .col-modified,
+:root.dark-theme .file-list-row.my-files-selected .col-size,
+:root.dark-theme .file-list-row.my-files-selected .col-sharing {
+  color: var(--text-secondary) !important;
 }
 
 /* Checkbox styling for selected items */
@@ -344,10 +387,25 @@
   color: #605e5c;
   width: 14px;
   height: 14px;
+  transition: color var(--transition-base);
+}
+
+:root.dark-theme .file-list-row .share-icon svg {
+  color: var(--text-secondary);
+}
+
+:root.dark-theme .file-list-row:hover .share-icon svg,
+:root.dark-theme .file-list-row.selected .share-icon svg,
+:root.dark-theme .file-list-row.my-files-selected .share-icon svg {
+  color: var(--text-primary);
 }
 
 .file-list-row .share-icon:hover {
   background-color: rgba(0, 0, 0, 0.05);
+}
+
+:root.dark-theme .file-list-row .share-icon:hover {
+  background-color: var(--bg-hover);
 }
 
 /* Ellipsis menu styling - subtle gray */
@@ -355,10 +413,25 @@
   color: #605e5c;
   width: 12px;
   height: 12px;
+  transition: color var(--transition-base);
+}
+
+:root.dark-theme .file-list-row .ellipsis-menu svg {
+  color: var(--text-secondary);
+}
+
+:root.dark-theme .file-list-row:hover .ellipsis-menu svg,
+:root.dark-theme .file-list-row.selected .ellipsis-menu svg,
+:root.dark-theme .file-list-row.my-files-selected .ellipsis-menu svg {
+  color: var(--text-primary);
 }
 
 .file-list-row .ellipsis-menu:hover {
   background-color: rgba(0, 0, 0, 0.05);
+}
+
+:root.dark-theme .file-list-row .ellipsis-menu:hover {
+  background-color: var(--bg-hover);
 }
 
 .file-list-row .action-icon.delete-icon {
@@ -391,6 +464,14 @@
 .col-sharing {
   color: #795548 !important;
   font-size: 13px;
+  transition: color var(--transition-base);
+}
+
+/* Dark mode: use lighter text color for better visibility */
+:root.dark-theme .col-modified,
+:root.dark-theme .col-size,
+:root.dark-theme .col-sharing {
+  color: var(--text-secondary) !important;
 }
 
 /* Allow Modified, Size, and Sharing to have dropdowns */
@@ -752,10 +833,16 @@
 .file-list-row .file-name {
   font-size: 14px;
   font-weight: 400;
-  color: #323130;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: color var(--transition-base);
+}
+
+/* Ensure file names are always visible in dark mode */
+:root.dark-theme .file-list-row .file-name {
+  color: var(--text-primary) !important;
 }
 
 .col-actions {
