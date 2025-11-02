@@ -20,6 +20,13 @@
   transition: background-color var(--transition-base);
 }
 
+.command-bar-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
 .personal-vault-toggle {
   display: flex;
   align-items: center;
@@ -28,14 +35,51 @@
   user-select: none;
   font-size: 14px;
   color: var(--text-primary);
-  padding: 4px 6px;
+  padding: 6px 8px;
   border-radius: 4px;
   transition: background-color var(--transition-fast),
               color var(--transition-base);
+  margin: 0 2px;
 }
 
 .personal-vault-toggle:hover {
   background-color: var(--bg-hover);
+}
+
+.empty-recycle-bin-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background-color: transparent;
+  border: none;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color var(--transition-fast),
+              color var(--transition-base);
+  font-family: inherit;
+  white-space: nowrap;
+  margin: 0 2px;
+  min-width: 40px;
+}
+
+.empty-recycle-bin-btn:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+}
+
+.empty-recycle-bin-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.empty-bin-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  transition: color var(--transition-base);
 }
 
 .vault-icon {
@@ -104,37 +148,49 @@
 
 /* Title */
 .recycle-bin-title {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #111827;
   margin: 0;
-  padding: 20px 32px 0 32px;
+  padding: 24px 32px 0 32px;
   line-height: 1.2;
-  font-family: inherit;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
   transition: color var(--transition-base);
+  letter-spacing: -0.02em;
+}
+
+[data-theme="dark"] .recycle-bin-title {
+  color: var(--text-primary);
 }
 
 /* Table Header */
 .recycle-bin-table-header {
   padding: 0 32px;
-  margin-top: 8px;
+  margin-top: 20px;
   background-color: var(--bg-primary);
   transition: background-color var(--transition-base);
 }
 
 .recycle-bin-table-wrapper {
-  background-color: var(--bg-secondary);
-  border: none;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
   max-height: calc(100vh - 250px);
   overflow-y: auto;
   overflow-x: auto;
-  transition: background-color var(--transition-base);
+  transition: background-color var(--transition-base), border-color var(--transition-base);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .recycle-bin-table-wrapper {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color-medium);
 }
 
 .recycle-bin-table {
   width: 100%;
   border-collapse: collapse;
-  background-color: var(--bg-secondary);
+  background-color: transparent;
   table-layout: auto;
   display: table;
   transition: background-color var(--transition-base);
@@ -149,7 +205,7 @@
 
 .recycle-bin-table tbody {
   display: table-row-group;
-  background-color: var(--bg-secondary);
+  background-color: transparent;
   transition: background-color var(--transition-base);
 }
 
@@ -163,82 +219,139 @@
 }
 
 .table-header-row {
-  background-color: var(--bg-hover);
-  border-bottom: 1px solid var(--border-color-light);
-  height: 40px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e5e7eb;
+  height: 44px;
   margin: 0;
   transition: background-color var(--transition-base),
               border-color var(--transition-base);
 }
 
+[data-theme="dark"] .table-header-row {
+  background-color: var(--bg-hover);
+  border-bottom-color: var(--border-color-light);
+}
+
 .table-header-cell {
-  padding: 12px 16px;
+  padding: 12px 20px;
   text-align: left;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #374151;
   border-bottom: none;
   white-space: nowrap;
-  font-family: inherit;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
   vertical-align: middle;
   transition: color var(--transition-base);
+  letter-spacing: -0.01em;
+}
+
+[data-theme="dark"] .table-header-cell {
+  color: var(--text-primary);
+}
+
+.table-header-cell:first-child {
+  padding-left: 16px;
 }
 
 .table-header-cell.sortable {
   cursor: pointer;
   user-select: none;
+  position: relative;
 }
 
 .table-header-cell.sortable:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="dark"] .table-header-cell.sortable:hover {
   background-color: var(--bg-active);
 }
 
 .header-icon {
   width: 16px;
   height: 16px;
-  color: var(--text-primary);
+  color: #6b7280;
   vertical-align: middle;
-  margin-right: 6px;
+  margin-right: 8px;
   display: inline-block;
   transition: color var(--transition-base);
+}
+
+[data-theme="dark"] .header-icon {
+  color: var(--text-primary);
 }
 
 .sort-icon {
   width: 14px;
   height: 14px;
-  color: var(--text-primary);
+  color: #9ca3af;
   margin-left: 6px;
   vertical-align: middle;
   display: inline-block;
   transition: color var(--transition-base);
 }
 
+[data-theme="dark"] .sort-icon {
+  color: var(--text-primary);
+}
+
 .table-row {
-  border-bottom: 1px solid var(--border-color-light);
+  border-bottom: 1px solid #f3f4f6;
   transition: background-color var(--transition-fast),
               border-color var(--transition-base);
+  background-color: #ffffff;
+}
+
+[data-theme="dark"] .table-row {
   background-color: var(--bg-secondary);
+  border-bottom-color: var(--border-color-light);
 }
 
 .table-row:hover {
+  background-color: #f9fafb;
+}
+
+[data-theme="dark"] .table-row:hover {
   background-color: var(--bg-hover);
 }
 
 .table-row.selected {
+  background-color: #eff6ff;
+}
+
+[data-theme="dark"] .table-row.selected {
   background-color: var(--bg-active);
 }
 
 .table-row.selected:hover {
+  background-color: #dbeafe;
+}
+
+[data-theme="dark"] .table-row.selected:hover {
   background-color: var(--bg-active);
 }
 
 .table-cell {
-  padding: 12px 16px;
+  padding: 16px 20px;
   font-size: 14px;
-  color: var(--text-primary);
+  color: #374151;
   vertical-align: middle;
-  font-family: inherit;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
   transition: color var(--transition-base);
+  line-height: 1.5;
+}
+
+[data-theme="dark"] .table-cell {
+  color: var(--text-primary);
+}
+
+.table-cell svg {
+  color: #6b7280;
+}
+
+[data-theme="dark"] .table-cell svg {
+  color: var(--text-secondary);
 }
 
 /* Empty State */
@@ -319,22 +432,34 @@
 }
 
 .recycle-bin-table-wrapper::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
 }
 
 .recycle-bin-table-wrapper::-webkit-scrollbar-track {
-  background: var(--scrollbar-track);
+  background: #f3f4f6;
   transition: background var(--transition-base);
 }
 
+[data-theme="dark"] .recycle-bin-table-wrapper::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
 .recycle-bin-table-wrapper::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
+  background: #d1d5db;
   border-radius: 6px;
   transition: background var(--transition-base);
 }
 
+[data-theme="dark"] .recycle-bin-table-wrapper::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+}
+
 .recycle-bin-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+[data-theme="dark"] .recycle-bin-table-wrapper::-webkit-scrollbar-thumb:hover {
   background: var(--scrollbar-thumb-hover);
 }
 
@@ -363,7 +488,12 @@
 
   .personal-vault-toggle {
     font-size: 13px;
-    padding: 3px 5px;
+    padding: 5px 7px;
+  }
+
+  .empty-recycle-bin-btn {
+    font-size: 13px;
+    padding: 5px 7px;
   }
 
   .sort-btn-top,
@@ -416,13 +546,24 @@
     font-size: 12px;
   }
 
+  .command-bar-group {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
   .personal-vault-toggle {
     font-size: 12px;
     padding: 4px 6px;
   }
 
+  .empty-recycle-bin-btn {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+
   .vault-icon,
-  .ellipsis-icon {
+  .ellipsis-icon,
+  .empty-bin-icon {
     width: 14px;
     height: 14px;
   }
@@ -523,8 +664,14 @@
     padding: 3px 5px;
   }
 
+  .empty-recycle-bin-btn {
+    font-size: 11px;
+    padding: 3px 5px;
+  }
+
   .vault-icon,
-  .ellipsis-icon {
+  .ellipsis-icon,
+  .empty-bin-icon {
     width: 12px;
     height: 12px;
   }
@@ -572,34 +719,58 @@
 /* Action Buttons */
 .btn-restore,
 .btn-delete {
-  padding: 4px 12px;
+  padding: 6px 14px;
   font-size: 13px;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
-  transition: background-color var(--transition-fast),
-              color var(--transition-base);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  transition: all 0.15s ease;
   white-space: nowrap;
+  font-weight: 500;
 }
 
 .btn-restore {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+}
+
+[data-theme="dark"] .btn-restore {
   background-color: var(--bg-hover);
   color: var(--text-primary);
+  border-color: var(--border-color-medium);
 }
 
 .btn-restore:hover {
+  background-color: #e5e7eb;
+  border-color: #d1d5db;
+}
+
+[data-theme="dark"] .btn-restore:hover {
   background-color: var(--bg-active);
 }
 
 .btn-delete {
   background-color: transparent;
+  color: #6b7280;
+  border: 1px solid transparent;
+}
+
+[data-theme="dark"] .btn-delete {
   color: var(--text-secondary);
 }
 
 .btn-delete:hover {
-  background-color: var(--bg-hover);
-  color: var(--text-primary);
+  background-color: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+[data-theme="dark"] .btn-delete:hover {
+  background-color: rgba(220, 38, 38, 0.1);
+  color: #ef4444;
+  border-color: rgba(220, 38, 38, 0.3);
 }
 
 /* Checkbox Styling */
@@ -639,20 +810,28 @@
   height: 20px;
   width: 20px;
   background-color: transparent;
-  border: 1.5px solid #c7c7c7;
+  border: 2px solid #d1d5db;
   border-radius: 50%;
-  transition: background-color var(--transition-fast),
-              border-color var(--transition-fast);
+  transition: all 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: none;
 }
 
+[data-theme="dark"] .circular-checkbox-checkmark {
+  border-color: #4b5563;
+}
+
+.select-all-checkbox-label:hover .circular-checkbox-checkmark,
+.row-checkbox-label:hover .circular-checkbox-checkmark {
+  border-color: #3b82f6;
+}
+
 .select-all-checkbox-input:checked ~ .circular-checkbox-checkmark,
 .row-checkbox-input:checked ~ .circular-checkbox-checkmark {
-  background-color: #0078d4;
-  border-color: #0078d4;
+  background-color: #3b82f6;
+  border-color: #3b82f6;
 }
 
 .circular-checkbox-checkmark svg {
@@ -727,4 +906,189 @@
   background-color: var(--bg-hover);
   color: var(--text-primary);
   border-color: var(--border-color-hover);
+}
+
+/* Selection Command Bar - Microsoft 365 Style */
+.selection-command-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 3.2px 7.2px rgba(0, 0, 0, 0.133), 0 0.6px 1.8px rgba(0, 0, 0, 0.11);
+  gap: 16px;
+  max-width: 100%;
+  flex: 1;
+  transition: background-color var(--transition-base), box-shadow var(--transition-base);
+  animation: slideIn 0.267s ease both;
+}
+
+[data-theme="dark"] .selection-command-bar {
+  background-color: var(--bg-secondary);
+  box-shadow: 0 3.2px 7.2px rgba(0, 0, 0, 0.4), 0 0.6px 1.8px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.command-bar-primary {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.command-bar-secondary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.command-bar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background-color: transparent;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  color: #141414;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-base);
+  white-space: nowrap;
+  min-height: 40px;
+  margin: 0 2px;
+}
+
+[data-theme="dark"] .command-bar-btn {
+  color: var(--text-primary);
+}
+
+.command-bar-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .command-bar-btn:hover {
+  background-color: var(--bg-hover);
+}
+
+.command-bar-btn:active {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .command-bar-btn:active {
+  background-color: var(--bg-active);
+}
+
+.command-bar-icon {
+  width: 16px;
+  height: 16px;
+  color: currentColor;
+  flex-shrink: 0;
+}
+
+.command-bar-btn-selection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background-color: transparent;
+  border: 0.8px solid #d1d1d1;
+  border-radius: 16px;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  color: #141414;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  min-height: 34px;
+}
+
+[data-theme="dark"] .command-bar-btn-selection {
+  color: var(--text-primary);
+  border-color: var(--border-color-medium);
+}
+
+.command-bar-btn-selection:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+  border-color: #b3b3b3;
+}
+
+[data-theme="dark"] .command-bar-btn-selection:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--border-color-hover);
+}
+
+.selection-count-text {
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* Responsive styles for selection command bar */
+@media (max-width: 768px) {
+  .selection-command-bar {
+    padding: 6px 10px;
+    gap: 10px;
+    border-radius: 10px;
+  }
+
+  .command-bar-btn {
+    padding: 6px 10px;
+    font-size: 13px;
+    min-height: 36px;
+  }
+
+  .command-bar-btn span {
+    display: none;
+  }
+
+  .command-bar-btn-selection {
+    padding: 6px 12px;
+    font-size: 13px;
+    min-height: 32px;
+  }
+
+  .command-bar-icon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .selection-command-bar {
+    padding: 5px 8px;
+    gap: 8px;
+    border-radius: 8px;
+  }
+
+  .command-bar-btn {
+    padding: 5px 8px;
+    font-size: 12px;
+    min-height: 32px;
+  }
+
+  .command-bar-btn-selection {
+    padding: 5px 10px;
+    font-size: 12px;
+    min-height: 30px;
+    border-radius: 14px;
+  }
+
+  .command-bar-icon {
+    width: 13px;
+    height: 13px;
+  }
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ChevronDownRegular, DocumentRegular } from "@fluentui/react-icons";
+import { ChevronDownRegular, DocumentRegular, DeleteRegular } from "@fluentui/react-icons";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
@@ -78,6 +78,50 @@ const RecycleBin = () => {
     } catch (error) {
       console.error("Error deleting items:", error);
       toast.error("Failed to delete items");
+    }
+  };
+
+  // Handle empty recycle bin
+  const handleEmptyRecycleBin = async () => {
+    if (deletedItems.length === 0) {
+      toast.info("Recycle bin is already empty");
+      return;
+    }
+
+    try {
+      const token = getToken();
+      if (!token) return;
+
+      const deletePromises = deletedItems.map(async (item) => {
+        const endpoint =
+          item.item_type === "folder"
+            ? `${API_BASE_URL}/folders/${item.id}?permanent=true`
+            : `${API_BASE_URL}/files/${item.id}?permanent=true`;
+
+        const response = await fetch(endpoint, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        return response.json();
+      });
+
+      const results = await Promise.all(deletePromises);
+      const hasError = results.some((r) => r.status !== "success");
+
+      if (hasError) {
+        toast.error("Some items could not be deleted");
+      } else {
+        toast.success("Recycle bin emptied successfully");
+      }
+
+      setSelectedItems([]);
+      loadRecycleBinItems();
+    } catch (error) {
+      console.error("Error emptying recycle bin:", error);
+      toast.error("Failed to empty recycle bin");
     }
   };
 
@@ -284,53 +328,58 @@ const RecycleBin = () => {
       {/* Top Bar */}
       <div className="recycle-bin-top-bar">
         {selectedItems.length > 0 ? (
-          <div className="bulk-actions-bar">
-            <span className="selected-count">
-              {selectedItems.length} selected
-            </span>
-            <div className="bulk-actions-buttons">
-              <button className="btn-bulk-restore" onClick={handleBulkRestore}>
-                Restore
+          <div className="selection-command-bar">
+            <div className="command-bar-primary">
+              <button className="command-bar-btn" onClick={handleBulkRestore} title="Restore">
+                <svg className="command-bar-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 2v6l4-4M8 8l-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M8 8v6M4 14h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                <span>Restore</span>
               </button>
-              <button className="btn-bulk-delete" onClick={handleBulkDelete}>
-                Delete permanently
+              <button className="command-bar-btn" onClick={handleBulkDelete} title="Delete">
+                <svg className="command-bar-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 4h10M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1M6 7v5M10 7v5M4 4h8v9a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span>Delete</span>
               </button>
-              <button
-                className="btn-clear-selection"
-                onClick={() => setSelectedItems([])}
-              >
-                Clear selection
+            </div>
+            <div className="command-bar-secondary">
+              <button className="command-bar-btn-selection" onClick={() => setSelectedItems([])} title="Clear selection">
+                <svg className="command-bar-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                <span className="selection-count-text">{selectedItems.length} selected</span>
               </button>
             </div>
           </div>
         ) : (
-          <div className="personal-vault-toggle">
-            <svg
-              className="vault-icon"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+          <div className="command-bar-group">
+            <div className="personal-vault-toggle">
+              <svg
+                className="vault-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M8 1L3 4V7C3 10.87 5.61 14.34 8 15C10.39 14.34 13 10.87 13 7V4L8 1Z"
+                  fill="currentColor"
+                />
+              </svg>
+              <span>Show Personal Vault items</span>
+            </div>
+            <button
+              className="empty-recycle-bin-btn"
+              onClick={handleEmptyRecycleBin}
+              disabled={deletedItems.length === 0}
+              title="Empty Recycle Bin"
             >
-              <path
-                d="M8 1L3 4V7C3 10.87 5.61 14.34 8 15C10.39 14.34 13 10.87 13 7V4L8 1Z"
-                fill="currentColor"
-              />
-            </svg>
-            <span>Show Personal Vault items</span>
-            <svg
-              className="ellipsis-icon"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle cx="4" cy="8" r="1.5" fill="currentColor" />
-              <circle cx="8" cy="8" r="1.5" fill="currentColor" />
-              <circle cx="12" cy="8" r="1.5" fill="currentColor" />
-            </svg>
+              <DeleteRegular className="empty-bin-icon" />
+              <span>Empty Recycle Bin</span>
+            </button>
           </div>
         )}
         <div className="top-bar-controls">
@@ -522,7 +571,6 @@ const RecycleBin = () => {
                   <ChevronDownRegular className="sort-icon" />
                 </th>
                 <th className="table-header-cell">File size</th>
-                <th className="table-header-cell">Actions</th>
               </tr>
             </thead>
             {sortedItems.length > 0 && (
@@ -598,30 +646,6 @@ const RecycleBin = () => {
                       {formatDate(item.deleted_at)}
                     </td>
                     <td className="table-cell">{formatSize(item.size)}</td>
-                    <td className="table-cell" style={{ width: "120px" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "8px",
-                          alignItems: "center",
-                        }}
-                      >
-                        <button
-                          className="btn-restore"
-                          onClick={() => handleRestore(item)}
-                          title="Restore"
-                        >
-                          Restore
-                        </button>
-                        <button
-                          className="btn-delete"
-                          onClick={() => handlePermanentDelete(item)}
-                          title="Delete permanently"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
                   </tr>
                 ))}
               </tbody>
