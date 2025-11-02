@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import FileGrid from "../components/FileGrid";
@@ -22,6 +23,7 @@ import FavouritesPage from "./FavouritesPage";
 
 const Dashboard = () => {
   const { user, getToken } = useAuth();
+  const toast = useToast();
   const location = useLocation();
   const navigate = useNavigate();
   const params = useParams();
@@ -70,8 +72,7 @@ const Dashboard = () => {
     navigateToPath,
     downloadFile,
     createEmptyFile,
-    moveFileToFolder,
-  } = useFileManager();
+  } = useFileManager(toast);
 
   // Store navigateToFolderBySlug in ref for stable reference
   useEffect(() => {
@@ -253,7 +254,7 @@ const Dashboard = () => {
   const handleFolderUpload = (files) => {
     // Backend team will implement folder upload logic
     console.log("Folder upload:", files);
-    alert("Folder upload feature will be implemented by backend team");
+    toast.info("Folder upload feature will be implemented by backend team");
   };
 
   const handleCreateFolder = (folderName) => {
@@ -291,10 +292,10 @@ const Dashboard = () => {
     const itemsToDelete = itemIds || selectedItems;
     if (itemsToDelete.length > 0) {
       const itemCount = itemsToDelete.length;
-      if (window.confirm(`Delete ${itemCount} item(s)?`)) {
-        deleteItems(itemsToDelete);
-        setSelectedItems([]);
-      }
+      // Delete immediately and show toast
+      deleteItems(itemsToDelete);
+      setSelectedItems([]);
+      toast.success(`${itemCount} item(s) moved to recycle bin`);
     }
   };
 
@@ -332,19 +333,19 @@ const Dashboard = () => {
   };
 
   const handleShare = () => {
-    alert("Share feature will be implemented");
+    toast.info("Share feature will be implemented");
   };
 
   const handleCopyLink = () => {
-    alert("Copy link feature will be implemented");
+    toast.info("Copy link feature will be implemented");
   };
 
   const handleMoveTo = () => {
-    alert("Move to feature will be implemented");
+    toast.info("Move to feature will be implemented");
   };
 
   const handleCopyTo = () => {
-    alert("Copy to feature will be implemented");
+    toast.info("Copy to feature will be implemented");
   };
 
   const handleCommandBarRename = () => {
@@ -360,7 +361,7 @@ const Dashboard = () => {
 
   const handleDetails = () => {
     console.log("Open details pane");
-    alert("Details pane feature will be implemented");
+    toast.info("Details pane feature will be implemented");
   };
 
   // Prevent body scroll when sidebar is open on mobile
@@ -698,7 +699,12 @@ const Dashboard = () => {
                     onSortChange={handleSort}
                     onFilesUpload={handleFilesUpload}
                     onFolderUpload={handleFolderUpload}
-                    onMoveFileToFolder={moveFileToFolder}
+                    onShare={handleShare}
+                    onCopyLink={handleCopyLink}
+                    onMoveTo={handleMoveTo}
+                    onCopyTo={handleCopyTo}
+                    onRename={(file) => setRenameItem(file)}
+                    onDetails={handleDetails}
                   />
                 </div>
               </div>
