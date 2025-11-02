@@ -311,6 +311,14 @@
   background-color: var(--bg-secondary);
 }
 
+/* File row actions wrapper */
+.file-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
 /* Hide action icons by default */
 .file-list-row .action-icon {
   opacity: 0;
@@ -331,9 +339,22 @@
   visibility: visible;
 }
 
+/* Share icon styling - subtle gray */
+.file-list-row .share-icon svg {
+  color: #605e5c;
+  width: 14px;
+  height: 14px;
+}
+
+.file-list-row .share-icon:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
 /* Ellipsis menu styling - subtle gray */
 .file-list-row .ellipsis-menu svg {
   color: #605e5c;
+  width: 12px;
+  height: 12px;
 }
 
 .file-list-row .ellipsis-menu:hover {
@@ -747,13 +768,15 @@
   border: none;
   color: var(--text-secondary);
   cursor: pointer;
-  padding: 6px;
+  padding: 4px;
   border-radius: 4px;
-  transition: background-color var(--transition-fast), 
+  transition: background-color var(--transition-fast),
               color var(--transition-base);
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
 }
 
 .btn-icon:hover {
@@ -762,7 +785,7 @@
 }
 
 .btn-icon svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   color: inherit;
 }

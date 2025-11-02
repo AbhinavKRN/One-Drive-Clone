@@ -1,9 +1,25 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+import { DismissRegular } from '@fluentui/react-icons'
 import './Modal.css'
 
 const RenameModal = ({ item, onClose, onRename }) => {
   const [newName, setNewName] = useState(item.name)
   const [error, setError] = useState('')
+  const inputRef = useRef(null)
+
+  // Auto-select filename (without extension) when modal opens
+  useEffect(() => {
+    if (inputRef.current && item.type !== 'folder') {
+      const lastDotIndex = item.name.lastIndexOf('.')
+      if (lastDotIndex > 0) {
+        inputRef.current.setSelectionRange(0, lastDotIndex)
+      } else {
+        inputRef.current.select()
+      }
+    } else if (inputRef.current) {
+      inputRef.current.select()
+    }
+  }, [item])
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -29,11 +45,11 @@ const RenameModal = ({ item, onClose, onRename }) => {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
+      <div className="modal rename-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Rename {item.type === 'folder' ? 'folder' : 'file'}</h2>
-          <button className="btn-close" onClick={onClose}>
-            <i className="fas fa-times"></i>
+          <h2>Rename</h2>
+          <button className="btn-close" onClick={onClose} aria-label="Close">
+            <DismissRegular />
           </button>
         </div>
 
@@ -42,24 +58,21 @@ const RenameModal = ({ item, onClose, onRename }) => {
             {error && <div className="error-message">{error}</div>}
 
             <div className="form-group">
-              <label htmlFor="newName">New name</label>
               <input
+                ref={inputRef}
                 type="text"
                 id="newName"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                placeholder="Enter new name"
+                placeholder="Enter name"
                 autoFocus
               />
             </div>
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="btn-secondary" onClick={onClose}>
-              Cancel
-            </button>
             <button type="submit" className="btn-primary">
-              Rename
+              Update
             </button>
           </div>
         </form>

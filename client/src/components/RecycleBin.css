@@ -95,8 +95,8 @@
 }
 
 .dropdown-icon {
-  width: 14px;
-  height: 14px;
+  width: 10px;
+  height: 10px;
   color: var(--text-secondary);
   flex-shrink: 0;
   transition: color var(--transition-base);

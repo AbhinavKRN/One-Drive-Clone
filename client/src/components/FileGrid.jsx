@@ -5,7 +5,8 @@ import {
   DocumentRegular,
   VideoRegular,
   MusicNote2Regular,
-  ArchiveRegular
+  ArchiveRegular,
+  ShareRegular
 } from '@fluentui/react-icons'
 import './FileGrid.css'
 
@@ -432,7 +433,7 @@ const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemCli
               onClick={() => setShowNameMenu(!showNameMenu)}
             >
               Name
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style={{ marginLeft: '4px' }}>
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor" style={{ marginLeft: '4px' }}>
                 <path d="M6 8.5L1 3.5L11 3.5L6 8.5Z" />
               </svg>
             </span>
@@ -700,7 +701,7 @@ const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemCli
             </div>
 
             <div className="file-list-col col-name">
-              <div 
+              <div
                 className="file-icon-clickable"
                 style={{ color: file.type === 'folder' ? '#ffb900' : '#0078d4', cursor: 'pointer' }}
                 onClick={(e) => {
@@ -710,7 +711,7 @@ const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemCli
               >
                 {getFileIcon(file)}
               </div>
-              <span 
+              <span
                 className="file-name file-name-clickable"
                 onClick={(e) => {
                   e.stopPropagation()
@@ -720,20 +721,32 @@ const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemCli
               >
                 {file.name}
               </span>
-              <button
-                className="btn-icon action-icon ellipsis-menu"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  // More options
-                }}
-                title="More options"
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                  <circle cx="8" cy="3" r="1.5"></circle>
-                  <circle cx="8" cy="8" r="1.5"></circle>
-                  <circle cx="8" cy="13" r="1.5"></circle>
-                </svg>
-              </button>
+              <div className="file-row-actions">
+                <button
+                  className="btn-icon action-icon share-icon"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    // Share functionality
+                  }}
+                  title="Share"
+                >
+                  <ShareRegular />
+                </button>
+                <button
+                  className="btn-icon action-icon ellipsis-menu"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    // More options
+                  }}
+                  title="More options"
+                >
+                  <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+                    <circle cx="8" cy="3" r="1.5"></circle>
+                    <circle cx="8" cy="8" r="1.5"></circle>
+                    <circle cx="8" cy="13" r="1.5"></circle>
+                  </svg>
+                </button>
+              </div>
             </div>
 
             <div className="file-list-col col-modified">
