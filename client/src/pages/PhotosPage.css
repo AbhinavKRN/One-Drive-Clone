@@ -1,0 +1,283 @@
+.photos-page {
+  min-height: calc(100vh - 80px);
+  background: linear-gradient(180deg, #0d0e13 0%, #181a29 50%, #0d0e13 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 80px 20px 120px;
+  overflow-x: hidden; /* ✅ prevents horizontal scroll */
+  overflow-y: auto;
+  width: 100%;
+  box-sizing: border-box; /* ✅ ensures padding doesn’t push layout wider */
+}
+
+.photos-page::before {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 300px;
+  height: 100%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.photos-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  max-width: 900px;
+  width: 100%;
+  z-index: 1;
+  overflow-x: hidden; /* ✅ ensures inner transforms don’t overflow */
+}
+
+.photos-hero h1 {
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 3rem;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.photos-stack {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  height: 400px;
+  margin: 0 auto 3.5rem;
+  perspective: 1000px;
+  overflow: visible;
+}
+
+.photo-card {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+  position: absolute;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease, z-index 0.3s ease;
+  cursor: pointer;
+}
+
+.photo-left {
+  transform: rotate(-12deg) translateX(-40px) translateY(-20px);
+  z-index: 1;
+  opacity: 0.85;
+}
+
+.photo-center {
+  z-index: 2;
+  transform: translateY(0);
+}
+
+.photo-right {
+  transform: rotate(12deg) translateX(40px) translateY(-20px);
+  z-index: 1;
+  opacity: 0.85;
+}
+
+.photo-card:hover {
+  transform: scale(1.05);
+  z-index: 3;
+  opacity: 1;
+}
+
+.photo-card:hover.photo-left {
+  transform: rotate(-8deg) translateX(-30px) translateY(-15px) scale(1.05);
+}
+
+.photo-card:hover.photo-right {
+  transform: rotate(8deg) translateX(30px) translateY(-15px) scale(1.05);
+}
+
+.photos-actions {
+  display: flex;
+  justify-content: center;
+  gap: 4rem;
+  width: 100%;
+  max-width: 700px;
+  margin-bottom: 2rem;
+  flex-wrap: wrap; /* ✅ prevents overflow on narrow screens */
+}
+
+.action-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  max-width: 100%; /* ✅ prevents cards from overflowing */
+}
+
+.action-card:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.action-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.action-icon svg {
+  width: 24px;
+  height: 24px;
+  color: #ffffff;
+}
+
+.upload-icon {
+  background: linear-gradient(135deg, #4b8ef1 0%, #357abd 100%);
+}
+
+.phone-icon {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.action-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.action-text p {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #ffffff;
+  margin: 0;
+}
+
+.action-link {
+  background: none;
+  border: none;
+  color: #8b5cf6;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  font-family: inherit;
+}
+
+.action-link:hover {
+  color: #a78bfa;
+  text-decoration: underline;
+}
+
+.photos-search-container {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 100;
+  width: calc(100% - 40px);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.add-photo-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.add-photo-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 30px rgba(139, 92, 246, 0.6);
+}
+
+.add-photo-btn svg {
+  width: 24px;
+  height: 24px;
+  color: #ffffff;
+}
+
+.photos-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1d1e2f;
+  padding: 14px 24px;
+  border-radius: 50px;
+  min-width: 300px;
+  max-width: 90vw; /* ✅ ensures it never exceeds screen width */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.photos-search-bar svg {
+  width: 20px;
+  height: 20px;
+  color: #b0b3c1;
+  flex-shrink: 0;
+}
+
+.photos-search-bar input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.photos-search-bar input::placeholder {
+  color: #b0b3c1;
+}
+
+@media (max-width: 768px) {
+  .photos-hero h1 {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+  }
+
+  .photos-stack {
+    height: 300px;
+    margin-bottom: 2.5rem;
+  }
+
+  .photos-actions {
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .photos-search-bar {
+    min-width: unset;
+    width: 80%;
+  }
+
+  .photos-search-container {
+    flex-direction: column;
+    bottom: 20px;
+    gap: 16px;
+  }
+}

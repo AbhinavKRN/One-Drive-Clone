@@ -8,11 +8,12 @@ import {
   PersonAddRegular,
 } from "@fluentui/react-icons";
 import "./Navbar.css";
+import { useLocation } from "react-router-dom";
 
-const Navbar = ({ user, searchQuery, onSearchChange }) => {
+const Navbar = ({ user, searchQuery, onSearchChange , activeTab  , setActiveTab}) => {
   const { logout } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("Files");
+  // const [activeTab, setActiveTab] = useState("Files");
   const [showProfilePopup, setShowProfilePopup] = useState(false);
   const profilePopupRef = useRef(null);
   const avatarRef = useRef(null);
@@ -22,6 +23,11 @@ const Navbar = ({ user, searchQuery, onSearchChange }) => {
     navigate("/login");
     setShowProfilePopup(false);
   };
+
+  useEffect(() => {
+    if (location.pathname.includes("photos")) setActiveTab("Photos");
+    else setActiveTab("Files");
+  }, [location]);
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
