@@ -61,9 +61,50 @@ const Dashboard = () => {
     uploadedFiles.forEach(file => uploadFile(file))
   }
 
+  const handleFilesUpload = (files) => {
+    files.forEach(file => uploadFile(file))
+  }
+
+  const handleFolderUpload = (files) => {
+    // Backend team will implement folder upload logic
+    console.log('Folder upload:', files)
+    alert('Folder upload feature will be implemented by backend team')
+  }
+
   const handleCreateFolder = (folderName) => {
     createFolder(folderName)
     setShowCreateFolder(false)
+  }
+
+  // Handlers for Office document creation - Backend team will implement these
+  const handleWordDocument = () => {
+    console.log('Create Word document')
+    alert('Word document creation feature will be implemented by backend team')
+  }
+
+  const handleExcelWorkbook = () => {
+    console.log('Create Excel workbook')
+    alert('Excel workbook creation feature will be implemented by backend team')
+  }
+
+  const handlePowerPointPresentation = () => {
+    console.log('Create PowerPoint presentation')
+    alert('PowerPoint presentation creation feature will be implemented by backend team')
+  }
+
+  const handleOneNoteNotebook = () => {
+    console.log('Create OneNote notebook')
+    alert('OneNote notebook creation feature will be implemented by backend team')
+  }
+
+  const handleExcelSurvey = () => {
+    console.log('Create Excel survey')
+    alert('Excel survey creation feature will be implemented by backend team')
+  }
+
+  const handleTextDocument = () => {
+    console.log('Create Text document')
+    alert('Text document creation feature will be implemented by backend team')
   }
 
   const handleDelete = () => {
@@ -110,6 +151,14 @@ const Dashboard = () => {
           filterType={filterType}
           onFilterChange={setFilterType}
           onCreateClick={() => setShowCreateFolder(true)}
+          onFilesUpload={handleFilesUpload}
+          onFolderUpload={handleFolderUpload}
+          onWordDocument={handleWordDocument}
+          onExcelWorkbook={handleExcelWorkbook}
+          onPowerPointPresentation={handlePowerPointPresentation}
+          onOneNoteNotebook={handleOneNoteNotebook}
+          onExcelSurvey={handleExcelSurvey}
+          onTextDocument={handleTextDocument}
         />
 
         <div className="main-content">
@@ -126,85 +175,6 @@ const Dashboard = () => {
             <RecycleBin />
           ) : (
             <>
-              <div className="toolbar">
-                <div className="breadcrumbs">
-                  {breadcrumbs.map((crumb, index) => (
-                    <React.Fragment key={crumb.id}>
-                      <span
-                        className="breadcrumb"
-                        onClick={() => navigateToPath(crumb.id)}
-                      >
-                        {crumb.name}
-                      </span>
-                      {index < breadcrumbs.length - 1 && <span className="separator">/</span>}
-                    </React.Fragment>
-                  ))}
-                </div>
-
-                <div className="toolbar-actions">
-                  <label className="btn-upload">
-                    <i className="fas fa-upload"></i>
-                    Upload
-                    <input
-                      type="file"
-                      multiple
-                      onChange={handleFileUpload}
-                      style={{ display: 'none' }}
-                    />
-                  </label>
-
-                  <button
-                    className="btn-action"
-                    onClick={() => setShowCreateFolder(true)}
-                  >
-                    <i className="fas fa-folder-plus"></i>
-                    New folder
-                  </button>
-
-                  {selectedItems.length > 0 && (
-                    <>
-                      <button
-                        className="btn-action"
-                        onClick={handleDelete}
-                      >
-                        <i className="fas fa-trash"></i>
-                        Delete
-                      </button>
-
-                      {selectedItems.length === 1 && (
-                        <button
-                          className="btn-action"
-                          onClick={() => {
-                            const item = files.find(f => f.id === selectedItems[0])
-                            setRenameItem(item)
-                          }}
-                        >
-                          <i className="fas fa-edit"></i>
-                          Rename
-                        </button>
-                      )}
-                    </>
-                  )}
-
-                  <div className="view-toggle">
-                    <button
-                      className={viewMode === 'grid' ? 'active' : ''}
-                      onClick={() => setViewMode('grid')}
-                      title="Grid view"
-                    >
-                      <i className="fas fa-th"></i>
-                    </button>
-                    <button
-                      className={viewMode === 'list' ? 'active' : ''}
-                      onClick={() => setViewMode('list')}
-                      title="List view"
-                    >
-                      <i className="fas fa-list"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
               <FileGrid
                 files={filteredFiles}
                 viewMode={viewMode}

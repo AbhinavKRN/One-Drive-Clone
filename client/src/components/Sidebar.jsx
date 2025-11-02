@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import {
   ArrowLeftRegular,
@@ -11,16 +11,96 @@ import {
   DiamondRegular,
   ArrowRightRegular,
   ChevronRightRegular,
-  ChevronDownRegular
+  ChevronDownRegular,
+  DocumentRegular,
+  ArrowUploadRegular,
+  TableRegular,
+  SlideTextRegular
 } from '@fluentui/react-icons'
 import './Sidebar.css'
 
-const Sidebar = ({ storageUsed, storageTotal, filterType, onFilterChange, onCreateClick }) => {
+const Sidebar = ({ 
+  storageUsed, 
+  storageTotal, 
+  filterType, 
+  onFilterChange, 
+  onCreateClick,
+  onFilesUpload,
+  onFolderUpload,
+  onWordDocument,
+  onExcelWorkbook,
+  onPowerPointPresentation,
+  onOneNoteNotebook,
+  onExcelSurvey,
+  onTextDocument
+}) => {
   const { user } = useAuth()
   const [openCloseArrow, setOpenCloseArrow] = useState(false)
   const [isBrowseFilesExpanded, setIsBrowseFilesExpanded] = useState(false)
+  const [showCreateDropdown, setShowCreateDropdown] = useState(false)
+  const dropdownRef = useRef(null)
+  const buttonRef = useRef(null)
+  const fileInputRef = useRef(null)
+  const folderInputRef = useRef(null)
 
   const storagePercentage = (storageUsed / storageTotal) * 100
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target)
+      ) {
+        setShowCreateDropdown(false)
+      }
+    }
+
+    if (showCreateDropdown) {
+      document.addEventListener("mousedown", handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [showCreateDropdown])
+
+  const handleCreateButtonClick = () => {
+    setShowCreateDropdown(!showCreateDropdown)
+  }
+
+  const handleFolderClick = () => {
+    if (onCreateClick) onCreateClick()
+    setShowCreateDropdown(false)
+  }
+
+  const handleFilesUploadClick = () => {
+    fileInputRef.current?.click()
+    setShowCreateDropdown(false)
+  }
+
+  const handleFolderUploadClick = () => {
+    folderInputRef.current?.click()
+    setShowCreateDropdown(false)
+  }
+
+  const handleFileInputChange = (e) => {
+    const files = Array.from(e.target.files)
+    if (files.length > 0 && onFilesUpload) {
+      onFilesUpload(files)
+    }
+    e.target.value = "" // Reset input
+  }
+
+  const handleFolderInputChange = (e) => {
+    const files = Array.from(e.target.files)
+    if (files.length > 0 && onFolderUpload) {
+      onFolderUpload(files)
+    }
+    e.target.value = "" // Reset input
+  }
 
   const formatBytes = (bytes) => {
     if (bytes === 0) return '0 Bytes'
@@ -40,11 +120,81 @@ const Sidebar = ({ storageUsed, storageTotal, filterType, onFilterChange, onCrea
         // 🔹 Collapsed Sidebar
         <aside className="sidebar-closed">
           <div className="sidebar-section">
-            <button className="sidebar-create-btn" onClick={onCreateClick}>
-              <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" fill="white" viewBox="0 0 24 24">
-                <path d="M12 5v14m-7-7h14" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none" />
-              </svg>
-            </button>
+            <div className="sidebar-create-btn-wrapper">
+              <button 
+                ref={buttonRef}
+                className="sidebar-create-btn" 
+                onClick={handleCreateButtonClick}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" fill="white" viewBox="0 0 24 24">
+                  <path d="M12 5v14m-7-7h14" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none" />
+                </svg>
+              </button>
+              {showCreateDropdown && (
+                <div ref={dropdownRef} className="sidebar-create-dropdown">
+                  <div className="sidebar-dropdown-item" onClick={handleFolderClick}>
+                    <div className="sidebar-dropdown-icon folder-icon">
+                      <FolderRegular />
+                    </div>
+                    <span>Folder</span>
+                  </div>
+                  <div className="sidebar-dropdown-separator"></div>
+                  <div className="sidebar-dropdown-item" onClick={handleFilesUploadClick}>
+                    <div className="sidebar-dropdown-icon document-upload-icon">
+                      <DocumentRegular />
+                      <ArrowUploadRegular className="upload-overlay" />
+                    </div>
+                    <span>Files upload</span>
+                  </div>
+                  <div className="sidebar-dropdown-item" onClick={handleFolderUploadClick}>
+                    <div className="sidebar-dropdown-icon folder-upload-icon">
+                      <FolderRegular />
+                      <ArrowUploadRegular className="upload-overlay" />
+                    </div>
+                    <span>Folder upload</span>
+                  </div>
+                  <div className="sidebar-dropdown-separator"></div>
+                  <div className="sidebar-dropdown-item" onClick={() => { if (onWordDocument) onWordDocument(); setShowCreateDropdown(false); }}>
+                    <div className="sidebar-dropdown-icon word-icon">
+                      <DocumentRegular />
+                    </div>
+                    <span>Word document</span>
+                  </div>
+                  <div className="sidebar-dropdown-item" onClick={() => { if (onExcelWorkbook) onExcelWorkbook(); setShowCreateDropdown(false); }}>
+                    <div className="sidebar-dropdown-icon excel-icon">
+                      <TableRegular />
+                    </div>
+                    <span>Excel workbook</span>
+                  </div>
+                  <div className="sidebar-dropdown-item" onClick={() => { if (onPowerPointPresentation) onPowerPointPresentation(); setShowCreateDropdown(false); }}>
+                    <div className="sidebar-dropdown-icon powerpoint-icon">
+                      <SlideTextRegular />
+                    </div>
+                    <span>PowerPoint presentation</span>
+                  </div>
+                  <div className="sidebar-dropdown-item" onClick={() => { if (onOneNoteNotebook) onOneNoteNotebook(); setShowCreateDropdown(false); }}>
+                    <div className="sidebar-dropdown-icon onenote-icon">
+                      <DocumentRegular />
+                    </div>
+                    <span>OneNote notebook</span>
+                  </div>
+                  <div className="sidebar-dropdown-item" onClick={() => { if (onExcelSurvey) onExcelSurvey(); setShowCreateDropdown(false); }}>
+                    <div className="sidebar-dropdown-icon excel-icon">
+                      <TableRegular />
+                    </div>
+                    <span>Excel survey</span>
+                  </div>
+                  <div className="sidebar-dropdown-item" onClick={() => { if (onTextDocument) onTextDocument(); setShowCreateDropdown(false); }}>
+                    <div className="sidebar-dropdown-icon text-icon">
+                      <DocumentRegular />
+                    </div>
+                    <span>Text Document</span>
+                  </div>
+                </div>
+              )}
+              <input ref={fileInputRef} type="file" multiple onChange={handleFileInputChange} style={{ display: "none" }} />
+              <input ref={folderInputRef} type="file" webkitdirectory="" directory="" multiple onChange={handleFolderInputChange} style={{ display: "none" }} />
+            </div>
           </div>
 
           <div className="sidebar-section">
@@ -112,12 +262,82 @@ const Sidebar = ({ storageUsed, storageTotal, filterType, onFilterChange, onCrea
         // 🔹 Expanded Sidebar
         <aside className="sidebar">
           <div className="sidebar-section">
-            <button className="sidebar-create-btn" onClick={onCreateClick}>
-              <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" fill="white" viewBox="0 0 24 24">
-                <path d="M12 5v14m-7-7h14" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none" />
-              </svg>
-              <span>Create or upload</span>
-            </button>
+            <div className="sidebar-create-btn-wrapper">
+              <button 
+                ref={buttonRef}
+                className="sidebar-create-btn" 
+                onClick={handleCreateButtonClick}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" fill="white" viewBox="0 0 24 24">
+                  <path d="M12 5v14m-7-7h14" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none" />
+                </svg>
+                <span>Create or upload</span>
+              </button>
+              {showCreateDropdown && (
+                <div ref={dropdownRef} className="sidebar-create-dropdown">
+                  <div className="sidebar-dropdown-item" onClick={handleFolderClick}>
+                    <div className="sidebar-dropdown-icon folder-icon">
+                      <FolderRegular />
+                    </div>
+                    <span>Folder</span>
+                  </div>
+                  <div className="sidebar-dropdown-separator"></div>
+                  <div className="sidebar-dropdown-item" onClick={handleFilesUploadClick}>
+                    <div className="sidebar-dropdown-icon document-upload-icon">
+                      <DocumentRegular />
+                      <ArrowUploadRegular className="upload-overlay" />
+                    </div>
+                    <span>Files upload</span>
+                  </div>
+                  <div className="sidebar-dropdown-item" onClick={handleFolderUploadClick}>
+                    <div className="sidebar-dropdown-icon folder-upload-icon">
+                      <FolderRegular />
+                      <ArrowUploadRegular className="upload-overlay" />
+                    </div>
+                    <span>Folder upload</span>
+                  </div>
+                  <div className="sidebar-dropdown-separator"></div>
+                  <div className="sidebar-dropdown-item" onClick={() => { if (onWordDocument) onWordDocument(); setShowCreateDropdown(false); }}>
+                    <div className="sidebar-dropdown-icon word-icon">
+                      <DocumentRegular />
+                    </div>
+                    <span>Word document</span>
+                  </div>
+                  <div className="sidebar-dropdown-item" onClick={() => { if (onExcelWorkbook) onExcelWorkbook(); setShowCreateDropdown(false); }}>
+                    <div className="sidebar-dropdown-icon excel-icon">
+                      <TableRegular />
+                    </div>
+                    <span>Excel workbook</span>
+                  </div>
+                  <div className="sidebar-dropdown-item" onClick={() => { if (onPowerPointPresentation) onPowerPointPresentation(); setShowCreateDropdown(false); }}>
+                    <div className="sidebar-dropdown-icon powerpoint-icon">
+                      <SlideTextRegular />
+                    </div>
+                    <span>PowerPoint presentation</span>
+                  </div>
+                  <div className="sidebar-dropdown-item" onClick={() => { if (onOneNoteNotebook) onOneNoteNotebook(); setShowCreateDropdown(false); }}>
+                    <div className="sidebar-dropdown-icon onenote-icon">
+                      <DocumentRegular />
+                    </div>
+                    <span>OneNote notebook</span>
+                  </div>
+                  <div className="sidebar-dropdown-item" onClick={() => { if (onExcelSurvey) onExcelSurvey(); setShowCreateDropdown(false); }}>
+                    <div className="sidebar-dropdown-icon excel-icon">
+                      <TableRegular />
+                    </div>
+                    <span>Excel survey</span>
+                  </div>
+                  <div className="sidebar-dropdown-item" onClick={() => { if (onTextDocument) onTextDocument(); setShowCreateDropdown(false); }}>
+                    <div className="sidebar-dropdown-icon text-icon">
+                      <DocumentRegular />
+                    </div>
+                    <span>Text Document</span>
+                  </div>
+                </div>
+              )}
+              <input ref={fileInputRef} type="file" multiple onChange={handleFileInputChange} style={{ display: "none" }} />
+              <input ref={folderInputRef} type="file" webkitdirectory="" directory="" multiple onChange={handleFolderInputChange} style={{ display: "none" }} />
+            </div>
           </div>
 
           <div className="sidebar-section">
