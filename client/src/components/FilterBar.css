@@ -1,0 +1,137 @@
+.filter-bar-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 52px;
+  margin-top: 16px;
+  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+  color: rgb(97, 97, 97);
+  flex-wrap: wrap;
+}
+
+.filter-bar-title {
+  display: block;
+  margin: 0 16px 0 8px;
+  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 28px;
+  color: rgb(97, 97, 97);
+}
+
+.filter-bar-content {
+  display: flex;
+  flex: 1 1 0%;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  margin-left: 8px;
+}
+
+.filter-buttons-group {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  border-radius: 18px;
+  gap: 8px;
+  align-items: center;
+}
+
+.filter-button {
+  display: flex;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  height: 32px;
+  border: 1px solid rgb(209, 209, 209);
+  border-radius: 18px;
+  background-color: #ffffff;
+  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+  color: rgb(36, 36, 36);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 1;
+  gap: 6px;
+}
+
+.filter-button:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.filter-button-active {
+  background-color: rgb(235, 243, 252);
+  border: 2px solid rgb(15, 108, 189);
+  padding: 0 20px;
+  font-weight: 600;
+}
+
+.filter-button-active::before {
+  display: none;
+}
+
+.filter-button-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.filter-button span {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.filter-search-box {
+  display: flex;
+  align-items: center;
+  flex: 0 1 auto;
+  padding: 0 16px;
+  height: 32px;
+  border: 0.8px solid rgb(209, 209, 209);
+  border-radius: 16px;
+  background-color: transparent;
+  margin-left: auto;
+}
+
+.filter-search-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+  font-size: 14px;
+  color: rgb(36, 36, 36);
+  width: 240px;
+  padding: 1px 2px;
+}
+
+.filter-search-input::placeholder {
+  color: rgb(97, 97, 97);
+  font-size: 14px;
+}
+
+.filter-search-input:focus {
+  outline: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .filter-bar-container {
+    flex-wrap: wrap;
+    height: auto;
+    gap: 12px;
+  }
+
+  .filter-search-box {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .filter-search-input {
+    width: 100%;
+  }
+}

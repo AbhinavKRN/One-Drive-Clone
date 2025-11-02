@@ -10,6 +10,7 @@ import RecycleBin from "../components/RecycleBin";
 import CreateFolderModal from "../components/CreateFolderModal";
 import RenameModal from "../components/RenameModal";
 import CommandBar from "../components/CommandBar";
+import FilterBar from "../components/FilterBar";
 import { useFileManager } from "../hooks/useFileManager";
 import { nameToSlug } from "../hooks/useFileManager";
 import PhotosPage from "./PhotosPage"; // 👈 new Photos page component
@@ -38,6 +39,7 @@ const Dashboard = () => {
   const sortMenuRef = useRef(null);
   const navigateToFolderBySlugRef = useRef(null);
   const [photoTab, setPhotoTab] = useState("Moments");
+  const [documentFilter, setDocumentFilter] = useState("all");
 
   // Set filter type based on URL path
   useEffect(() => {
@@ -157,7 +159,55 @@ const Dashboard = () => {
     const matchesSearch = file.name
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
-    if (filterType === "all") return matchesSearch && file.type !== "folder"; // Home: files only, no folders
+
+    if (filterType === "all") {
+      // Home: files only, no folders
+      if (file.type === "folder") return false;
+      if (!matchesSearch) return false;
+
+      // Apply document type filter
+      if (documentFilter === "all") return true;
+
+      if (documentFilter === "word") {
+        return (
+          file.type.includes("word") ||
+          file.type.includes("application/vnd.openxmlformats-officedocument.wordprocessingml") ||
+          file.name.endsWith(".doc") ||
+          file.name.endsWith(".docx")
+        );
+      }
+
+      if (documentFilter === "excel") {
+        return (
+          file.type.includes("excel") ||
+          file.type.includes("spreadsheet") ||
+          file.type.includes("application/vnd.openxmlformats-officedocument.spreadsheetml") ||
+          file.name.endsWith(".xls") ||
+          file.name.endsWith(".xlsx")
+        );
+      }
+
+      if (documentFilter === "powerpoint") {
+        return (
+          file.type.includes("powerpoint") ||
+          file.type.includes("presentation") ||
+          file.type.includes("application/vnd.openxmlformats-officedocument.presentationml") ||
+          file.name.endsWith(".ppt") ||
+          file.name.endsWith(".pptx")
+        );
+      }
+
+      if (documentFilter === "onenote") {
+        return (
+          file.type.includes("onenote") ||
+          file.name.endsWith(".one") ||
+          file.name.endsWith(".onepkg")
+        );
+      }
+
+      return true;
+    }
+
     if (filterType === "myfiles") {
       // If we're inside a folder (currentPath is set), show all items, otherwise show folders only
       if (currentPath) return matchesSearch; // Inside folder: show files and folders
@@ -393,6 +443,13 @@ const Dashboard = () => {
                       onSortMenuToggle={() => setShowSortMenu(!showSortMenu)}
                     />
                   </div>
+                ) : filterType === "all" ? (
+                  <FilterBar
+                    filterType={documentFilter}
+                    onFilterChange={setDocumentFilter}
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                  />
                 ) : (
                   <div className="recycle-bin-top-bar">
                     <h1 className="files-title-inline">
@@ -515,11 +572,13 @@ const Dashboard = () => {
                   </div>
                 )}
 
-                <h1 className="files-title">
-                  {filterType === "all" ? "Recent" :
-                   filterType === "myfiles" ? "My files" :
-                   filterType === "folders" ? "Folders" : "Files"}
-                </h1>
+                {filterType !== "all" && (
+                  <h1 className="files-title">
+                    {filterType === "all" ? "Recent" :
+                     filterType === "myfiles" ? "My files" :
+                     filterType === "folders" ? "Folders" : "Files"}
+                  </h1>
+                )}
 
 
                 <div className="files-white-box">
