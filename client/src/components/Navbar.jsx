@@ -165,14 +165,18 @@ const Navbar = ({
             <span>Moments</span>
           </button>
           <button
-            className={`photos-nav-item ${photoTab === "Gallery" ? "active" : ""}`}
+            className={`photos-nav-item ${
+              photoTab === "Gallery" ? "active" : ""
+            }`}
             onClick={() => setPhotoTab("Gallery")}
           >
             <ImageRegular />
             <span>Gallery</span>
           </button>
           <button
-            className={`photos-nav-item ${photoTab === "Albums" ? "active" : ""}`}
+            className={`photos-nav-item ${
+              photoTab === "Albums" ? "active" : ""
+            }`}
             onClick={() => setPhotoTab("Albums")}
           >
             <AlbumRegular />
@@ -221,7 +225,8 @@ const Navbar = ({
           <div ref={settingsDropdownRef} className="settings-dropdown">
             <div className="settings-storage-section">
               <div className="settings-storage-text">
-                {storageUsedFormatted} used of {storageTotalFormatted} ({storagePercent}%)
+                {storageUsedFormatted} used of {storageTotalFormatted} (
+                {storagePercent}%)
               </div>
               <div className="settings-storage-bar">
                 <div
@@ -230,6 +235,11 @@ const Navbar = ({
                     width: `${Math.max(1, Math.min(storagePercentage, 100))}%`,
                   }}
                 ></div>
+              </div>
+              <div className="settings-storage-links">
+                <button className="settings-link">Manage</button>
+                <span className="settings-link-separator">|</span>
+                <button className="settings-link">Buy storage</button>
               </div>
             </div>
             <div className="settings-divider"></div>
@@ -246,6 +256,8 @@ const Navbar = ({
                   <option value="System">System</option>
                 </select>
               </div>
+              <div className="settings-divider"></div>
+
               <label className="settings-checkbox-label">
                 <input
                   type="checkbox"
@@ -255,6 +267,25 @@ const Navbar = ({
                 />
                 <span>Always use dark theme for photos</span>
               </label>
+              <div className="settings-actions-section">
+                <button className="settings-action-item">
+                  <SettingsRegular className="settings-action-icon" />
+
+                  <span>Settings</span>
+                </button>
+
+                <button className="settings-action-item">
+                  <QuestionCircleRegular className="settings-action-icon" />
+
+                  <span>Help</span>
+                </button>
+
+                <button className="settings-action-item">
+                  <PersonFeedbackRegular className="settings-action-icon" />
+
+                  <span>Submit feedback</span>
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -286,7 +317,9 @@ const Navbar = ({
             </div>
 
             <div className="profile-popup-content">
-              <div className="profile-picture-placeholder">{getUserInitials()}</div>
+              <div className="profile-picture-placeholder">
+                {getUserInitials()}
+              </div>
               <div className="profile-user-info">
                 <div className="profile-user-name">{getFormattedName()}</div>
                 <div className="profile-user-email">{user?.email || ""}</div>
