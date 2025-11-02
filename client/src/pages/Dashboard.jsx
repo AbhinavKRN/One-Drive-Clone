@@ -222,9 +222,8 @@ const Dashboard = () => {
       }
 
       if (filterType === "myfiles") {
-        // If we're inside a folder (currentPath is set), show all items, otherwise show folders only
-        if (currentPath) return matchesSearch; // Inside folder: show files and folders
-        return matchesSearch && file.type === "folder"; // My Files root: folders only
+        // Show all items (files and folders) in both root and inside folders
+        return matchesSearch;
       }
       if (filterType === "folders")
         return matchesSearch && file.type === "folder";

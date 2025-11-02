@@ -204,7 +204,12 @@ const FileGrid = ({
         : b.name.localeCompare(a.name);
     }
 
-    // Standard My Files sorting
+    // Standard My Files sorting - folders always first
+    // First, ensure folders come before files
+    if (a.type === "folder" && b.type !== "folder") return -1;
+    if (a.type !== "folder" && b.type === "folder") return 1;
+    
+    // If both are folders or both are files, sort by selected criteria
     if (sortBy === "name") {
       if (sortOrder === "ascending") {
         return a.name.localeCompare(b.name);

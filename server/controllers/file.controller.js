@@ -82,21 +82,10 @@ const uploadFile = async (req, res) => {
       })
     }
 
-    // If no folder_id specified, auto-organize based on file type
-    let targetFolderId = folderId
-    
-    if (!targetFolderId) {
-      const category = getFileCategory(req.file.mimetype, req.file.originalname)
-      console.log('📤 Upload:', req.file.originalname, 'MIME:', req.file.mimetype, 'Category:', category || 'none')
-      
-      if (category) {
-        const systemFolder = await getOrCreateSystemFolder(userId, category)
-        targetFolderId = systemFolder.id
-        console.log('📂 Auto-routing to:', category, '(folder ID:', systemFolder.id.substring(0, 8) + '...)')
-      }
-    }
+    // Use folder_id if provided, otherwise upload to root (no auto-organization)
+    let targetFolderId = folderId || null
 
-    // Validate folder if provided or auto-determined
+    // Validate folder if provided
     if (targetFolderId) {
       const { data: folder } = await supabase
         .from('folders')
@@ -752,14 +741,8 @@ const createEmptyFile = async (req, res) => {
           code: 404
         })
       }
-    } else {
-      // Auto-organize based on category - all these go to Documents folder
-      const fileCategory = getFileCategory(fileConfig.mimetype, fileConfig.defaultName)
-      if (fileCategory) {
-        const systemFolder = await getOrCreateSystemFolder(userId, fileCategory)
-        targetFolderId = systemFolder.id
-      }
     }
+    // If no folder_id provided, file goes to root (no auto-organization)
 
     // Insert file into database
     const { data: file, error } = await supabase

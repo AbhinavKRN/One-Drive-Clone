@@ -162,9 +162,8 @@ export const useFileManager = () => {
 
       const formData = new FormData()
       formData.append('file', file)
-      if (currentFolderId) {
-        formData.append('folder_id', currentFolderId)
-      }
+      // Don't send folder_id - let backend auto-organize files into type-based folders
+      // Files will go to Documents, Pictures, Videos, etc. based on file type
 
       const response = await fetch(`${API_BASE_URL}/files/upload`, {
         method: 'POST',
@@ -405,8 +404,8 @@ export const useFileManager = () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          category: category,
-          folder_id: currentFolderId || null
+          category: category
+          // Don't send folder_id - let backend auto-organize files into type-based folders
         })
       })
 
@@ -420,7 +419,7 @@ export const useFileManager = () => {
       console.error('Create file error:', error)
       alert('Failed to create file')
     }
-  }, [getToken, currentFolderId, loadData])
+  }, [getToken, loadData])
 
   // Refresh files and folders
   const refreshFiles = useCallback(() => {
