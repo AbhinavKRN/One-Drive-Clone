@@ -1,21 +1,26 @@
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import {
   SearchRegular,
   SettingsRegular,
-  GlobeRegular
-} from '@fluentui/react-icons'
-import './Navbar.css'
+  GlobeRegular,
+} from "@fluentui/react-icons";
+import "./Navbar.css";
 
 const Navbar = ({ user, searchQuery, onSearchChange }) => {
-  const { logout } = useAuth()
-  const navigate = useNavigate()
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("Files");
 
   const handleLogout = () => {
-    logout()
-    navigate('/login')
-  }
+    logout();
+    navigate("/login");
+  };
+
+  const handleTabClick = (tab) => {
+    setActiveTab(tab);
+  };
 
   return (
     <nav className="navbar">
@@ -33,10 +38,29 @@ const Navbar = ({ user, searchQuery, onSearchChange }) => {
             <div className="logo-dot"></div>
           </div>
         </button>
-        <img src="/images/onedrive-logo.png" alt="OneDrive" className="onedrive-logo" />
+        <img
+          src="/images/onedrive-logo.png"
+          alt="OneDrive"
+          className="onedrive-logo"
+        />
         <div className="navbar-tabs">
-          <button className="navbar-tab">Photos</button>
-          <button className="navbar-tab active">Files</button>
+          <button
+            className={`navbar-tab ${activeTab === "Photos" ? "active" : ""}`}
+            onClick={() => handleTabClick("Photos")}
+          >
+            Photos
+          </button>
+          <button
+            className={`navbar-tab ${activeTab === "Files" ? "active" : ""}`}
+            onClick={() => handleTabClick("Files")}
+          >
+            Files
+          </button>
+          <div
+            className={`tab-slider ${
+              activeTab === "Files" ? "move-right" : "move-left"
+            }`}
+          ></div>
         </div>
       </div>
 
@@ -61,11 +85,12 @@ const Navbar = ({ user, searchQuery, onSearchChange }) => {
           <SettingsRegular />
         </button>
         <div className="user-avatar" title={user?.name}>
-          {user?.name?.charAt(0).toUpperCase()}{user?.name?.charAt(1)?.toUpperCase() || ''}
+          {user?.name?.charAt(0).toUpperCase()}
+          {user?.name?.charAt(1)?.toUpperCase() || ""}
         </div>
       </div>
     </nav>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;
