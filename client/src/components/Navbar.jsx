@@ -24,7 +24,9 @@ const Navbar = ({
   activeTab,
   setActiveTab,
   storageUsed = 0,
-  storageTotal = 5 * 1024 * 1024 * 1024, // 5GB default
+  storageTotal = 5 * 1024 * 1024 * 1024,
+  photoTab,
+  setPhotoTab,
 }) => {
   const { logout } = useAuth();
   const { theme, changeTheme } = useTheme();
@@ -36,7 +38,6 @@ const Navbar = ({
   const settingsDropdownRef = useRef(null);
   const settingsButtonRef = useRef(null);
   const avatarRef = useRef(null);
-  const [photoTab, setPhotoTab] = useState("Moments");
   const [darkThemeForPhotos, setDarkThemeForPhotos] = useState(false);
 
   const handleLogout = () => {
@@ -50,13 +51,8 @@ const Navbar = ({
     else setActiveTab("Files");
   }, [location]);
 
-  const handleTabClick = (tab) => {
-    setActiveTab(tab);
-  };
-
-  const handleAvatarClick = () => {
-    setShowProfilePopup(!showProfilePopup);
-  };
+  const handleTabClick = (tab) => setActiveTab(tab);
+  const handleAvatarClick = () => setShowProfilePopup(!showProfilePopup);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -92,21 +88,18 @@ const Navbar = ({
     return user.name.charAt(0).toUpperCase();
   };
 
-  const getFormattedName = () => {
-    if (!user?.name) return "";
-    return user.name.toUpperCase();
-  };
+  const getFormattedName = () => (user?.name || "").toUpperCase();
 
   const formatBytes = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     const size = bytes / Math.pow(k, i);
     if (size < 0.1 && i >= 2) {
       return `< 0.1 ${sizes[i]}`;
     }
-    return Math.round(size * 10) / 10 + ' ' + sizes[i];
+    return Math.round(size * 10) / 10 + " " + sizes[i];
   };
 
   const storagePercentage = (storageUsed / storageTotal) * 100;
@@ -159,20 +152,8 @@ const Navbar = ({
         </div>
       </div>
 
-      {/* When Photos is active, hide search bar and show 4 buttons */}
-      {activeTab === "Files" ? (
-        <div className="navbar-center">
-          <div className="search-bar">
-            <SearchRegular />
-            <input
-              type="text"
-              placeholder="Search"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-            />
-          </div>
-        </div>
-      ) : (
+      {/* Photos sub-tabs */}
+      {activeTab === "Photos" ? (
         <div className="photos-nav">
           <button
             className={`photos-nav-item ${
@@ -184,18 +165,14 @@ const Navbar = ({
             <span>Moments</span>
           </button>
           <button
-            className={`photos-nav-item ${
-              photoTab === "Gallery" ? "active" : ""
-            }`}
+            className={`photos-nav-item ${photoTab === "Gallery" ? "active" : ""}`}
             onClick={() => setPhotoTab("Gallery")}
           >
             <ImageRegular />
             <span>Gallery</span>
           </button>
           <button
-            className={`photos-nav-item ${
-              photoTab === "Albums" ? "active" : ""
-            }`}
+            className={`photos-nav-item ${photoTab === "Albums" ? "active" : ""}`}
             onClick={() => setPhotoTab("Albums")}
           >
             <AlbumRegular />
@@ -211,8 +188,21 @@ const Navbar = ({
             <span>Favorites</span>
           </button>
         </div>
+      ) : (
+        <div className="navbar-center">
+          <div className="search-bar">
+            <SearchRegular />
+            <input
+              type="text"
+              placeholder="Search"
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+            />
+          </div>
+        </div>
       )}
 
+      {/* Right side */}
       <div className="navbar-right">
         <button className="navbar-storage-btn">
           <GlobeRegular />
@@ -229,7 +219,6 @@ const Navbar = ({
 
         {showSettingsDropdown && (
           <div ref={settingsDropdownRef} className="settings-dropdown">
-            {/* Storage Information Section */}
             <div className="settings-storage-section">
               <div className="settings-storage-text">
                 {storageUsedFormatted} used of {storageTotalFormatted} ({storagePercent}%)
@@ -237,33 +226,25 @@ const Navbar = ({
               <div className="settings-storage-bar">
                 <div
                   className="settings-storage-bar-fill"
-                  style={{ width: `${Math.max(1, Math.min(storagePercentage, 100))}%` }}
+                  style={{
+                    width: `${Math.max(1, Math.min(storagePercentage, 100))}%`,
+                  }}
                 ></div>
               </div>
-              <div className="settings-storage-links">
-                <button className="settings-link">Manage</button>
-                <span className="settings-link-separator">|</span>
-                <button className="settings-link">Buy storage</button>
-              </div>
             </div>
-
-            {/* Theme Settings Section */}
             <div className="settings-divider"></div>
             <div className="settings-theme-section">
               <div className="settings-theme-row">
                 <label className="settings-theme-label">Theme</label>
-                <div className="settings-theme-dropdown">
-                  <select
-                    className="settings-select"
-                    value={theme}
-                    onChange={(e) => changeTheme(e.target.value)}
-                  >
-                    <option value="Light">Light</option>
-                    <option value="Dark">Dark</option>
-                    <option value="System">System</option>
-                  </select>
-                  <ChevronDownRegular className="settings-select-icon" />
-                </div>
+                <select
+                  className="settings-select"
+                  value={theme}
+                  onChange={(e) => changeTheme(e.target.value)}
+                >
+                  <option value="Light">Light</option>
+                  <option value="Dark">Dark</option>
+                  <option value="System">System</option>
+                </select>
               </div>
               <label className="settings-checkbox-label">
                 <input
@@ -275,30 +256,14 @@ const Navbar = ({
                 <span>Always use dark theme for photos</span>
               </label>
             </div>
-
-            {/* Action Buttons Section */}
-            <div className="settings-divider"></div>
-            <div className="settings-actions-section">
-              <button className="settings-action-item">
-                <SettingsRegular className="settings-action-icon" />
-                <span>Settings</span>
-              </button>
-              <button className="settings-action-item">
-                <QuestionCircleRegular className="settings-action-icon" />
-                <span>Help</span>
-              </button>
-              <button className="settings-action-item">
-                <PersonFeedbackRegular className="settings-action-icon" />
-                <span>Submit feedback</span>
-              </button>
-            </div>
           </div>
         )}
+
         <div
           ref={avatarRef}
           className="user-avatar"
           title={user?.name}
-          onClick={handleAvatarClick}
+          onClick={() => setShowProfilePopup(!showProfilePopup)}
         >
           {getUserInitials()}
         </div>
@@ -321,29 +286,19 @@ const Navbar = ({
             </div>
 
             <div className="profile-popup-content">
-              <div className="profile-picture-placeholder">
-                {getUserInitials()}
-              </div>
+              <div className="profile-picture-placeholder">{getUserInitials()}</div>
               <div className="profile-user-info">
                 <div className="profile-user-name">{getFormattedName()}</div>
                 <div className="profile-user-email">{user?.email || ""}</div>
-                <a
-                  href="#"
-                  className="profile-view-account"
-                  onClick={(e) => e.preventDefault()}
-                >
+                <a href="#" onClick={(e) => e.preventDefault()}>
                   View account
                 </a>
               </div>
             </div>
 
             <div className="profile-popup-footer">
-              <div className="profile-add-account-icon">
-                <PersonAddRegular />
-              </div>
-              <span className="profile-add-account-text">
-                Sign in with a different account
-              </span>
+              <PersonAddRegular />
+              <span>Sign in with a different account</span>
             </div>
           </div>
         )}

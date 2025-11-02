@@ -12,6 +12,9 @@ import { useFileManager } from "../hooks/useFileManager";
 import PhotosPage from "./PhotosPage"; // 👈 new Photos page component
 import { ChevronDownRegular } from "@fluentui/react-icons";
 import "./Dashboard.css";
+import MomentsPage from "./MomentsPage";
+import AlbumPage from "./AlbumsPage";
+import FavouritesPage from "./FavouritesPage";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -23,9 +26,10 @@ const Dashboard = () => {
   const [renameItem, setRenameItem] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
   const [activeTab, setActiveTab] = useState("Files");
-  const [sortBy, setSortBy] = useState('name');
+  const [sortBy, setSortBy] = useState("name");
   const [showSortMenu, setShowSortMenu] = useState(false);
   const sortMenuRef = useRef(null);
+  const [photoTab, setPhotoTab] = useState("Moments");
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -35,11 +39,11 @@ const Dashboard = () => {
     };
 
     if (showSortMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showSortMenu]);
 
@@ -92,14 +96,14 @@ const Dashboard = () => {
   };
 
   const handleFilesUpload = (files) => {
-    files.forEach(file => uploadFile(file))
-  }
+    files.forEach((file) => uploadFile(file));
+  };
 
   const handleFolderUpload = (files) => {
     // Backend team will implement folder upload logic
-    console.log('Folder upload:', files)
-    alert('Folder upload feature will be implemented by backend team')
-  }
+    console.log("Folder upload:", files);
+    alert("Folder upload feature will be implemented by backend team");
+  };
 
   const handleCreateFolder = (folderName) => {
     createFolder(folderName);
@@ -108,34 +112,40 @@ const Dashboard = () => {
 
   // Handlers for Office document creation - Backend team will implement these
   const handleWordDocument = () => {
-    console.log('Create Word document')
-    alert('Word document creation feature will be implemented by backend team')
-  }
+    console.log("Create Word document");
+    alert("Word document creation feature will be implemented by backend team");
+  };
 
   const handleExcelWorkbook = () => {
-    console.log('Create Excel workbook')
-    alert('Excel workbook creation feature will be implemented by backend team')
-  }
+    console.log("Create Excel workbook");
+    alert(
+      "Excel workbook creation feature will be implemented by backend team"
+    );
+  };
 
   const handlePowerPointPresentation = () => {
-    console.log('Create PowerPoint presentation')
-    alert('PowerPoint presentation creation feature will be implemented by backend team')
-  }
+    console.log("Create PowerPoint presentation");
+    alert(
+      "PowerPoint presentation creation feature will be implemented by backend team"
+    );
+  };
 
   const handleOneNoteNotebook = () => {
-    console.log('Create OneNote notebook')
-    alert('OneNote notebook creation feature will be implemented by backend team')
-  }
+    console.log("Create OneNote notebook");
+    alert(
+      "OneNote notebook creation feature will be implemented by backend team"
+    );
+  };
 
   const handleExcelSurvey = () => {
-    console.log('Create Excel survey')
-    alert('Excel survey creation feature will be implemented by backend team')
-  }
+    console.log("Create Excel survey");
+    alert("Excel survey creation feature will be implemented by backend team");
+  };
 
   const handleTextDocument = () => {
-    console.log('Create Text document')
-    alert('Text document creation feature will be implemented by backend team')
-  }
+    console.log("Create Text document");
+    alert("Text document creation feature will be implemented by backend team");
+  };
 
   const handleDelete = () => {
     if (selectedItems.length > 0) {
@@ -174,11 +184,21 @@ const Dashboard = () => {
         activeTab={activeTab}
         storageUsed={storageUsed}
         storageTotal={storageTotal}
+        photoTab={photoTab}
+        setPhotoTab={setPhotoTab}
       />
 
       {/* --- Conditionally Render Tabs --- */}
       {activeTab === "Photos" ? (
-        <PhotosPage />
+        photoTab === "Moments" ? (
+          <MomentsPage />
+        ) : photoTab === "Gallery" ? (
+          <PhotosPage /> // or GalleryPage
+        ) : photoTab === "Albums" ? (
+          <AlbumPage />
+        ) : photoTab === "Favorites" ? (
+          <FavouritesPage />
+        ) : null
       ) : (
         <div className="dashboard-content">
           {/* Sidebar */}
@@ -198,75 +218,147 @@ const Dashboard = () => {
             onTextDocument={handleTextDocument}
           />
 
-        <div className="main-content">
-          {filterType === 'recycle' ? (
-            <RecycleBin />
-          ) : filterType === 'shared' ? (
-            <SharedView
-              files={files}
-              viewMode={viewMode}
-              selectedItems={selectedItems}
-              onSelectionChange={setSelectedItems}
-              onItemClick={handleItemClick}
-              onDownload={handleDownload}
-            />
-          ) : filterType === 'folders' ? (
-            <div className="files-container">
-              {/* Top Bar */}
-              <div className="recycle-bin-top-bar">
-                <div style={{ flex: 1 }}></div>
-                <div className="top-bar-controls">
-                  <div className="sort-dropdown" ref={sortMenuRef}>
-                    <button
-                      className="sort-btn-top"
-                      onClick={() => setShowSortMenu(!showSortMenu)}
-                    >
-                      <svg className="sort-icon-top" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <line x1="2" y1="4" x2="14" y2="4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                        <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                        <line x1="2" y1="12" x2="14" y2="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                        <path d="M11 10l2 2 2-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-                      </svg>
-                      <span>Sort</span>
-                      <ChevronDownRegular className="dropdown-icon" />
-                    </button>
-                    {showSortMenu && (
-                      <div className="sort-menu">
-                        <button onClick={() => handleSort('name')}>Name</button>
-                        <button onClick={() => handleSort('date')}>Date modified</button>
-                        <button onClick={() => handleSort('size')}>File size</button>
-                        <button onClick={() => handleSort('type')}>File type</button>
-                      </div>
-                    )}
-                  </div>
-                  <button className="details-btn-top">
-                    <svg className="details-icon-top" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M4 3h8v10H4V3z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                      <path d="M6 6h4M6 9h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                      <path d="M11 5l2-2v4l-2-2z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-                    </svg>
-                    <span>Details</span>
-                  </button>
-                </div>
-              </div>
-
-              <h1 className="files-title">My files</h1>
-
-              <div className="files-white-box">
-                <div className="toolbar">
-                  <div className="breadcrumbs">
-                    {breadcrumbs.map((crumb, index) => (
-                      <React.Fragment key={crumb.id}>
-                        <span
-                          className="breadcrumb"
-                          onClick={() => navigateToPath(crumb.id)}
+          <div className="main-content">
+            {filterType === "recycle" ? (
+              <RecycleBin />
+            ) : filterType === "shared" ? (
+              <SharedView
+                files={files}
+                viewMode={viewMode}
+                selectedItems={selectedItems}
+                onSelectionChange={setSelectedItems}
+                onItemClick={handleItemClick}
+                onDownload={handleDownload}
+              />
+            ) : filterType === "folders" ? (
+              <div className="files-container">
+                {/* Top Bar */}
+                <div className="recycle-bin-top-bar">
+                  <div style={{ flex: 1 }}></div>
+                  <div className="top-bar-controls">
+                    <div className="sort-dropdown" ref={sortMenuRef}>
+                      <button
+                        className="sort-btn-top"
+                        onClick={() => setShowSortMenu(!showSortMenu)}
+                      >
+                        <svg
+                          className="sort-icon-top"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
                         >
-                          {crumb.name}
-                        </span>
-                        {index < breadcrumbs.length - 1 && <span className="separator">/</span>}
-                      </React.Fragment>
-                    ))}
+                          <line
+                            x1="2"
+                            y1="4"
+                            x2="14"
+                            y2="4"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                          />
+                          <line
+                            x1="2"
+                            y1="8"
+                            x2="14"
+                            y2="8"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                          />
+                          <line
+                            x1="2"
+                            y1="12"
+                            x2="14"
+                            y2="12"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                          />
+                          <path
+                            d="M11 10l2 2 2-2"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            fill="none"
+                          />
+                        </svg>
+                        <span>Sort</span>
+                        <ChevronDownRegular className="dropdown-icon" />
+                      </button>
+                      {showSortMenu && (
+                        <div className="sort-menu">
+                          <button onClick={() => handleSort("name")}>
+                            Name
+                          </button>
+                          <button onClick={() => handleSort("date")}>
+                            Date modified
+                          </button>
+                          <button onClick={() => handleSort("size")}>
+                            File size
+                          </button>
+                          <button onClick={() => handleSort("type")}>
+                            File type
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    <button className="details-btn-top">
+                      <svg
+                        className="details-icon-top"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M4 3h8v10H4V3z"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          fill="none"
+                        />
+                        <path
+                          d="M6 6h4M6 9h3"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                        />
+                        <path
+                          d="M11 5l2-2v4l-2-2z"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          fill="none"
+                        />
+                      </svg>
+                      <span>Details</span>
+                    </button>
                   </div>
+                </div>
+
+                <h1 className="files-title">My files</h1>
+
+                <div className="files-white-box">
+                  <div className="toolbar">
+                    <div className="breadcrumbs">
+                      {breadcrumbs.map((crumb, index) => (
+                        <React.Fragment key={crumb.id}>
+                          <span
+                            className="breadcrumb"
+                            onClick={() => navigateToPath(crumb.id)}
+                          >
+                            {crumb.name}
+                          </span>
+                          {index < breadcrumbs.length - 1 && (
+                            <span className="separator">/</span>
+                          )}
+                        </React.Fragment>
+                      ))}
+                    </div>
 
                     <div className="toolbar-actions">
                       <label className="btn-upload">
@@ -290,10 +382,7 @@ const Dashboard = () => {
 
                       {selectedItems.length > 0 && (
                         <>
-                          <button
-                            className="btn-action"
-                            onClick={handleDelete}
-                          >
+                          <button className="btn-action" onClick={handleDelete}>
                             <i className="fas fa-trash"></i>
                             Delete
                           </button>
@@ -317,29 +406,29 @@ const Dashboard = () => {
                     </div>
                   </div>
 
-                <FileGrid
-                  files={filteredFiles}
-                  viewMode="list"
-                  selectedItems={selectedItems}
-                  onSelectionChange={setSelectedItems}
-                  onItemClick={handleItemClick}
-                  onDownload={handleDownload}
-                />
+                  <FileGrid
+                    files={filteredFiles}
+                    viewMode="list"
+                    selectedItems={selectedItems}
+                    onSelectionChange={setSelectedItems}
+                    onItemClick={handleItemClick}
+                    onDownload={handleDownload}
+                  />
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="home-empty-state">
-              <h3>Your recent files will show up here</h3>
-              <div className="home-empty-illustration">
-                <img
-                  src="/images/image.png"
-                  alt="Recent files illustration"
-                  className="home-empty-image"
-                />
+            ) : (
+              <div className="home-empty-state">
+                <h3>Your recent files will show up here</h3>
+                <div className="home-empty-illustration">
+                  <img
+                    src="/images/image.png"
+                    alt="Recent files illustration"
+                    className="home-empty-image"
+                  />
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
         </div>
       )}
 
