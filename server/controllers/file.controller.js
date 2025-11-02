@@ -82,21 +82,10 @@ const uploadFile = async (req, res) => {
       })
     }
 
-    // If no folder_id specified, auto-organize based on file type
-    let targetFolderId = folderId
-    
-    if (!targetFolderId) {
-      const category = getFileCategory(req.file.mimetype, req.file.originalname)
-      console.log('📤 Upload:', req.file.originalname, 'MIME:', req.file.mimetype, 'Category:', category || 'none')
-      
-      if (category) {
-        const systemFolder = await getOrCreateSystemFolder(userId, category)
-        targetFolderId = systemFolder.id
-        console.log('📂 Auto-routing to:', category, '(folder ID:', systemFolder.id.substring(0, 8) + '...)')
-      }
-    }
+    // Use folder_id if provided, otherwise upload to root (no auto-organization)
+    let targetFolderId = folderId || null
 
-    // Validate folder if provided or auto-determined
+    // Validate folder if provided
     if (targetFolderId) {
       const { data: folder } = await supabase
         .from('folders')
@@ -256,6 +245,78 @@ const getFile = async (req, res) => {
       error: error.message,
       code: 500
     })
+  }
+}
+
+// Preview file (for inline display)
+const previewFile = async (req, res) => {
+  try {
+    const { id } = req.params
+    const userId = req.user.id
+
+    const { data: file, error } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .single()
+
+    if (error || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'preview_file',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Check if file exists on disk
+    try {
+      await fs.access(file.path)
+    } catch {
+      return res.status(404).json({
+        status: 'error',
+        action: 'preview_file',
+        error: 'File not found on disk',
+        code: 404
+      })
+    }
+
+    // Get file stats
+    const stats = await fs.stat(file.path)
+    const fileSize = stats.size
+    
+    // Set headers for inline preview
+    res.setHeader('Content-Type', file.type || 'application/octet-stream')
+    res.setHeader('Content-Length', fileSize)
+    res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(file.name)}"`)
+    res.setHeader('Cache-Control', 'private, max-age=3600')
+    
+    // Stream the file
+    const fileStream = require('fs').createReadStream(file.path)
+    fileStream.pipe(res)
+    
+    fileStream.on('error', (err) => {
+      console.error('Preview stream error:', err)
+      if (!res.headersSent) {
+        res.status(500).json({
+          status: 'error',
+          action: 'preview_file',
+          error: 'Error reading file',
+          code: 500
+        })
+      }
+    })
+  } catch (error) {
+    console.error('Preview file error:', error)
+    if (!res.headersSent) {
+      return res.status(500).json({
+        status: 'error',
+        action: 'preview_file',
+        error: error.message,
+        code: 500
+      })
+    }
   }
 }
 
@@ -666,13 +727,147 @@ const restoreItem = async (req, res) => {
   }
 }
 
+// Create empty file with specific category
+const createEmptyFile = async (req, res) => {
+  try {
+    const userId = req.user.id
+    const { category, folder_id } = req.body
+
+    if (!category) {
+      return res.status(400).json({
+        status: 'error',
+        action: 'create_file',
+        error: 'Category is required',
+        code: 400
+      })
+    }
+
+    // Map category to file extension and MIME type
+    const categoryMap = {
+      word: {
+        extension: '.docx',
+        mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        defaultName: 'Document.docx'
+      },
+      excel: {
+        extension: '.xlsx',
+        mimetype: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        defaultName: 'Workbook.xlsx'
+      },
+      powerpoint: {
+        extension: '.pptx',
+        mimetype: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        defaultName: 'Presentation.pptx'
+      },
+      onenote: {
+        extension: '.one',
+        mimetype: 'application/msonenote',
+        defaultName: 'Notebook.one'
+      },
+      text: {
+        extension: '.txt',
+        mimetype: 'text/plain',
+        defaultName: 'Text Document.txt'
+      }
+    }
+
+    const fileConfig = categoryMap[category.toLowerCase()]
+    if (!fileConfig) {
+      return res.status(400).json({
+        status: 'error',
+        action: 'create_file',
+        error: 'Invalid category. Must be: word, excel, powerpoint, onenote, or text',
+        code: 400
+      })
+    }
+
+    // Generate unique filename
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`
+    const filename = `${uniqueSuffix}-${fileConfig.defaultName}`
+    const filePath = path.join(__dirname, '../uploads', filename)
+
+    // Create empty file
+    await fs.writeFile(filePath, '', 'utf8')
+
+    // Get file stats
+    const stats = await fs.stat(filePath)
+    const fileSize = stats.size
+
+    // Validate folder if provided
+    let targetFolderId = folder_id || null
+    if (targetFolderId) {
+      const { data: folder } = await supabase
+        .from('folders')
+        .select('*')
+        .eq('id', targetFolderId)
+        .eq('user_id', userId)
+        .single()
+
+      if (!folder) {
+        // Clean up created file
+        await fs.unlink(filePath).catch(console.error)
+        return res.status(404).json({
+          status: 'error',
+          action: 'create_file',
+          error: 'Folder not found',
+          code: 404
+        })
+      }
+    }
+    // If no folder_id provided, file goes to root (no auto-organization)
+
+    // Insert file into database
+    const { data: file, error } = await supabase
+      .from('files')
+      .insert([{
+        name: fileConfig.defaultName,
+        type: fileConfig.mimetype,
+        size: fileSize,
+        path: filePath,
+        user_id: userId,
+        folder_id: targetFolderId
+      }])
+      .select()
+      .single()
+
+    if (error) {
+      // Clean up created file
+      await fs.unlink(filePath).catch(console.error)
+      throw error
+    }
+
+    return res.status(201).json({
+      status: 'success',
+      action: 'create_file',
+      data: {
+        file_id: file.id,
+        folder_id: file.folder_id,
+        name: file.name,
+        size: `${(file.size / 1024).toFixed(2)}KB`,
+        type: file.type
+      },
+      message: 'File created successfully'
+    })
+  } catch (error) {
+    console.error('Create file error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'create_file',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
 module.exports = {
   uploadFile,
   getAllFiles,
   getFile,
   downloadFile,
+  previewFile,
   deleteFile,
   renameFile,
   getRecycleBinItems,
-  restoreItem
+  restoreItem,
+  createEmptyFile
 }

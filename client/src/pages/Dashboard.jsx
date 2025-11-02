@@ -68,6 +68,7 @@ const Dashboard = () => {
     navigateToFolderBySlug,
     navigateToPath,
     downloadFile,
+    createEmptyFile,
   } = useFileManager();
 
   // Store navigateToFolderBySlug in ref for stable reference
@@ -221,9 +222,8 @@ const Dashboard = () => {
       }
 
       if (filterType === "myfiles") {
-        // If we're inside a folder (currentPath is set), show all items, otherwise show folders only
-        if (currentPath) return matchesSearch; // Inside folder: show files and folders
-        return matchesSearch && file.type === "folder"; // My Files root: folders only
+        // Show all items (files and folders) in both root and inside folders
+        return matchesSearch;
       }
       if (filterType === "folders")
         return matchesSearch && file.type === "folder";
@@ -259,41 +259,30 @@ const Dashboard = () => {
     setShowCreateFolder(false);
   };
 
-  // Handlers for Office document creation - Backend team will implement these
+  // Handlers for Office document creation
   const handleWordDocument = () => {
-    console.log("Create Word document");
-    alert("Word document creation feature will be implemented by backend team");
+    createEmptyFile('word');
   };
 
   const handleExcelWorkbook = () => {
-    console.log("Create Excel workbook");
-    alert(
-      "Excel workbook creation feature will be implemented by backend team"
-    );
+    createEmptyFile('excel');
   };
 
   const handlePowerPointPresentation = () => {
-    console.log("Create PowerPoint presentation");
-    alert(
-      "PowerPoint presentation creation feature will be implemented by backend team"
-    );
+    createEmptyFile('powerpoint');
   };
 
   const handleOneNoteNotebook = () => {
-    console.log("Create OneNote notebook");
-    alert(
-      "OneNote notebook creation feature will be implemented by backend team"
-    );
+    createEmptyFile('onenote');
   };
 
   const handleExcelSurvey = () => {
-    console.log("Create Excel survey");
-    alert("Excel survey creation feature will be implemented by backend team");
+    // Excel survey is the same as Excel workbook
+    createEmptyFile('excel');
   };
 
   const handleTextDocument = () => {
-    console.log("Create Text document");
-    alert("Text document creation feature will be implemented by backend team");
+    createEmptyFile('text');
   };
 
   const handleDelete = (itemIds = null) => {

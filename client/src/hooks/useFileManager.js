@@ -162,9 +162,8 @@ export const useFileManager = () => {
 
       const formData = new FormData()
       formData.append('file', file)
-      if (currentFolderId) {
-        formData.append('folder_id', currentFolderId)
-      }
+      // Don't send folder_id - let backend auto-organize files into type-based folders
+      // Files will go to Documents, Pictures, Videos, etc. based on file type
 
       const response = await fetch(`${API_BASE_URL}/files/upload`, {
         method: 'POST',
@@ -392,6 +391,36 @@ export const useFileManager = () => {
     }
   }, [])
 
+  // Create empty file with specific category
+  const createEmptyFile = useCallback(async (category) => {
+    try {
+      const token = getToken()
+      if (!token) return
+
+      const response = await fetch(`${API_BASE_URL}/files/create`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          category: category
+          // Don't send folder_id - let backend auto-organize files into type-based folders
+        })
+      })
+
+      const data = await response.json()
+      if (data.status === 'success') {
+        loadData()
+      } else {
+        alert(data.error || 'Failed to create file')
+      }
+    } catch (error) {
+      console.error('Create file error:', error)
+      alert('Failed to create file')
+    }
+  }, [getToken, loadData])
+
   // Refresh files and folders
   const refreshFiles = useCallback(() => {
     loadData()
@@ -415,7 +444,8 @@ export const useFileManager = () => {
     downloadFile,
     refreshFiles,
     loading,
-    nameToSlug // Export helper for Dashboard
+    nameToSlug, // Export helper for Dashboard
+    createEmptyFile
   }
 }
 

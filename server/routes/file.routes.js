@@ -7,10 +7,12 @@ const {
   getAllFiles,
   getFile,
   downloadFile,
+  previewFile,
   deleteFile,
   renameFile,
   getRecycleBinItems,
-  restoreItem
+  restoreItem,
+  createEmptyFile
 } = require('../controllers/file.controller')
 const { authenticate } = require('../middlewares/auth.middleware')
 
@@ -47,6 +49,8 @@ const upload = multer({
 router.get('/', authenticate, getAllFiles)
 router.get('/recycle-bin', authenticate, getRecycleBinItems)
 router.post('/restore/:id', authenticate, restoreItem)
+router.post('/create', authenticate, createEmptyFile)
+router.get('/:id/preview', authenticate, previewFile)
 router.get('/:id/download', authenticate, downloadFile)
 router.get('/:id', authenticate, getFile)
 router.post('/upload', authenticate, upload.single('file'), uploadFile)
