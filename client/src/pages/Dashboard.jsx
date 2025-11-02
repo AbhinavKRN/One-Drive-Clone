@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
@@ -10,11 +10,12 @@ import CreateFolderModal from "../components/CreateFolderModal";
 import RenameModal from "../components/RenameModal";
 import { useFileManager } from "../hooks/useFileManager";
 import PhotosPage from "./PhotosPage"; // 👈 new Photos page component
+import { ChevronDownRegular } from "@fluentui/react-icons";
 import "./Dashboard.css";
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const [viewMode, setViewMode] = useState("grid");
+  const [viewMode, setViewMode] = useState("list");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [previewFile, setPreviewFile] = useState(null);
@@ -22,6 +23,30 @@ const Dashboard = () => {
   const [renameItem, setRenameItem] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
   const [activeTab, setActiveTab] = useState("Files");
+  const [sortBy, setSortBy] = useState('name');
+  const [showSortMenu, setShowSortMenu] = useState(false);
+  const sortMenuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (sortMenuRef.current && !sortMenuRef.current.contains(event.target)) {
+        setShowSortMenu(false);
+      }
+    };
+
+    if (showSortMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showSortMenu]);
+
+  const handleSort = (sortType) => {
+    setSortBy(sortType);
+    setShowSortMenu(false);
+  };
 
   const {
     files,
@@ -185,35 +210,45 @@ const Dashboard = () => {
             />
           ) : filterType === 'folders' ? (
             <div className="files-container">
-              <div className="files-header">
-                <h1 className="files-title">My files</h1>
-                <div className="files-header-actions">
-                  <button className="header-btn">
-                    <i className="fas fa-sort"></i>
-                    Sort
-                  </button>
-                  <div className="view-toggle">
+              {/* Top Bar */}
+              <div className="recycle-bin-top-bar">
+                <div style={{ flex: 1 }}></div>
+                <div className="top-bar-controls">
+                  <div className="sort-dropdown" ref={sortMenuRef}>
                     <button
-                      className={viewMode === 'grid' ? 'active' : ''}
-                      onClick={() => setViewMode('grid')}
-                      title="Grid view"
+                      className="sort-btn-top"
+                      onClick={() => setShowSortMenu(!showSortMenu)}
                     >
-                      <i className="fas fa-th"></i>
+                      <svg className="sort-icon-top" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="2" y1="4" x2="14" y2="4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        <line x1="2" y1="12" x2="14" y2="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        <path d="M11 10l2 2 2-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                      </svg>
+                      <span>Sort</span>
+                      <ChevronDownRegular className="dropdown-icon" />
                     </button>
-                    <button
-                      className={viewMode === 'list' ? 'active' : ''}
-                      onClick={() => setViewMode('list')}
-                      title="List view"
-                    >
-                      <i className="fas fa-list"></i>
-                    </button>
+                    {showSortMenu && (
+                      <div className="sort-menu">
+                        <button onClick={() => handleSort('name')}>Name</button>
+                        <button onClick={() => handleSort('date')}>Date modified</button>
+                        <button onClick={() => handleSort('size')}>File size</button>
+                        <button onClick={() => handleSort('type')}>File type</button>
+                      </div>
+                    )}
                   </div>
-                  <button className="header-btn">
-                    <i className="fas fa-info-circle"></i>
-                    Details
+                  <button className="details-btn-top">
+                    <svg className="details-icon-top" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M4 3h8v10H4V3z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                      <path d="M6 6h4M6 9h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                      <path d="M11 5l2-2v4l-2-2z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                    </svg>
+                    <span>Details</span>
                   </button>
                 </div>
               </div>
+
+              <h1 className="files-title">My files</h1>
 
               <div className="files-white-box">
                 <div className="toolbar">
@@ -282,7 +317,7 @@ const Dashboard = () => {
 
                 <FileGrid
                   files={filteredFiles}
-                  viewMode={viewMode}
+                  viewMode="list"
                   selectedItems={selectedItems}
                   onSelectionChange={setSelectedItems}
                   onItemClick={handleItemClick}
