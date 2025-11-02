@@ -91,6 +91,7 @@ const createFolder = async (req, res) => {
 const getAllFolders = async (req, res) => {
   try {
     const userId = req.user.id
+    console.log('📁 getAllFolders called for user:', userId)
 
     const { data: folders, error } = await supabase
       .from('folders')
@@ -98,9 +99,17 @@ const getAllFolders = async (req, res) => {
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
 
+    console.log('📊 Folders query result:', { 
+      count: folders?.length || 0, 
+      error: error?.message || null,
+      folders: folders?.slice(0, 2).map(f => ({ name: f.name, parent_id: f.parent_id }))
+    })
+
     if (error) {
       throw error
     }
+
+    console.log('✅ Returning', folders.length, 'folders to frontend')
 
     return res.json({
       status: 'success',
@@ -109,7 +118,7 @@ const getAllFolders = async (req, res) => {
       message: 'Folders retrieved successfully'
     })
   } catch (error) {
-    console.error('Get folders error:', error)
+    console.error('❌ Get folders error:', error)
     return res.status(500).json({
       status: 'error',
       action: 'get_folders',

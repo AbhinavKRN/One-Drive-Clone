@@ -1,39 +1,78 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import API_BASE_URL from '../config/api'
+
+// Helper to convert folder name to URL-friendly slug
+const nameToSlug = (name) => {
+  return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+}
+
+// Helper to find folder by slug
+const findFolderBySlug = (slug, folders) => {
+  return folders.find(f => nameToSlug(f.name) === slug)
+}
 
 export const useFileManager = () => {
   const { getToken } = useAuth()
   const [files, setFiles] = useState([])
   const [folders, setFolders] = useState([])
+  const [allFilesRaw, setAllFilesRaw] = useState([])
+  const foldersRef = useRef([])
   const [currentFolderId, setCurrentFolderId] = useState(null)
   const [breadcrumbs, setBreadcrumbs] = useState([{ id: null, name: 'My Files' }])
   const storageTotal = 5 * 1024 * 1024 * 1024 // 5GB in bytes
   const [storageUsed, setStorageUsed] = useState(0)
   const [loading, setLoading] = useState(false)
 
+  // Build path to folder for breadcrumbs
+  const buildPathToFolder = useCallback((folderId, allFolders) => {
+    const path = []
+    let currentId = folderId
+
+    while (currentId) {
+      const folder = allFolders.find(f => f.id === currentId)
+      if (folder) {
+        path.unshift({ id: folder.id, name: folder.name })
+        currentId = folder.parentId
+      } else {
+        break
+      }
+    }
+
+    return path
+  }, [])
+
   // Load files and folders
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
+    console.log('🔄 loadData called')
     setLoading(true)
     try {
       const token = getToken()
-      if (!token) return
+      console.log('🔑 Token:', token ? 'Found' : 'NOT FOUND')
+      if (!token) {
+        console.log('❌ No token, skipping load')
+        return
+      }
 
       // Load files
+      console.log('📥 Fetching files from:', API_BASE_URL + '/files')
       const filesResponse = await fetch(`${API_BASE_URL}/files`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       })
       const filesData = await filesResponse.json()
+      console.log('📁 Files response:', filesData.status, filesData.data?.files?.length || 0, 'files')
 
       // Load folders
+      console.log('📥 Fetching folders from:', API_BASE_URL + '/folders')
       const foldersResponse = await fetch(`${API_BASE_URL}/folders`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       })
       const foldersData = await foldersResponse.json()
+      console.log('📂 Folders response:', foldersData.status, foldersData.data?.folders?.length || 0, 'folders')
 
       if (filesData.status === 'success' && foldersData.status === 'success') {
         const allFiles = filesData.data.files || []
@@ -76,7 +115,10 @@ export const useFileManager = () => {
           return a.name.localeCompare(b.name)
         })
 
+        console.log('✅ Setting', combined.length, 'items to state:', combined.map(i => i.name).join(', '))
         setFiles(combined)
+        // Store all files for recent view
+        setAllFilesRaw(allFiles)
         // Normalize folder field names from snake_case to camelCase
         const normalizedFolders = allFolders.map(folder => ({
           ...folder,
@@ -85,6 +127,7 @@ export const useFileManager = () => {
           updatedAt: folder.updated_at
         }))
         setFolders(normalizedFolders)
+        foldersRef.current = normalizedFolders
 
         // Calculate storage
         const totalSize = allFiles.reduce((sum, file) => sum + file.size, 0)
@@ -97,35 +140,19 @@ export const useFileManager = () => {
         } else {
           setBreadcrumbs([{ id: null, name: 'My Files' }])
         }
+      } else {
+        console.log('⚠️ Response not successful:', filesData.status, foldersData.status)
       }
     } catch (error) {
-      console.error('Error loading data:', error)
+      console.error('❌ Error loading data:', error)
     } finally {
       setLoading(false)
     }
-  }
-
-  // Build path to folder for breadcrumbs
-  const buildPathToFolder = (folderId, allFolders) => {
-    const path = []
-    let currentId = folderId
-
-    while (currentId) {
-      const folder = allFolders.find(f => f.id === currentId)
-      if (folder) {
-        path.unshift({ id: folder.id, name: folder.name })
-        currentId = folder.parentId
-      } else {
-        break
-      }
-    }
-
-    return path
-  }
+  }, [getToken, currentFolderId, buildPathToFolder])
 
   useEffect(() => {
     loadData()
-  }, [currentFolderId])
+  }, [loadData])
 
   // Upload file
   const uploadFile = async (file) => {
@@ -252,14 +279,14 @@ export const useFileManager = () => {
   }
 
   // Navigate to folder
-  const navigateToFolder = (folderId) => {
+  const navigateToFolder = useCallback((folderId) => {
     setCurrentFolderId(folderId)
-  }
+  }, [])
 
   // Navigate to specific path (for breadcrumbs)
-  const navigateToPath = (pathId) => {
+  const navigateToPath = useCallback((pathId) => {
     setCurrentFolderId(pathId)
-  }
+  }, [])
 
   // Download file
   const downloadFile = async (file) => {
@@ -292,8 +319,26 @@ export const useFileManager = () => {
     }
   }
 
+  // Navigate to folder by ID or slug
+  const navigateToFolderBySlug = useCallback((slugOrId) => {
+    // If it's a UUID, use it directly
+    if (slugOrId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slugOrId)) {
+      setCurrentFolderId(slugOrId)
+    } else if (slugOrId) {
+      // Otherwise, find by slug using ref
+      const folder = findFolderBySlug(slugOrId, foldersRef.current)
+      if (folder) {
+        setCurrentFolderId(folder.id)
+      }
+    } else {
+      setCurrentFolderId(null)
+    }
+  }, [])
+
   return {
     files,
+    folders,
+    allFilesRaw,
     currentPath: currentFolderId,
     breadcrumbs,
     storageUsed,
@@ -303,8 +348,13 @@ export const useFileManager = () => {
     deleteItems,
     renameItem,
     navigateToFolder,
+    navigateToFolderBySlug,
     navigateToPath,
     downloadFile,
-    loading
+    loading,
+    nameToSlug // Export helper for Dashboard
   }
 }
+
+// Export helper functions
+export { nameToSlug, findFolderBySlug }

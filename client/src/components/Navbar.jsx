@@ -34,8 +34,11 @@ const Navbar = ({
   const location = useLocation();
   const [showProfilePopup, setShowProfilePopup] = useState(false);
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
+  const [showAppsLauncher, setShowAppsLauncher] = useState(false);
   const profilePopupRef = useRef(null);
   const settingsDropdownRef = useRef(null);
+  const appsLauncherRef = useRef(null);
+  const appsButtonRef = useRef(null);
   const settingsButtonRef = useRef(null);
   const avatarRef = useRef(null);
   const [darkThemeForPhotos, setDarkThemeForPhotos] = useState(false);
@@ -49,7 +52,7 @@ const Navbar = ({
   useEffect(() => {
     if (location.pathname.includes("photos")) setActiveTab("Photos");
     else setActiveTab("Files");
-  }, [location]);
+  }, [location, setActiveTab]);
 
   const handleTabClick = (tab) => setActiveTab(tab);
   const handleAvatarClick = () => setShowProfilePopup(!showProfilePopup);
@@ -72,11 +75,19 @@ const Navbar = ({
       ) {
         setShowSettingsDropdown(false);
       }
+      if (
+        appsLauncherRef.current &&
+        !appsLauncherRef.current.contains(event.target) &&
+        appsButtonRef.current &&
+        !appsButtonRef.current.contains(event.target)
+      ) {
+        setShowAppsLauncher(false);
+      }
     };
-    if (showProfilePopup || showSettingsDropdown)
+    if (showProfilePopup || showSettingsDropdown || showAppsLauncher)
       document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showProfilePopup, showSettingsDropdown]);
+  }, [showProfilePopup, showSettingsDropdown, showAppsLauncher]);
 
   const getUserInitials = () => {
     if (!user?.name) return "";
@@ -115,7 +126,12 @@ const Navbar = ({
   return (
     <nav className={`navbar ${activeTab === "Photos" ? "photos-mode" : ""}`}>
       <div className="navbar-left">
-        <button className="navbar-icon-btn apps-icon" title="Apps">
+        <button 
+          ref={appsButtonRef}
+          className="navbar-icon-btn apps-icon" 
+          title="Apps"
+          onClick={() => setShowAppsLauncher(!showAppsLauncher)}
+        >
           <div className="logo-grid">
             {Array(9)
               .fill(0)
@@ -130,6 +146,115 @@ const Navbar = ({
           alt="OneDrive"
           className="onedrive-logo"
         />
+
+        {showAppsLauncher && (
+          <div ref={appsLauncherRef} className="apps-launcher">
+            {/* Search Bar */}
+            <div className="apps-search-container">
+              <div className="apps-search-bar">
+                <SearchRegular />
+                <input type="text" placeholder="Find Microsoft 365 apps" />
+                <button className="apps-search-clear">×</button>
+              </div>
+            </div>
+
+            {/* Apps Grid */}
+            <div className="apps-grid">
+              {/* Row 1 */}
+              <button className="app-item">
+                <div className="app-icon copilot-icon"></div>
+                <span>Microsoft 365 Copilot</span>
+              </button>
+              <button className="app-item">
+                <div className="app-icon outlook-icon"></div>
+                <span>Outlook</span>
+              </button>
+              <button className="app-item">
+                <div className="app-icon onedrive-icon"></div>
+                <span>OneDrive</span>
+              </button>
+              <button className="app-item">
+                <div className="app-icon teams-icon"></div>
+                <span>Teams</span>
+              </button>
+              <button className="app-item">
+                <div className="app-icon word-icon"></div>
+                <span>Word</span>
+              </button>
+
+              {/* Row 2 */}
+              <button className="app-item">
+                <div className="app-icon excel-icon"></div>
+                <span>Excel</span>
+              </button>
+              <button className="app-item">
+                <div className="app-icon powerpoint-icon"></div>
+                <span>PowerPoint</span>
+              </button>
+              <button className="app-item">
+                <div className="app-icon onenote-icon"></div>
+                <span>OneNote</span>
+              </button>
+              <button className="app-item">
+                <div className="app-icon todo-icon"></div>
+                <span>To Do</span>
+              </button>
+              <button className="app-item">
+                <div className="app-icon family-safety-icon"></div>
+                <span>Family Safety</span>
+              </button>
+
+              {/* Row 3 */}
+              <button className="app-item">
+                <div className="app-icon calendar-icon"></div>
+                <span>Calendar</span>
+              </button>
+              <button className="app-item">
+                <div className="app-icon clipchamp-icon"></div>
+                <span>Clipchamp</span>
+              </button>
+              <button className="app-item">
+                <div className="app-icon designer-icon"></div>
+                <span>Designer</span>
+              </button>
+              <button className="app-item">
+                <div className="app-icon skype-icon"></div>
+                <span>Skype</span>
+              </button>
+              <button className="app-item">
+                <div className="app-icon more-apps-icon"></div>
+                <span>More apps</span>
+              </button>
+            </div>
+
+            {/* Separator */}
+            <div className="apps-separator"></div>
+
+            {/* Document Creation */}
+            <div className="apps-create-section">
+              <button className="app-item">
+                <div className="app-icon document-icon"></div>
+                <span>Document</span>
+              </button>
+              <button className="app-item">
+                <div className="app-icon workbook-icon"></div>
+                <span>Workbook</span>
+              </button>
+              <button className="app-item">
+                <div className="app-icon presentation-icon"></div>
+                <span>Presentation</span>
+              </button>
+              <button className="app-item">
+                <div className="app-icon survey-icon"></div>
+                <span>Survey</span>
+              </button>
+              <button className="app-item">
+                <div className="app-icon create-more-icon"></div>
+                <span>Create more</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="navbar-tabs">
           <button

@@ -23,7 +23,9 @@ const Sidebar = ({
   storageUsed, 
   storageTotal, 
   filterType, 
-  onFilterChange, 
+  onFilterChange,
+  folders = [],
+  onFolderClick,
   onCreateClick,
   onFilesUpload,
   onFolderUpload,
@@ -350,7 +352,7 @@ const Sidebar = ({
                 <HomeRegular />
                 <span>Home</span>
               </li>
-              <li className={filterType === 'folders' ? 'active' : ''} onClick={() => onFilterChange('folders')}>
+              <li className={filterType === 'myfiles' ? 'active' : ''} onClick={() => onFilterChange('myfiles')}>
                 <FolderRegular />
                 <span>My files</span>
               </li>
@@ -376,6 +378,16 @@ const Sidebar = ({
             </div>
             {isBrowseFilesExpanded && (
               <ul className="sidebar-menu">
+                {folders.filter(f => !f.parentId).length > 0 && folders.filter(f => !f.parentId).map(folder => (
+                  <li 
+                    key={folder.id} 
+                    className={filterType === folder.name.toLowerCase() ? 'active' : ''} 
+                    onClick={() => onFolderClick ? onFolderClick(folder.id) : null}
+                  >
+                    <FolderRegular />
+                    <span>{folder.name}</span>
+                  </li>
+                ))}
                 <li className={filterType === 'people' ? 'active' : ''} onClick={() => onFilterChange('people')}>
                   <PersonRegular />
                   <span>People</span>
