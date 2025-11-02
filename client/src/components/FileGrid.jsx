@@ -302,6 +302,15 @@ const FileGrid = ({
       const sizeA = a.size || 0;
       const sizeB = b.size || 0;
       return sizeSortOrder === "ascending" ? sizeA - sizeB : sizeB - sizeA;
+    } else if (sortBy === "sharing") {
+      // Sort by sharing status (Private vs Shared)
+      const sharingA = a.is_shared ? "Shared" : "Private";
+      const sharingB = b.is_shared ? "Shared" : "Private";
+      if (sharingSortOrder === "ascending") {
+        return sharingA.localeCompare(sharingB);
+      } else {
+        return sharingB.localeCompare(sharingA);
+      }
     }
     // Default to name sorting
     return sortOrder === "ascending"
@@ -312,6 +321,70 @@ const FileGrid = ({
   const handleSortChange = (order) => {
     setSortOrder(order);
     setShowNameMenu(false);
+  };
+
+  // Handle arrow click for Name column
+  const handleNameArrowClick = (e) => {
+    e.stopPropagation();
+    if (sortBy !== "name") {
+      // If switching to name column, start with ascending
+      setSortOrder("ascending");
+    } else {
+      // If already sorting by name, toggle order
+      const newOrder = sortOrder === "ascending" ? "descending" : "ascending";
+      setSortOrder(newOrder);
+    }
+    if (onSortChange) {
+      onSortChange("name");
+    }
+  };
+
+  // Handle arrow click for Modified column
+  const handleModifiedArrowClick = (e) => {
+    e.stopPropagation();
+    if (sortBy !== "date") {
+      // If switching to date column, start with ascending
+      setModifiedSortOrder("ascending");
+    } else {
+      // If already sorting by date, toggle order
+      const newOrder = modifiedSortOrder === "ascending" ? "descending" : "ascending";
+      setModifiedSortOrder(newOrder);
+    }
+    if (onSortChange) {
+      onSortChange("date");
+    }
+  };
+
+  // Handle arrow click for Size column
+  const handleSizeArrowClick = (e) => {
+    e.stopPropagation();
+    if (sortBy !== "size") {
+      // If switching to size column, start with ascending
+      setSizeSortOrder("ascending");
+    } else {
+      // If already sorting by size, toggle order
+      const newOrder = sizeSortOrder === "ascending" ? "descending" : "ascending";
+      setSizeSortOrder(newOrder);
+    }
+    if (onSortChange) {
+      onSortChange("size");
+    }
+  };
+
+  // Handle arrow click for Sharing column
+  const handleSharingArrowClick = (e) => {
+    e.stopPropagation();
+    if (sortBy !== "sharing") {
+      // If switching to sharing column, start with ascending
+      setSharingSortOrder("ascending");
+    } else {
+      // If already sorting by sharing, toggle order
+      const newOrder = sharingSortOrder === "ascending" ? "descending" : "ascending";
+      setSharingSortOrder(newOrder);
+    }
+    if (onSortChange) {
+      onSortChange("sharing");
+    }
   };
 
   const handleWidenColumn = () => {
@@ -739,9 +812,14 @@ const FileGrid = ({
                 height="10"
                 viewBox="0 0 12 12"
                 fill="currentColor"
-                style={{ marginLeft: "4px" }}
+                style={{ marginLeft: "4px", cursor: "pointer" }}
+                onClick={handleNameArrowClick}
               >
-                <path d="M6 8.5L1 3.5L11 3.5L6 8.5Z" />
+                {sortBy === "name" && sortOrder === "ascending" ? (
+                  <path d="M6 8.5L1 3.5L11 3.5L6 8.5Z" />
+                ) : (
+                  <path d="M6 3.5L1 8.5L11 8.5L6 3.5Z" />
+                )}
               </svg>
             </span>
             {showNameMenu && (
@@ -825,9 +903,14 @@ const FileGrid = ({
                 height="12"
                 viewBox="0 0 12 12"
                 fill="currentColor"
-                style={{ marginLeft: "2px" }}
+                style={{ marginLeft: "2px", cursor: "pointer" }}
+                onClick={handleModifiedArrowClick}
               >
-                <path d="M6 8.5L1 3.5L11 3.5L6 8.5Z" />
+                {sortBy === "date" && modifiedSortOrder === "ascending" ? (
+                  <path d="M6 8.5L1 3.5L11 3.5L6 8.5Z" />
+                ) : (
+                  <path d="M6 3.5L1 8.5L11 8.5L6 3.5Z" />
+                )}
               </svg>
             </span>
             {showModifiedMenu && (
@@ -887,9 +970,14 @@ const FileGrid = ({
                 height="12"
                 viewBox="0 0 12 12"
                 fill="currentColor"
-                style={{ marginLeft: "4px" }}
+                style={{ marginLeft: "4px", cursor: "pointer" }}
+                onClick={handleSizeArrowClick}
               >
-                <path d="M6 8.5L1 3.5L11 3.5L6 8.5Z" />
+                {sortBy === "size" && sizeSortOrder === "ascending" ? (
+                  <path d="M6 8.5L1 3.5L11 3.5L6 8.5Z" />
+                ) : (
+                  <path d="M6 3.5L1 8.5L11 8.5L6 3.5Z" />
+                )}
               </svg>
             </span>
             {showSizeMenu && (
@@ -949,9 +1037,14 @@ const FileGrid = ({
                 height="12"
                 viewBox="0 0 12 12"
                 fill="currentColor"
-                style={{ marginLeft: "4px" }}
+                style={{ marginLeft: "4px", cursor: "pointer" }}
+                onClick={handleSharingArrowClick}
               >
-                <path d="M6 8.5L1 3.5L11 3.5L6 8.5Z" />
+                {sortBy === "sharing" && sharingSortOrder === "ascending" ? (
+                  <path d="M6 8.5L1 3.5L11 3.5L6 8.5Z" />
+                ) : (
+                  <path d="M6 3.5L1 8.5L11 8.5L6 3.5Z" />
+                )}
               </svg>
             </span>
             {showSharingMenu && (
