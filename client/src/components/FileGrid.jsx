@@ -43,6 +43,7 @@ const FileGrid = ({
   const dragCounterRef = useRef(0);
   const [draggedFileId, setDraggedFileId] = useState(null);
   const [dragOverFolderId, setDragOverFolderId] = useState(null);
+  const [contextMenu, setContextMenu] = useState(null);
 
   // Check if we're in My Files view (root or inside folder) - MUST be declared early
   // Check if we're in Recent/Home view - MUST be declared early
@@ -65,16 +66,21 @@ const FileGrid = ({
         setShowSharingMenu(false);
         setShowColumnSettings(false);
       }
+      
+      // Close context menu when clicking outside
+      if (!e.target.closest(".file-context-menu") && contextMenu) {
+        setContextMenu(null);
+      }
     };
 
-    if (showNameMenu || showModifiedMenu || showSizeMenu || showSharingMenu) {
+    if (showNameMenu || showModifiedMenu || showSizeMenu || showSharingMenu || contextMenu) {
       document.addEventListener("click", handleClickOutside);
     }
 
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, [showNameMenu, showModifiedMenu, showSizeMenu, showSharingMenu]);
+  }, [showNameMenu, showModifiedMenu, showSizeMenu, showSharingMenu, contextMenu]);
 
   // Drag and drop handlers for file upload (from outside)
   const handleDragEnter = (e) => {
