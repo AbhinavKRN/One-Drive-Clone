@@ -258,7 +258,7 @@ const Sidebar = ({
             <div className="sidebar-promo">
               <div className="storage-promo">
                 <button className="storage-promo-btn">
-                  <DiamondRegular />
+                  <img src="/images/image copy 2.png" alt="Diamond" className="buy-storage-diamond-icon" />
                 </button>
               </div>
             </div>
@@ -414,7 +414,7 @@ const Sidebar = ({
               <div className="storage-promo">
                 <p className="storage-promo-text">Get storage for all your files and photos.</p>
                 <button className="storage-promo-btn">
-                  <DiamondRegular />
+                  <img src="/images/image copy 2.png" alt="Diamond" className="buy-storage-diamond-icon" />
                   <span>Buy storage</span>
                 </button>
               </div>

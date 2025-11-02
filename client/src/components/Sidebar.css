@@ -627,6 +627,16 @@
   fill: currentColor;
 }
 
+/* Buy storage diamond image icon */
+.buy-storage-diamond-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
+  object-fit: contain;
+}
+
 .storage-promo-btn span {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -649,6 +659,11 @@
 }
 
 .sidebar-closed .storage-promo-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.sidebar-closed .buy-storage-diamond-icon {
   width: 20px;
   height: 20px;
 }

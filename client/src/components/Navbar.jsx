@@ -402,7 +402,7 @@ const Navbar = ({
             {/* Buy Storage Button */}
             <div className="apps-launcher-footer">
               <button className="apps-buy-storage-btn">
-                <DiamondRegular className="buy-storage-icon" />
+                <img src="/images/image copy 2.png" alt="Diamond" className="buy-storage-diamond-icon" />
                 <span>Buy storage</span>
               </button>
             </div>
@@ -487,7 +487,7 @@ const Navbar = ({
       {/* Right side */}
       <div className="navbar-right">
         <button className="navbar-storage-btn">
-          <GlobeRegular />
+          <img src="/images/image copy 2.png" alt="Diamond" className="navbar-storage-diamond-icon" />
           <span>Get more storage</span>
         </button>
         <button
