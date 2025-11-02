@@ -2,22 +2,25 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #faf9f8;
+  background-color: var(--bg-primary);
   overflow: hidden;
+  transition: background-color var(--transition-slow);
 }
 
 .dashboard-content {
   display: flex;
   flex: 1;
-  background-color: #faf9f8;
+  background-color: var(--bg-primary);
   overflow: hidden;
+  transition: background-color var(--transition-slow);
 }
 
 .main-content {
   flex: 1;
   overflow-y: auto;
-  background-color: #faf9f8;
+  background-color: var(--bg-primary);
   height: 100%;
+  transition: background-color var(--transition-slow);
 }
 
 /* Home Empty State */
@@ -33,9 +36,10 @@
 .home-empty-state h3 {
   font-size: 20px;
   font-weight: 600;
-  color: #605e5c;
+  color: var(--text-secondary);
   margin: 0 0 40px 0;
   text-align: center;
+  transition: color var(--transition-base);
 }
 
 .home-empty-illustration {
@@ -57,6 +61,106 @@
   display: flex;
   flex-direction: column;
   padding: 20px 32px;
+  background-color: var(--bg-primary);
+  transition: background-color var(--transition-base);
+}
+
+.recycle-bin-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0 12px 0;
+  background-color: var(--bg-primary);
+  border-bottom: none;
+  transition: background-color var(--transition-base);
+}
+
+.top-bar-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sort-btn-top,
+.view-btn,
+.details-btn-top {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background-color: transparent;
+  border: none;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast),
+              color var(--transition-base);
+  border-radius: 4px;
+  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
+}
+
+.sort-btn-top:hover,
+.view-btn:hover,
+.details-btn-top:hover {
+  background-color: var(--bg-hover);
+}
+
+.sort-icon-top,
+.view-icon,
+.details-icon-top {
+  width: 16px;
+  height: 16px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  transition: color var(--transition-base);
+}
+
+.dropdown-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  transition: color var(--transition-base);
+}
+
+/* Sort Menu */
+.sort-dropdown {
+  position: relative;
+}
+
+.sort-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color-medium);
+  border-radius: 4px;
+  box-shadow: var(--shadow-sm);
+  min-width: 160px;
+  z-index: 100;
+  overflow: hidden;
+  transition: background-color var(--transition-base),
+              border-color var(--transition-base),
+              box-shadow var(--transition-base);
+}
+
+.sort-menu button {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  text-align: left;
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast),
+              color var(--transition-base);
+  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
+}
+
+.sort-menu button:hover {
+  background-color: var(--bg-hover);
 }
 
 /* Files Header */
@@ -69,10 +173,14 @@
 }
 
 .files-title {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 600;
-  color: #323130;
+  color: var(--text-primary);
   margin: 0;
+  padding: 20px 0 0 0;
+  line-height: 1.2;
+  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  transition: color var(--transition-base);
 }
 
 .files-header-actions {
@@ -90,30 +198,34 @@
   border: none;
   border-radius: 4px;
   font-size: 14px;
-  color: #323130;
+  color: var(--text-primary);
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color var(--transition-fast),
+              color var(--transition-base);
 }
 
 .header-btn:hover {
-  background-color: #f3f2f1;
+  background-color: var(--bg-hover);
 }
 
 .header-btn i {
   font-size: 16px;
-  color: #605e5c;
+  color: var(--text-secondary);
+  transition: color var(--transition-base);
 }
 
 /* White Box Container */
 .files-white-box {
-  background-color: #ffffff;
+  background-color: var(--bg-secondary);
   border-radius: 8px;
-  box-shadow: 0 1.6px 3.6px rgba(0, 0, 0, 0.132), 0 0.3px 0.9px rgba(0, 0, 0, 0.108);
+  box-shadow: var(--shadow-sm);
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   min-height: 0;
+  transition: background-color var(--transition-base),
+              box-shadow var(--transition-base);
 }
 
 .toolbar {
@@ -121,8 +233,10 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 24px;
-  background-color: #ffffff;
-  border-bottom: 1px solid #edebe9;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color-light);
+  transition: background-color var(--transition-base),
+              border-color var(--transition-base);
 }
 
 .files-white-box .toolbar {
@@ -138,20 +252,22 @@
 }
 
 .breadcrumb {
-  color: #0078d4;
+  color: var(--accent-primary);
   cursor: pointer;
   padding: 4px 8px;
   border-radius: 4px;
-  transition: background-color 0.2s;
+  transition: background-color var(--transition-fast),
+              color var(--transition-base);
 }
 
 .breadcrumb:hover {
-  background-color: #e1dfdd;
+  background-color: var(--bg-hover);
   text-decoration: underline;
 }
 
 .separator {
-  color: #605e5c;
+  color: var(--text-secondary);
+  transition: color var(--transition-base);
 }
 
 .toolbar-actions {
@@ -167,38 +283,43 @@
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background-color: #0078d4;
+  background-color: var(--accent-primary);
   color: white;
   border: none;
   border-radius: 4px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color var(--transition-fast);
 }
 
 .btn-upload:hover,
 .btn-action:hover {
-  background-color: #106ebe;
+  background-color: var(--accent-primary-hover);
 }
 
 .btn-action {
-  background-color: #f3f2f1;
-  color: #323130;
-  border: 1px solid #d2d0ce;
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color-medium);
+  transition: background-color var(--transition-fast),
+              color var(--transition-base),
+              border-color var(--transition-base);
 }
 
 .btn-action:hover {
-  background-color: #e1dfdd;
+  background-color: var(--bg-active);
 }
 
 .view-toggle {
   display: flex;
   gap: 0;
-  border: 1px solid #d2d0ce;
+  border: 1px solid var(--border-color-medium);
   border-radius: 4px;
   overflow: hidden;
-  background-color: #ffffff;
+  background-color: var(--bg-secondary);
+  transition: border-color var(--transition-base),
+              background-color var(--transition-base);
 }
 
 .view-toggle button {
@@ -206,8 +327,8 @@
   border: none;
   padding: 6px 10px;
   cursor: pointer;
-  color: #605e5c;
-  transition: all 0.2s;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -218,12 +339,12 @@
 }
 
 .view-toggle button:hover {
-  background-color: #f3f2f1;
+  background-color: var(--bg-hover);
 }
 
 .view-toggle button.active {
-  background-color: #edebe9;
-  color: #323130;
+  background-color: var(--bg-active);
+  color: var(--text-primary);
 }
 
 @media (max-width: 768px) {
