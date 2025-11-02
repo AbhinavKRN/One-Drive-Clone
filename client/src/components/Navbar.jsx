@@ -1,22 +1,32 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   SearchRegular,
   SettingsRegular,
   GlobeRegular,
   PersonAddRegular,
+  StarRegular,
+  ImageRegular,
+  AlbumRegular,
+  ClockRegular,
 } from "@fluentui/react-icons";
 import "./Navbar.css";
-import { useLocation } from "react-router-dom";
 
-const Navbar = ({ user, searchQuery, onSearchChange , activeTab  , setActiveTab}) => {
+const Navbar = ({
+  user,
+  searchQuery,
+  onSearchChange,
+  activeTab,
+  setActiveTab,
+}) => {
   const { logout } = useAuth();
   const navigate = useNavigate();
-  // const [activeTab, setActiveTab] = useState("Files");
+  const location = useLocation();
   const [showProfilePopup, setShowProfilePopup] = useState(false);
   const profilePopupRef = useRef(null);
   const avatarRef = useRef(null);
+  const [photoTab, setPhotoTab] = useState("Moments");
 
   const handleLogout = () => {
     logout();
@@ -37,7 +47,6 @@ const Navbar = ({ user, searchQuery, onSearchChange , activeTab  , setActiveTab}
     setShowProfilePopup(!showProfilePopup);
   };
 
-  // Close popup when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -49,55 +58,45 @@ const Navbar = ({ user, searchQuery, onSearchChange , activeTab  , setActiveTab}
         setShowProfilePopup(false);
       }
     };
-
-    if (showProfilePopup) {
+    if (showProfilePopup)
       document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showProfilePopup]);
 
-  // Get user initials for profile picture
   const getUserInitials = () => {
     if (!user?.name) return "";
     const parts = user.name.split(" ");
-    if (parts.length >= 2) {
+    if (parts.length >= 2)
       return (
         parts[0].charAt(0).toUpperCase() + parts[1].charAt(0).toUpperCase()
       );
-    }
     return user.name.charAt(0).toUpperCase();
   };
 
-  // Format name to uppercase
   const getFormattedName = () => {
     if (!user?.name) return "";
     return user.name.toUpperCase();
   };
 
   return (
-    <nav className="navbar">
+    <nav className={`navbar ${activeTab === "Photos" ? "photos-mode" : ""}`}>
       <div className="navbar-left">
         <button className="navbar-icon-btn apps-icon" title="Apps">
           <div className="logo-grid">
-            <div className="logo-dot"></div>
-            <div className="logo-dot"></div>
-            <div className="logo-dot"></div>
-            <div className="logo-dot"></div>
-            <div className="logo-dot"></div>
-            <div className="logo-dot"></div>
-            <div className="logo-dot"></div>
-            <div className="logo-dot"></div>
-            <div className="logo-dot"></div>
+            {Array(9)
+              .fill(0)
+              .map((_, i) => (
+                <div key={i} className="logo-dot"></div>
+              ))}
           </div>
         </button>
+
         <img
           src="/images/onedrive-logo.png"
           alt="OneDrive"
           className="onedrive-logo"
         />
+
         <div className="navbar-tabs">
           <button
             className={`navbar-tab ${activeTab === "Photos" ? "active" : ""}`}
@@ -119,17 +118,59 @@ const Navbar = ({ user, searchQuery, onSearchChange , activeTab  , setActiveTab}
         </div>
       </div>
 
-      <div className="navbar-center">
-        <div className="search-bar">
-          <SearchRegular />
-          <input
-            type="text"
-            placeholder="Search"
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-          />
+      {/* When Photos is active, hide search bar and show 4 buttons */}
+      {activeTab === "Files" ? (
+        <div className="navbar-center">
+          <div className="search-bar">
+            <SearchRegular />
+            <input
+              type="text"
+              placeholder="Search"
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+            />
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="photos-nav">
+          <button
+            className={`photos-nav-item ${
+              photoTab === "Moments" ? "active" : ""
+            }`}
+            onClick={() => setPhotoTab("Moments")}
+          >
+            <ClockRegular />
+            <span>Moments</span>
+          </button>
+          <button
+            className={`photos-nav-item ${
+              photoTab === "Gallery" ? "active" : ""
+            }`}
+            onClick={() => setPhotoTab("Gallery")}
+          >
+            <ImageRegular />
+            <span>Gallery</span>
+          </button>
+          <button
+            className={`photos-nav-item ${
+              photoTab === "Albums" ? "active" : ""
+            }`}
+            onClick={() => setPhotoTab("Albums")}
+          >
+            <AlbumRegular />
+            <span>Albums</span>
+          </button>
+          <button
+            className={`photos-nav-item ${
+              photoTab === "Favorites" ? "active" : ""
+            }`}
+            onClick={() => setPhotoTab("Favorites")}
+          >
+            <StarRegular />
+            <span>Favorites</span>
+          </button>
+        </div>
+      )}
 
       <div className="navbar-right">
         <button className="navbar-storage-btn">
