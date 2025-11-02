@@ -53,7 +53,9 @@
   height: 400px;
   margin: 0 auto 3.5rem;
   perspective: 1000px;
-  overflow: visible;
+  /* overflow: visible; */
+  overflow-y: hidden;
+  overflow-x: hidden;
 }
 
 .photo-card {
