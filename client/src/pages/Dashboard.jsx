@@ -9,6 +9,7 @@ import FilePreview from "../components/FilePreview";
 import RecycleBin from "../components/RecycleBin";
 import CreateFolderModal from "../components/CreateFolderModal";
 import RenameModal from "../components/RenameModal";
+import CommandBar from "../components/CommandBar";
 import { useFileManager } from "../hooks/useFileManager";
 import { nameToSlug } from "../hooks/useFileManager";
 import PhotosPage from "./PhotosPage"; // 👈 new Photos page component
@@ -266,6 +267,56 @@ const Dashboard = () => {
   };
 
   const handleDownload = (file) => downloadFile(file);
+
+  // CommandBar handlers
+  const handleShare = () => {
+    console.log("Share items:", selectedItems);
+    alert("Share feature will be implemented");
+  };
+
+  const handleCopyLink = () => {
+    console.log("Copy link for items:", selectedItems);
+    alert("Copy link feature will be implemented");
+  };
+
+  const handleCommandBarDelete = () => {
+    handleDelete(selectedItems);
+  };
+
+  const handleCommandBarDownload = () => {
+    selectedItems.forEach(itemId => {
+      const file = files.find(f => f.id === itemId);
+      if (file && file.type !== 'folder') {
+        handleDownload(file);
+      }
+    });
+  };
+
+  const handleMoveTo = () => {
+    console.log("Move to for items:", selectedItems);
+    alert("Move to feature will be implemented");
+  };
+
+  const handleCopyTo = () => {
+    console.log("Copy to for items:", selectedItems);
+    alert("Copy to feature will be implemented");
+  };
+
+  const handleCommandBarRename = () => {
+    if (selectedItems.length === 1) {
+      const item = files.find(f => f.id === selectedItems[0]);
+      setRenameItem(item);
+    }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedItems([]);
+  };
+
+  const handleDetails = () => {
+    console.log("Open details pane");
+    alert("Details pane feature will be implemented");
+  };
 
   return (
     <div className="dashboard">
@@ -655,10 +706,27 @@ const Dashboard = () => {
                 ) : null}
 
                 <h1 className="files-title">
-                  {filterType === "all" ? "Recent" : 
+                  {filterType === "all" ? "Recent" :
                    filterType === "myfiles" ? "My files" :
                    filterType === "folders" ? "Folders" : "Files"}
                 </h1>
+
+                {/* CommandBar appears when items are selected */}
+                <CommandBar
+                  selectedCount={selectedItems.length}
+                  onShare={handleShare}
+                  onCopyLink={handleCopyLink}
+                  onDelete={handleCommandBarDelete}
+                  onDownload={handleCommandBarDownload}
+                  onMoveTo={handleMoveTo}
+                  onCopyTo={handleCopyTo}
+                  onRename={handleCommandBarRename}
+                  onClearSelection={handleClearSelection}
+                  onSort={() => setShowSortMenu(!showSortMenu)}
+                  onDetails={handleDetails}
+                  showSortMenu={showSortMenu}
+                  onSortMenuToggle={() => setShowSortMenu(!showSortMenu)}
+                />
 
                 <div className="files-white-box">
                   <div className="toolbar">
