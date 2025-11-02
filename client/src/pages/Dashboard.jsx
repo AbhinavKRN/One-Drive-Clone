@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
@@ -10,11 +10,12 @@ import CreateFolderModal from "../components/CreateFolderModal";
 import RenameModal from "../components/RenameModal";
 import { useFileManager } from "../hooks/useFileManager";
 import PhotosPage from "./PhotosPage"; // 👈 new Photos page component
+import { ChevronDownRegular } from "@fluentui/react-icons";
 import "./Dashboard.css";
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const [viewMode, setViewMode] = useState("grid");
+  const [viewMode, setViewMode] = useState("list");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [previewFile, setPreviewFile] = useState(null);
@@ -22,6 +23,30 @@ const Dashboard = () => {
   const [renameItem, setRenameItem] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
   const [activeTab, setActiveTab] = useState("Files");
+  const [sortBy, setSortBy] = useState('name');
+  const [showSortMenu, setShowSortMenu] = useState(false);
+  const sortMenuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (sortMenuRef.current && !sortMenuRef.current.contains(event.target)) {
+        setShowSortMenu(false);
+      }
+    };
+
+    if (showSortMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showSortMenu]);
+
+  const handleSort = (sortType) => {
+    setSortBy(sortType);
+    setShowSortMenu(false);
+  };
 
   const {
     files,
@@ -171,68 +196,75 @@ const Dashboard = () => {
             onTextDocument={handleTextDocument}
           />
 
-          {/* Main Content */}
-          <div className="main-content">
-            {filterType === "shared" ? (
-              <SharedView
-                files={files}
-                viewMode={viewMode}
-                selectedItems={selectedItems}
-                onSelectionChange={setSelectedItems}
-                onItemClick={handleItemClick}
-                onDownload={handleDownload}
-              />
-            ) : filterType === "recycle" ? (
-              <RecycleBin />
-            ) : filterType === "folders" ? (
-              <div className="files-container">
-                <div className="files-header">
-                  <h1 className="files-title">My files</h1>
-                  <div className="files-header-actions">
-                    <button className="header-btn">
-                      <i className="fas fa-sort"></i>
-                      Sort
+        <div className="main-content">
+          {filterType === 'recycle' ? (
+            <RecycleBin />
+          ) : filterType === 'shared' ? (
+            <SharedView
+              files={files}
+              viewMode={viewMode}
+              selectedItems={selectedItems}
+              onSelectionChange={setSelectedItems}
+              onItemClick={handleItemClick}
+              onDownload={handleDownload}
+            />
+          ) : filterType === 'folders' ? (
+            <div className="files-container">
+              {/* Top Bar */}
+              <div className="recycle-bin-top-bar">
+                <div style={{ flex: 1 }}></div>
+                <div className="top-bar-controls">
+                  <div className="sort-dropdown" ref={sortMenuRef}>
+                    <button
+                      className="sort-btn-top"
+                      onClick={() => setShowSortMenu(!showSortMenu)}
+                    >
+                      <svg className="sort-icon-top" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="2" y1="4" x2="14" y2="4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        <line x1="2" y1="12" x2="14" y2="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        <path d="M11 10l2 2 2-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                      </svg>
+                      <span>Sort</span>
+                      <ChevronDownRegular className="dropdown-icon" />
                     </button>
-                    <div className="view-toggle">
-                      <button
-                        className={viewMode === "grid" ? "active" : ""}
-                        onClick={() => setViewMode("grid")}
-                        title="Grid view"
-                      >
-                        <i className="fas fa-th"></i>
-                      </button>
-                      <button
-                        className={viewMode === "list" ? "active" : ""}
-                        onClick={() => setViewMode("list")}
-                        title="List view"
-                      >
-                        <i className="fas fa-list"></i>
-                      </button>
-                    </div>
-                    <button className="header-btn">
-                      <i className="fas fa-info-circle"></i>
-                      Details
-                    </button>
+                    {showSortMenu && (
+                      <div className="sort-menu">
+                        <button onClick={() => handleSort('name')}>Name</button>
+                        <button onClick={() => handleSort('date')}>Date modified</button>
+                        <button onClick={() => handleSort('size')}>File size</button>
+                        <button onClick={() => handleSort('type')}>File type</button>
+                      </div>
+                    )}
                   </div>
+                  <button className="details-btn-top">
+                    <svg className="details-icon-top" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M4 3h8v10H4V3z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                      <path d="M6 6h4M6 9h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                      <path d="M11 5l2-2v4l-2-2z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                    </svg>
+                    <span>Details</span>
+                  </button>
                 </div>
+              </div>
 
-                <div className="files-white-box">
-                  <div className="toolbar">
-                    <div className="breadcrumbs">
-                      {breadcrumbs.map((crumb, index) => (
-                        <React.Fragment key={crumb.id}>
-                          <span
-                            className="breadcrumb"
-                            onClick={() => navigateToPath(crumb.id)}
-                          >
-                            {crumb.name}
-                          </span>
-                          {index < breadcrumbs.length - 1 && (
-                            <span className="separator">/</span>
-                          )}
-                        </React.Fragment>
-                      ))}
-                    </div>
+              <h1 className="files-title">My files</h1>
+
+              <div className="files-white-box">
+                <div className="toolbar">
+                  <div className="breadcrumbs">
+                    {breadcrumbs.map((crumb, index) => (
+                      <React.Fragment key={crumb.id}>
+                        <span
+                          className="breadcrumb"
+                          onClick={() => navigateToPath(crumb.id)}
+                        >
+                          {crumb.name}
+                        </span>
+                        {index < breadcrumbs.length - 1 && <span className="separator">/</span>}
+                      </React.Fragment>
+                    ))}
+                  </div>
 
                     <div className="toolbar-actions">
                       <label className="btn-upload">
@@ -283,108 +315,29 @@ const Dashboard = () => {
                     </div>
                   </div>
 
-                  <FileGrid
-                    files={filteredFiles}
-                    viewMode={viewMode}
-                    selectedItems={selectedItems}
-                    onSelectionChange={setSelectedItems}
-                    onItemClick={handleItemClick}
-                    onDownload={handleDownload}
-                  />
-                </div>
-              </div>
-            ) : (
-              <>
-                {/* Toolbar */}
-                <div className="toolbar">
-                  <div className="breadcrumbs">
-                    {breadcrumbs.map((crumb, index) => (
-                      <React.Fragment key={crumb.id}>
-                        <span
-                          className="breadcrumb"
-                          onClick={() => navigateToPath(crumb.id)}
-                        >
-                          {crumb.name}
-                        </span>
-                        {index < breadcrumbs.length - 1 && (
-                          <span className="separator">/</span>
-                        )}
-                      </React.Fragment>
-                    ))}
-                  </div>
-
-                  <div className="toolbar-actions">
-                    <label className="btn-upload">
-                      <i className="fas fa-upload"></i>
-                      Upload
-                      <input
-                        type="file"
-                        multiple
-                        onChange={handleFileUpload}
-                        style={{ display: "none" }}
-                      />
-                    </label>
-
-                    <button
-                      className="btn-action"
-                      onClick={() => setShowCreateFolder(true)}
-                    >
-                      <i className="fas fa-folder-plus"></i>
-                      New folder
-                    </button>
-
-                    {selectedItems.length > 0 && (
-                      <>
-                        <button className="btn-action" onClick={handleDelete}>
-                          <i className="fas fa-trash"></i> Delete
-                        </button>
-
-                        {selectedItems.length === 1 && (
-                          <button
-                            className="btn-action"
-                            onClick={() => {
-                              const item = files.find(
-                                (f) => f.id === selectedItems[0]
-                              );
-                              setRenameItem(item);
-                            }}
-                          >
-                            <i className="fas fa-edit"></i> Rename
-                          </button>
-                        )}
-                      </>
-                    )}
-
-                    <div className="view-toggle">
-                      <button
-                        className={viewMode === "grid" ? "active" : ""}
-                        onClick={() => setViewMode("grid")}
-                        title="Grid view"
-                      >
-                        <i className="fas fa-th"></i>
-                      </button>
-                      <button
-                        className={viewMode === "list" ? "active" : ""}
-                        onClick={() => setViewMode("list")}
-                        title="List view"
-                      >
-                        <i className="fas fa-list"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
                 <FileGrid
                   files={filteredFiles}
-                  viewMode={viewMode}
+                  viewMode="list"
                   selectedItems={selectedItems}
                   onSelectionChange={setSelectedItems}
                   onItemClick={handleItemClick}
                   onDownload={handleDownload}
                 />
-              </>
-            )}
-          </div>
+              </div>
+            </div>
+          ) : (
+            <div className="home-empty-state">
+              <h3>Your recent files will show up here</h3>
+              <div className="home-empty-illustration">
+                <img
+                  src="/images/image.png"
+                  alt="Recent files illustration"
+                  className="home-empty-image"
+                />
+              </div>
+            </div>
+          )}
+        </div>
         </div>
       )}
 
