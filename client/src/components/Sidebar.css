@@ -24,8 +24,8 @@
   background-color: var(--bg-primary);
   border-right: none;
   padding: 12px 4px;
-  overflow: hidden;
   overflow-y: auto;
+  overflow-x: visible;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -115,6 +115,8 @@
 /* Create button in collapsed mode */
 .sidebar-closed .sidebar-create-btn-wrapper {
   justify-content: center;
+  position: relative;
+  overflow: visible;
 }
 
 .sidebar-closed .sidebar-create-btn {
@@ -158,6 +160,11 @@
 
 .sidebar-closed .sidebar-section {
   transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: visible;
+}
+
+.sidebar-closed .sidebar-section:first-child {
+  overflow: visible;
 }
 
 .sidebar-heading {
@@ -318,6 +325,8 @@
   left: calc(100% + 8px);
   top: 0;
   transform: none;
+  z-index: 10000;
+  position: absolute;
   animation: menuExpandContentsAnimationSide 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
 }
 
