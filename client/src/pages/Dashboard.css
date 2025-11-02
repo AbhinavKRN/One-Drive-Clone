@@ -445,6 +445,15 @@
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .action-bar-left {
   display: flex;
   align-items: center;
@@ -527,34 +536,273 @@
   padding: 4px;
 }
 
-@media (max-width: 768px) {
+/* Responsive Design */
+/* Tablet and below */
+@media (max-width: 1024px) {
   .dashboard-content {
-    flex-direction: column;
+    flex-direction: row;
   }
 
-  .sidebar {
+  .main-content {
+    padding: 0;
+  }
+
+  .files-container {
+    padding: 16px 24px;
+  }
+
+  .files-title {
+    font-size: 18px;
+    padding: 16px 0 10px 0;
+  }
+
+  .files-title-inline {
+    font-size: 18px;
+  }
+
+  .breadcrumbs-inline {
+    font-size: 18px;
+    gap: 6px;
+  }
+
+  .top-bar-controls {
+    gap: 6px;
+  }
+
+  .sort-btn-top,
+  .view-btn,
+  .details-btn-top {
+    font-size: 13px;
+    padding: 3px 6px;
+  }
+}
+
+/* Sidebar Backdrop */
+.sidebar-backdrop {
+  display: none;
+}
+
+/* Mobile and below */
+@media (max-width: 768px) {
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+    animation: fadeIn 0.2s ease;
+    backdrop-filter: blur(2px);
+  }
+  
+  /* Prevent scrolling when sidebar is open */
+  body.dashboard-sidebar-open {
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  .dashboard-content {
+    flex-direction: row;
+  }
+
+  .main-content {
     width: 100%;
-    height: auto;
+    margin-left: 0;
   }
 
-  .toolbar {
+  .files-container {
+    padding: 12px 16px;
+  }
+
+  .files-title {
+    font-size: 16px;
+    padding: 12px 0 8px 0;
+  }
+
+  .files-title-inline {
+    font-size: 16px;
+  }
+
+  .breadcrumbs-inline {
+    font-size: 16px;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .breadcrumb {
+    padding: 2px 3px;
+    font-size: 14px;
+  }
+
+  .separator {
+    margin: 0 2px;
+    font-size: 14px;
+  }
+
+  .recycle-bin-top-bar {
     flex-direction: column;
     align-items: flex-start;
+    gap: 8px;
+    padding: 8px 0;
   }
 
-  .toolbar-actions {
+  .top-bar-controls {
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .sort-btn-top,
+  .view-btn,
+  .details-btn-top {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+
+  .sort-icon-top,
+  .view-icon,
+  .details-icon-top {
+    width: 14px;
+    height: 14px;
+  }
+
+  .command-bar-top-wrapper {
+    margin-bottom: 8px;
+  }
+
+  .command-bar-top-wrapper .command-bar-container {
+    margin-bottom: 0;
+  }
+
+  .files-white-box {
+    border-radius: 4px;
   }
 
   .action-bar {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+    padding: 6px 12px;
   }
 
   .action-bar-left {
     width: 100%;
     flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .action-btn {
+    padding: 3px 6px;
+    font-size: 13px;
+  }
+
+  .selected-count-btn {
+    padding: 3px 10px;
+    font-size: 13px;
+  }
+
+  .home-empty-state {
+    padding: 30px 16px;
+  }
+
+  .home-empty-state h3 {
+    font-size: 18px;
+    margin-bottom: 30px;
+  }
+
+  .home-empty-image {
+    width: 200px;
+  }
+
+  /* Ensure main content is full width when sidebar is hidden */
+  .main-content {
+    margin-left: 0 !important;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .files-container {
+    padding: 10px 12px;
+  }
+
+  .files-title {
+    font-size: 15px;
+    padding: 10px 0 6px 0;
+  }
+
+  .files-title-inline {
+    font-size: 15px;
+  }
+
+  .breadcrumbs-inline {
+    font-size: 14px;
+  }
+
+  .breadcrumb {
+    font-size: 13px;
+  }
+
+  .separator {
+    font-size: 13px;
+  }
+
+  .top-bar-controls {
+    gap: 3px;
+  }
+
+  .sort-btn-top,
+  .view-btn,
+  .details-btn-top {
+    font-size: 11px;
+    padding: 3px 4px;
+    gap: 2px;
+  }
+
+  .sort-icon-top,
+  .view-icon,
+  .details-icon-top {
+    width: 12px;
+    height: 12px;
+  }
+
+  .dropdown-icon {
+    width: 8px;
+    height: 8px;
+  }
+
+  .action-bar {
+    padding: 6px 10px;
+  }
+
+  .action-btn {
+    padding: 2px 4px;
+    font-size: 12px;
+  }
+
+  .action-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .selected-count-btn {
+    padding: 3px 8px;
+    font-size: 12px;
+  }
+
+  .home-empty-state {
+    padding: 20px 12px;
+  }
+
+  .home-empty-state h3 {
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+
+  .home-empty-image {
+    width: 150px;
   }
 }

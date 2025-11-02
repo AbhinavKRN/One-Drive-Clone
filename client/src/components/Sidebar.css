@@ -647,3 +647,142 @@
 .sidebar-closed .storage-promo-text {
   display: none;
 }
+
+/* ===== Responsive Design ===== */
+
+/* Tablet and below */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 260px;
+    padding: 10px 6px;
+  }
+
+  .sidebar-closed {
+    width: 60px;
+    padding: 10px 4px;
+  }
+
+  .sidebar-create-btn {
+    font-size: 12px;
+    padding: 8px 16px;
+    max-width: 160px;
+  }
+
+  .sidebar-menu li {
+    padding: 5px 6px;
+    font-size: 12px;
+  }
+
+  .sidebar-menu li svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .sidebar-heading {
+    font-size: 10px;
+    padding: 0 6px;
+  }
+
+  .sidebar-user-heading {
+    font-size: 13px;
+    padding: 0 6px;
+  }
+}
+
+/* Mobile and below */
+@media (max-width: 768px) {
+  .sidebar,
+  .sidebar-closed {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    height: calc(100vh - 56px);
+    z-index: 999;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .sidebar.sidebar-open,
+  .sidebar-closed.sidebar-open {
+    transform: translateX(0);
+  }
+  
+  /* Ensure sidebar doesn't interfere with desktop view */
+  .dashboard-content {
+    position: relative;
+  }
+  
+  /* Main content should be full width on mobile when sidebar is hidden */
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+
+  .sidebar {
+    width: 280px;
+  }
+
+  .sidebar-closed {
+    width: 60px;
+  }
+
+  .sidebar-create-btn {
+    font-size: 13px;
+    padding: 10px 20px;
+  }
+
+  .sidebar-menu li {
+    padding: 6px 8px;
+  }
+
+  .sidebar-heading {
+    font-size: 11px;
+  }
+
+  .sidebar-user-heading {
+    font-size: 14px;
+  }
+
+  .storage-promo {
+    padding: 10px;
+  }
+
+  .storage-promo-text {
+    font-size: 10px;
+  }
+
+  .storage-promo-btn {
+    font-size: 13px;
+    padding: 4px 10px;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .sidebar {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .sidebar-closed {
+    width: 100%;
+    max-width: 60px;
+  }
+
+  .sidebar-create-btn {
+    max-width: 140px;
+    font-size: 12px;
+    padding: 8px 16px;
+  }
+
+  .sidebar-menu li {
+    padding: 5px 6px;
+    font-size: 13px;
+  }
+
+  .sidebar-dropdown {
+    min-width: 200px;
+  }
+}

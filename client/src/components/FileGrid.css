@@ -248,7 +248,7 @@
 
 .file-list-header {
   display: grid;
-  grid-template-columns: 48px 2fr 1fr 1fr 1fr;
+  grid-template-columns: 48px minmax(150px, 2fr) minmax(120px, 1fr) minmax(100px, 1fr) minmax(100px, 1fr);
   gap: 16px;
   padding: 12px 24px;
   background-color: #f5f5f5;
@@ -262,6 +262,7 @@
   transition: background-color var(--transition-base),
               border-color var(--transition-base),
               color var(--transition-base);
+  align-items: center;
 }
 
 :root.dark-theme .file-list-header {
@@ -272,7 +273,7 @@
 
 .file-list-row {
   display: grid;
-  grid-template-columns: 48px 2fr 1fr 1fr 1fr;
+  grid-template-columns: 48px minmax(150px, 2fr) minmax(120px, 1fr) minmax(100px, 1fr) minmax(100px, 1fr);
   gap: 16px;
   padding: 12px 24px;
   background: var(--bg-secondary);
@@ -282,6 +283,7 @@
               border-color var(--transition-base);
   position: relative;
   margin: 0;
+  align-items: center;
 }
 
 .file-list-row:first-of-type {
@@ -483,6 +485,15 @@
   font-size: 14px;
   color: var(--text-primary);
   transition: color var(--transition-base);
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Ensure name column can shrink properly */
+.file-list-header .col-name,
+.file-list-row .col-name {
+  min-width: 0;
+  overflow: hidden;
 }
 
 .col-name {
@@ -490,6 +501,22 @@
   position: relative;
   align-items: center;
   display: flex;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Ensure file icon doesn't shrink */
+.col-name .file-icon-clickable {
+  flex-shrink: 0;
+}
+
+/* Ensure file name takes available space but doesn't overflow */
+.col-name .file-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* OneDrive-style tan/brown color for Modified, Size, and Sharing columns */
@@ -499,6 +526,11 @@
   color: #795548 !important;
   font-size: 13px;
   transition: color var(--transition-base);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: fit-content;
+  flex-shrink: 0;
 }
 
 /* Dark mode: use lighter text color for better visibility */
@@ -858,6 +890,28 @@
   margin-right: 12px;
 }
 
+/* Ensure checkbox doesn't shrink */
+.col-checkbox {
+  flex-shrink: 0;
+}
+
+/* Ensure action icons don't shrink */
+.col-actions,
+.file-row-actions {
+  flex-shrink: 0;
+  min-width: fit-content;
+  margin-left: auto;
+}
+
+/* Ensure all columns align properly */
+.file-list-header > .file-list-col,
+.file-list-row > .file-list-col {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+
 .col-name i {
   font-size: 20px;
   margin-right: 12px;
@@ -872,6 +926,20 @@
   overflow: hidden;
   text-overflow: ellipsis;
   transition: color var(--transition-base);
+  min-width: 0;
+  flex: 1;
+  max-width: 100%;
+  display: inline-block;
+}
+
+/* Ensure file-name-clickable also has constraints */
+.file-name-clickable {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
 }
 
 /* Ensure file names are always visible in dark mode */
@@ -909,4 +977,279 @@
   width: 14px;
   height: 14px;
   color: inherit;
+}
+
+/* ===== Responsive Design ===== */
+
+/* Tablet and below */
+@media (max-width: 1024px) {
+  .file-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    padding: 16px;
+  }
+
+  .file-card {
+    padding: 10px;
+  }
+
+  .file-card-icon {
+    height: 70px;
+    margin-bottom: 6px;
+  }
+
+  .file-card-icon svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .file-name {
+    font-size: 13px;
+  }
+
+  .file-meta {
+    font-size: 11px;
+  }
+
+  .file-list-header {
+    grid-template-columns: 48px 2fr 1fr 1fr 80px;
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .file-list-row {
+    grid-template-columns: 48px 2fr 1fr 1fr 80px;
+    padding: 10px 16px;
+  }
+
+  .file-list-col {
+    font-size: 13px;
+  }
+
+  .col-modified,
+  .col-size,
+  .col-sharing {
+    font-size: 12px;
+  }
+}
+
+/* Mobile and below */
+@media (max-width: 768px) {
+  .file-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .file-card {
+    padding: 8px;
+  }
+
+  .file-card-icon {
+    height: 60px;
+    margin-bottom: 6px;
+  }
+
+  .file-card-icon svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .file-card-icon img {
+    max-width: 32px;
+    max-height: 32px;
+  }
+
+  .file-name {
+    font-size: 12px;
+    margin-bottom: 3px;
+  }
+
+  .file-meta {
+    font-size: 10px;
+    gap: 6px;
+  }
+
+  .file-card-actions {
+    top: 6px;
+    right: 6px;
+    gap: 3px;
+  }
+
+  .file-card-download,
+  .file-card-delete {
+    padding: 4px 8px;
+  }
+
+  .file-card-download svg,
+  .file-card-delete svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Hide some columns in list view on mobile */
+  .file-list-header {
+    grid-template-columns: 40px 2fr 1fr 60px;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .file-list-row {
+    grid-template-columns: 40px 2fr 1fr 60px;
+    padding: 8px 12px;
+  }
+
+  /* Hide size and sharing columns on mobile */
+  .col-size,
+  .col-sharing {
+    display: none;
+  }
+
+  .file-list-col {
+    font-size: 12px;
+  }
+
+  .col-modified {
+    font-size: 11px;
+  }
+
+  .col-name svg {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+  }
+
+  .file-list-row .action-icon {
+    width: 24px;
+    height: 24px;
+    padding: 2px;
+  }
+
+  .recent-view {
+    padding: 0;
+  }
+
+  .recent-header {
+    padding: 8px 16px;
+    font-size: 11px;
+  }
+
+  .recent-row {
+    padding: 10px 16px;
+  }
+
+  .recent-row .col-name {
+    gap: 10px;
+  }
+
+  .recent-row .col-name svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .file-name-primary {
+    font-size: 13px;
+  }
+
+  .file-name-secondary {
+    font-size: 11px;
+  }
+
+  .recent-row .col-opened,
+  .recent-row .col-owner {
+    font-size: 12px;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .file-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 6px;
+    padding: 10px;
+  }
+
+  .file-card {
+    padding: 6px;
+  }
+
+  .file-card-icon {
+    height: 50px;
+    margin-bottom: 4px;
+  }
+
+  .file-card-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .file-name {
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+
+  .file-meta {
+    font-size: 9px;
+    gap: 4px;
+  }
+
+  .file-card-checkbox {
+    top: 4px;
+    left: 4px;
+  }
+
+  .file-card-checkbox input {
+    width: 16px;
+    height: 16px;
+  }
+
+  .file-card-actions {
+    top: 4px;
+    right: 4px;
+    gap: 2px;
+  }
+
+  .file-card-download,
+  .file-card-delete {
+    padding: 3px 6px;
+  }
+
+  .file-list-header {
+    grid-template-columns: 36px 2fr 50px;
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .file-list-row {
+    grid-template-columns: 36px 2fr 50px;
+    padding: 6px 10px;
+  }
+
+  /* Hide modified column on small mobile */
+  .col-modified {
+    display: none;
+  }
+
+  .col-name svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+  }
+
+  .file-name-primary {
+    font-size: 12px;
+  }
+
+  .file-name-secondary {
+    font-size: 10px;
+  }
+
+  .recent-row {
+    padding: 8px 12px;
+  }
+
+  .recent-header {
+    padding: 6px 12px;
+    font-size: 10px;
+  }
 }

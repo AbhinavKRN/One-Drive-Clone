@@ -577,7 +577,7 @@ const FileGrid = ({
     >
       <div
         className={`file-list-header ${isMyFilesView ? "my-files-header" : ""}`}
-        style={{ gridTemplateColumns: `48px ${nameColumnWidth}fr 1fr 1fr 1fr` }}
+        style={{ gridTemplateColumns: `48px minmax(150px, ${nameColumnWidth}fr) minmax(120px, 1fr) minmax(100px, 1fr) minmax(100px, 1fr)` }}
       >
         {/* Select All Checkbox Column */}
         <div className="file-list-col col-checkbox">
@@ -898,7 +898,7 @@ const FileGrid = ({
               isInMyFilesView && isSelected ? "my-files-selected" : ""
             }`}
             style={{
-              gridTemplateColumns: `48px ${nameColumnWidth}fr 1fr 1fr 1fr`,
+              gridTemplateColumns: `48px minmax(150px, ${nameColumnWidth}fr) minmax(120px, 1fr) minmax(100px, 1fr) minmax(100px, 1fr)`,
             }}
             onClick={(e) => {
               // Only handle row click if not clicking on interactive elements

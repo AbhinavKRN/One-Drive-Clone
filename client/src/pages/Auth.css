@@ -396,3 +396,282 @@
 .login-copyright {
   color: #ffffff !important;
 }
+
+/* ===== Responsive Design ===== */
+
+/* Tablet and below */
+@media (max-width: 1024px) {
+  .auth-box {
+    padding: 40px;
+    max-width: 400px;
+  }
+
+  .auth-box h2 {
+    font-size: 22px;
+  }
+
+  .auth-subtitle {
+    font-size: 14px;
+  }
+
+  .ms-logo {
+    height: 60px;
+  }
+
+  .auth-header h1 {
+    font-size: 26px;
+  }
+
+  .login-box {
+    padding: 28px 36px 36px 36px !important;
+    max-width: 400px !important;
+  }
+
+  .login-title {
+    font-size: 22px !important;
+  }
+}
+
+/* Mobile and below */
+@media (max-width: 768px) {
+  .auth-container {
+    padding: 16px;
+    min-height: 100vh;
+  }
+
+  .auth-box {
+    padding: 32px 24px;
+    max-width: 100%;
+    margin-bottom: 60px;
+  }
+
+  .auth-box h2 {
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+
+  .auth-subtitle {
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+
+  .auth-header {
+    margin-bottom: 24px;
+  }
+
+  .ms-logo {
+    height: 50px;
+  }
+
+  .auth-header h1 {
+    font-size: 24px;
+  }
+
+  .form-group {
+    margin-bottom: 14px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  .form-group input,
+  .ms-input {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .btn-primary {
+    padding: 10px 20px;
+    font-size: 14px;
+    margin-top: 14px;
+  }
+
+  .btn-back {
+    font-size: 14px;
+  }
+
+  .auth-footer {
+    margin-top: 20px;
+    font-size: 14px;
+  }
+
+  .auth-footer-links {
+    bottom: 16px;
+    gap: 16px;
+    font-size: 11px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .auth-privacy-notice {
+    bottom: 40px;
+    font-size: 11px;
+    padding: 0 16px;
+  }
+
+  .error-message {
+    padding: 10px;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  .login-box {
+    padding: 24px 28px 32px 28px !important;
+    max-width: 100% !important;
+    border: 1px solid #7a7a7a !important;
+  }
+
+  .login-box .auth-header {
+    margin-bottom: 6px !important;
+    margin-left: -4px !important;
+  }
+
+  .login-box .ms-logo {
+    height: 50px !important;
+  }
+
+  .login-title {
+    font-size: 20px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .login-input {
+    padding: 8px 0 !important;
+    font-size: 14px !important;
+  }
+
+  .login-no-account {
+    font-size: 14px !important;
+    margin-top: 14px !important;
+  }
+
+  .login-button-container {
+    margin-top: 28px !important;
+    gap: 10px !important;
+  }
+
+  .login-btn {
+    min-width: 90px !important;
+    padding: 10px 24px !important;
+    font-size: 14px !important;
+  }
+
+  .login-back {
+    padding: 10px 10px !important;
+    font-size: 14px !important;
+  }
+
+  .login-email-display {
+    font-size: 14px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .login-footer {
+    padding: 6px 16px !important;
+    gap: 16px !important;
+    font-size: 11px !important;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .auth-container {
+    padding: 12px;
+  }
+
+  .auth-box {
+    padding: 24px 20px;
+    margin-bottom: 50px;
+  }
+
+  .auth-box h2 {
+    font-size: 18px;
+  }
+
+  .auth-subtitle {
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  .auth-header {
+    margin-bottom: 20px;
+  }
+
+  .ms-logo {
+    height: 45px;
+  }
+
+  .auth-header h1 {
+    font-size: 22px;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+
+  .form-group label {
+    font-size: 12px;
+    margin-bottom: 5px;
+  }
+
+  .form-group input,
+  .ms-input {
+    padding: 9px 10px;
+    font-size: 13px;
+  }
+
+  .btn-primary {
+    padding: 9px 18px;
+    font-size: 13px;
+    margin-top: 12px;
+  }
+
+  .auth-footer {
+    font-size: 13px;
+  }
+
+  .auth-footer-links {
+    bottom: 12px;
+    gap: 12px;
+    font-size: 10px;
+  }
+
+  .auth-privacy-notice {
+    bottom: 36px;
+    font-size: 10px;
+  }
+
+  .login-box {
+    padding: 20px 24px 28px 24px !important;
+  }
+
+  .login-title {
+    font-size: 18px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .login-input {
+    font-size: 13px !important;
+  }
+
+  .login-button-container {
+    flex-direction: column;
+    gap: 8px !important;
+  }
+
+  .login-btn,
+  .login-back {
+    width: 100% !important;
+    min-width: auto !important;
+  }
+
+  .login-footer {
+    padding: 6px 12px !important;
+    gap: 12px !important;
+    font-size: 10px !important;
+  }
+}
