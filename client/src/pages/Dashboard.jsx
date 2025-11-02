@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar'
 import Sidebar from '../components/Sidebar'
 import FileGrid from '../components/FileGrid'
 import SharedView from '../components/SharedView'
+import RecycleBin from '../components/RecycleBin'
 import FilePreview from '../components/FilePreview'
 import CreateFolderModal from '../components/CreateFolderModal'
 import RenameModal from '../components/RenameModal'
@@ -121,6 +122,8 @@ const Dashboard = () => {
               onItemClick={handleItemClick}
               onDownload={handleDownload}
             />
+          ) : filterType === 'recycle' ? (
+            <RecycleBin />
           ) : (
             <>
               <div className="toolbar">
