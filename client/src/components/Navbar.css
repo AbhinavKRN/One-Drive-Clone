@@ -327,6 +327,14 @@
   color: inherit;
 }
 
+/* Navbar storage diamond image icon */
+.navbar-storage-diamond-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
 /* ===== User Avatar ===== */
 .user-avatar {
   width: 38px;
@@ -1464,6 +1472,14 @@
   height: 16px;
   color: var(--text-primary);
   transition: color var(--transition-base);
+}
+
+/* Apps launcher buy storage diamond image icon */
+.apps-buy-storage-btn .buy-storage-diamond-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  object-fit: contain;
 }
 
 .navbar.photos-mode .apps-launcher-footer {
