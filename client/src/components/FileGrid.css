@@ -217,7 +217,7 @@
   grid-template-columns: 2fr 1fr 1fr 1fr;
   gap: 16px;
   padding: 8px 20px;
-  background-color: var(--bg-hover);
+  background-color: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color-light);
   font-weight: 600;
   font-size: 12px;
@@ -242,6 +242,11 @@
   transition: background-color var(--transition-fast),
               border-color var(--transition-base);
   position: relative;
+  margin: 0 2px;
+}
+
+.file-list-row:first-of-type {
+  margin-top: 0;
 }
 
 .file-list-row:hover {
@@ -251,6 +256,41 @@
 .file-list-row.selected {
   background-color: var(--bg-hover);
   border-left: 3px solid var(--accent-primary);
+}
+
+/* My Files Folder View - Dark Blue Selection (Transparent) */
+.file-list-row.my-files-selected {
+  background-color: rgba(26, 71, 122, 0.15) !important; /* #1A477A with 15% opacity */
+  border-left: none;
+  border-radius: 4px;
+}
+
+/* Keep text colors normal when using transparent background */
+.file-list-row.my-files-selected .file-list-col {
+  color: var(--text-primary) !important;
+}
+
+.file-list-row.my-files-selected .file-name {
+  color: var(--text-primary) !important;
+}
+
+.file-list-row.my-files-selected svg {
+  color: var(--text-primary) !important;
+}
+
+/* Only the checkbox checkmark should be dark blue/white for visibility */
+.file-list-row.my-files-selected .circular-checkbox:checked ~ .circular-checkbox-checkmark {
+  background-color: #1A477A;
+  border-color: #1A477A;
+}
+
+.file-list-row.my-files-selected .circular-checkbox-checkmark svg {
+  stroke: #FFFFFF;
+}
+
+/* My Files Header Styling */
+.file-list-header.my-files-header {
+  background-color: var(--bg-secondary);
 }
 
 /* Hide action icons by default */
@@ -264,6 +304,18 @@
 .file-list-row:hover .action-icon {
   opacity: 1;
   visibility: visible;
+}
+
+/* Always show ellipsis menu in My Files folder view */
+.file-list-row.my-files-selected .ellipsis-menu,
+.file-list-row:hover .ellipsis-menu {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Ensure ellipsis menu is visible on selected rows in My Files */
+.file-list-row.my-files-selected .ellipsis-menu svg {
+  color: #FFFFFF;
 }
 
 .file-list-row .action-icon.delete-icon {
@@ -285,6 +337,21 @@
 
 .col-name {
   gap: 12px;
+  position: relative;
+  align-items: center;
+}
+
+/* Checkbox spacing - positioned at far left with proper gap */
+.circular-checkbox-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-right: 12px; /* Consistent gap between checkbox and icon */
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
 }
 
 .name-header-wrapper {
@@ -372,6 +439,197 @@
   cursor: pointer;
   width: 18px;
   height: 18px;
+}
+
+/* File icon and name clickable styling */
+.file-icon-clickable,
+.file-name-clickable {
+  transition: opacity var(--transition-fast);
+}
+
+.file-icon-clickable:hover,
+.file-name-clickable:hover {
+  opacity: 0.8;
+}
+
+.circular-checkbox {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+.circular-checkbox-checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 18px;
+  width: 18px;
+  background-color: transparent;
+  border: 2px solid var(--border-color-medium);
+  border-radius: 50%;
+  transition: background-color var(--transition-fast),
+              border-color var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.circular-checkbox:checked ~ .circular-checkbox-checkmark {
+  background-color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.circular-checkbox-checkmark svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Sortable Header */
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  transition: background-color var(--transition-fast);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.sortable-header:hover {
+  background-color: var(--bg-hover);
+}
+
+.sortable-header svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+/* Recent View Styles - Clean and Simple */
+.recent-view {
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: 1px solid var(--border-color-light);
+  transition: background-color var(--transition-base),
+              border-color var(--transition-base);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  max-height: 100%;
+  height: 100%;
+}
+
+/* Ensure scrollbar styling */
+.recent-view::-webkit-scrollbar {
+  width: 8px;
+}
+
+.recent-view::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 4px;
+}
+
+.recent-view::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+.recent-view::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+.recent-header {
+  background-color: var(--bg-hover) !important;
+  border-bottom: 1px solid var(--border-color-light);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 10px 20px;
+  transition: background-color var(--transition-base);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.recent-row {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border-color-light);
+  transition: background-color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.recent-row:hover {
+  background-color: var(--bg-hover);
+}
+
+.recent-row:last-child {
+  border-bottom: none;
+}
+
+.recent-row .col-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.recent-row .col-name svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.file-name-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.file-name-primary {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-primary);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color var(--transition-base);
+}
+
+.file-name-secondary {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color var(--transition-base);
+}
+
+.recent-row .col-opened,
+.recent-row .col-owner {
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: color var(--transition-base);
+}
+
+.recent-row.selected {
+  background-color: var(--bg-active);
+}
+
+.recent-row.selected .file-name-primary,
+.recent-row.selected .col-opened,
+.recent-row.selected .col-owner {
+  color: var(--text-primary);
 }
 
 .col-name svg {
