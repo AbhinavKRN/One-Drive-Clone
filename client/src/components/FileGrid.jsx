@@ -20,6 +20,7 @@ const FileGrid = ({
   onItemClick,
   onDownload,
   onDelete,
+  onShare,
   sortBy,
   filterType,
   currentPath,
@@ -1214,16 +1215,20 @@ const FileGrid = ({
                 {file.name}
               </span>
               <div className="file-row-actions">
-                <button
-                  className="btn-icon action-icon share-icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Share functionality
-                  }}
-                  title="Share"
-                >
-                  <ShareRegular />
-                </button>
+                {file.type !== "folder" && (
+                  <button
+                    className="btn-icon action-icon share-icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onShare) {
+                        onShare(file);
+                      }
+                    }}
+                    title="Share"
+                  >
+                    <ShareRegular />
+                  </button>
+                )}
                 <button
                   className="btn-icon action-icon ellipsis-menu"
                   onClick={(e) => {

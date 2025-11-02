@@ -14,8 +14,25 @@ const {
   getRecycleBinItems,
   restoreItem,
   createEmptyFile,
-} = require("../controllers/file.controller");
-const { authenticate } = require("../middlewares/auth.middleware");
+  shareFile,
+  getFileShares,
+  unshareFile,
+  getSharedFiles,
+  createShareLink,
+  getShareLink,
+  disableShareLink,
+  accessSharedFile
+  createEmptyFile,
+  shareFile,
+  getFileShares,
+  unshareFile,
+  getSharedFiles,
+  createShareLink,
+  getShareLink,
+  disableShareLink,
+  accessSharedFile
+} = require('../controllers/file.controller')
+const { authenticate } = require('../middlewares/auth.middleware')
 
 const router = express.Router();
 
@@ -47,16 +64,31 @@ const upload = multer({
   },
 });
 
-router.get("/", authenticate, getAllFiles);
-router.get("/recycle-bin", authenticate, getRecycleBinItems);
-router.post("/restore/:id", authenticate, restoreItem);
-router.post("/create", authenticate, createEmptyFile);
-router.get("/:id/preview", authenticate, previewFile);
-router.get("/:id/download", authenticate, downloadFile);
-router.get("/:id", authenticate, getFile);
-router.post("/upload", authenticate, upload.single("file"), uploadFile);
-router.delete("/:id", authenticate, deleteFile);
-router.patch("/:id/rename", authenticate, renameFile);
-router.patch("/:id/move", authenticate, moveFile);
+// Specific routes must come BEFORE generic :id routes
+router.get('/', authenticate, getAllFiles)
+router.get('/recycle-bin', authenticate, getRecycleBinItems)
+router.get('/shared/:token', accessSharedFile) // Public endpoint for accessing shared files (must come before /shared)
+router.get('/shared', authenticate, getSharedFiles)
+router.post('/upload', authenticate, upload.single('file'), uploadFile)
+router.post('/create', authenticate, createEmptyFile)
+router.post('/restore/:id', authenticate, restoreItem)
+
+// File-specific routes (must come before generic /:id route)
+// Share link routes
+router.post('/:id/share-link', authenticate, createShareLink)
+router.get('/:id/share-link', authenticate, getShareLink)
+router.delete('/:id/share-link', authenticate, disableShareLink)
+
+// Email share routes (must come before /:id)
+router.post('/:id/share', authenticate, shareFile)
+router.get('/:id/shares', authenticate, getFileShares)
+router.delete('/:id/share', authenticate, unshareFile)
+router.get('/:id/preview', authenticate, previewFile)
+router.get('/:id/download', authenticate, downloadFile)
+router.patch('/:id/rename', authenticate, renameFile)
+
+// Generic routes (must come last)
+router.get('/:id', authenticate, getFile)
+router.delete('/:id', authenticate, deleteFile)
 
 module.exports = router;

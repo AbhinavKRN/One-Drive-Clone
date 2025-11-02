@@ -1,0 +1,610 @@
+.share-modal.onedrive-style {
+  max-width: 520px;
+  border-radius: 4px;
+}
+
+.share-modal.onedrive-style .share-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e1dfdd;
+}
+
+.share-modal.onedrive-style .share-modal-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #323130;
+  margin: 0;
+}
+
+.share-header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.share-header-actions .btn-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #605e5c;
+  transition: background-color 0.1s;
+}
+
+.share-header-actions .btn-icon:hover {
+  background-color: #f3f2f1;
+}
+
+.share-header-actions .btn-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.share-modal-body {
+  padding: 20px;
+}
+
+.share-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Permission Selector Section */
+.share-permission-section {
+  margin-bottom: 8px;
+}
+
+.permission-selector-inline {
+  display: flex;
+  gap: 8px;
+}
+
+.permission-option {
+  padding: 6px 12px;
+  border: 1px solid #e1dfdd;
+  background: white;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #323130;
+  transition: all 0.1s;
+}
+
+.permission-option:hover {
+  background-color: #f3f2f1;
+  border-color: #c8c6c4;
+}
+
+.permission-option.active {
+  background-color: #0078d4;
+  color: white;
+  border-color: #0078d4;
+}
+
+.permission-option.active:hover {
+  background-color: #106ebe;
+}
+
+/* Recipient Input */
+.permission-selector-inline {
+  display: flex;
+  align-items: center;
+}
+
+.permission-btn-inline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: none;
+  background: transparent;
+  color: #323130;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background-color 0.1s;
+}
+
+.permission-btn-inline:hover {
+  background-color: #f3f2f1;
+}
+
+.permission-btn-inline svg {
+  width: 14px;
+  height: 14px;
+  color: #605e5c;
+}
+
+.permission-btn-inline span {
+  font-size: 13px;
+}
+
+.permission-btn-inline .link-chevron {
+  width: 12px;
+  height: 12px;
+  color: #605e5c;
+}
+
+.share-recipient-input {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.recipient-input-wrapper {
+  display: flex;
+  align-items: center;
+  border: none;
+  border-bottom: 2px solid #0078d4;
+  border-radius: 0;
+  padding: 8px 0;
+  background: transparent;
+  transition: border-color 0.1s;
+}
+
+.recipient-input-wrapper:focus-within {
+  border-bottom-color: #0078d4;
+  border-bottom-width: 2px;
+}
+
+.input-divider {
+  width: 1px;
+  height: 20px;
+  background-color: #e1dfdd;
+  margin: 0 8px;
+}
+
+.input-icon {
+  padding: 0;
+  padding-right: 8px;
+  color: #605e5c;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.recipient-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 0;
+  font-size: 14px;
+  color: #323130;
+  background: transparent;
+}
+
+.recipient-input::placeholder {
+  color: #a19f9d;
+}
+
+.permission-selector {
+  display: flex;
+  align-items: center;
+  border-left: 1px solid #e1dfdd;
+  padding-left: 8px;
+}
+
+.permission-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #323130;
+  font-weight: 400;
+}
+
+.permission-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.permission-btn:hover {
+  background-color: #f3f2f1;
+  border-radius: 2px;
+}
+
+.permission-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: white;
+  border: 1px solid #e1dfdd;
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 150px;
+}
+
+.permission-dropdown button {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  color: #323130;
+}
+
+.permission-dropdown button:hover {
+  background-color: #f3f2f1;
+}
+
+.permission-dropdown button.active {
+  background-color: #edebe9;
+  font-weight: 500;
+}
+
+/* Message Input */
+.share-message-input {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e1dfdd;
+}
+
+.message-icon {
+  width: 16px;
+  height: 16px;
+  color: #605e5c;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.message-textarea {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 0;
+  font-size: 14px;
+  font-family: inherit;
+  color: #323130;
+  resize: vertical;
+  background: transparent;
+  min-height: 60px;
+}
+
+.message-textarea::placeholder {
+  color: #a19f9d;
+}
+
+/* Link Info */
+.share-link-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #faf9f8;
+  border-radius: 2px;
+  font-size: 13px;
+  color: #605e5c;
+}
+
+.share-link-info.clickable {
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.share-link-info.clickable:hover {
+  background-color: #f3f2f1;
+}
+
+.link-icon {
+  font-size: 16px;
+}
+
+.link-text {
+  flex: 1;
+}
+
+.link-chevron {
+  width: 12px;
+  height: 12px;
+  color: #605e5c;
+  transition: transform 0.2s;
+}
+
+.share-link-info.clickable:hover .link-chevron {
+  color: #323130;
+}
+
+/* Link Settings Panel */
+.link-settings-panel {
+  margin-top: 8px;
+  padding: 16px;
+  background: white;
+  border: 1px solid #e1dfdd;
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+.link-settings-header {
+  font-size: 14px;
+  font-weight: 600;
+  color: #323130;
+  margin-bottom: 16px;
+}
+
+.link-setting-item {
+  margin-bottom: 12px;
+}
+
+.link-setting-item:last-child {
+  margin-bottom: 16px;
+}
+
+.link-setting-item label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: #323130;
+}
+
+.link-setting-item:first-child label {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.link-setting-item label input[type="checkbox"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+.link-setting-item label input[type="date"] {
+  padding: 6px 8px;
+  border: 1px solid #8a8886;
+  border-radius: 2px;
+  font-size: 13px;
+  color: #323130;
+  background: white;
+  margin-top: 4px;
+  cursor: pointer;
+}
+
+.link-setting-item label input[type="date"]:focus {
+  outline: none;
+  border-color: #0078d4;
+  border-width: 2px;
+  padding: 5px 7px;
+}
+
+.btn-remove-expiry {
+  margin-top: 4px;
+  padding: 4px 8px;
+  background-color: transparent;
+  color: #605e5c;
+  border: 1px solid #e1dfdd;
+  border-radius: 2px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.btn-remove-expiry:hover {
+  background-color: #f3f2f1;
+  color: #323130;
+}
+
+.btn-save-link-settings {
+  margin-top: 8px;
+  padding: 8px 16px;
+  background-color: #0078d4;
+  color: white;
+  border: none;
+  border-radius: 2px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.btn-save-link-settings:hover {
+  background-color: #005a9e;
+}
+
+/* People with Access */
+.people-with-access {
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid #e1dfdd;
+}
+
+.people-header {
+  font-size: 13px;
+  font-weight: 600;
+  color: #323130;
+  margin-bottom: 12px;
+}
+
+.person-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.person-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.person-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #0078d4;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.person-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.person-name {
+  font-size: 14px;
+  font-weight: 400;
+  color: #323130;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.person-email {
+  font-size: 12px;
+  color: #605e5c;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-remove-person {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  color: #605e5c;
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.1s;
+}
+
+.btn-remove-person:hover {
+  background-color: #f3f2f1;
+}
+
+/* Action Buttons */
+.share-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid #e1dfdd;
+}
+
+.btn-copy-link-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #0078d4;
+  border: none;
+  color: white;
+  border-radius: 2px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.1s;
+  width: 100%;
+}
+
+.btn-copy-link-primary:hover {
+  background-color: #106ebe;
+}
+
+.btn-copy-link-primary:disabled {
+  background-color: #c8c6c4;
+  cursor: not-allowed;
+}
+
+.btn-copy-link-primary svg {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-copy-link-outline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid #0078d4;
+  color: #0078d4;
+  border-radius: 2px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.btn-copy-link-outline:hover {
+  background-color: #f3f9ff;
+}
+
+.btn-copy-link-outline svg {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-send {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  background: #0078d4;
+  border: none;
+  color: white;
+  border-radius: 2px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.btn-send:hover:not(:disabled) {
+  background-color: #005a9e;
+}
+
+.btn-send:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-send svg {
+  width: 16px;
+  height: 16px;
+}
+
+.error-message {
+  color: #d13438;
+  font-size: 13px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background-color: #fef0f0;
+  border-left: 3px solid #d13438;
+  border-radius: 2px;
+}

@@ -965,7 +965,3555 @@ const createEmptyFile = async (req, res) => {
       code: 500,
     });
   }
-};
+}
+
+// Share a file with a user by email
+const shareFile = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { email, permission = 'view', allow_download = true } = req.body
+    const userId = req.user.id
+    
+    console.log('📧 Share file request:', { fileId: id, email, userId })
+
+    if (!email) {
+      return res.status(400).json({
+        status: 'error',
+        action: 'share_file',
+        error: 'Email is required',
+        code: 400
+      })
+    }
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'share_file',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Find user by email
+    const { data: sharedWithUser, error: userError } = await supabase
+      .from('users')
+      .select('id, name, email')
+      .eq('email', email)
+      .single()
+
+    if (userError || !sharedWithUser) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'share_file',
+        error: 'User with this email not found',
+        code: 404
+      })
+    }
+
+    // Don't allow sharing with yourself
+    if (sharedWithUser.id === userId) {
+      return res.status(400).json({
+        status: 'error',
+        action: 'share_file',
+        error: 'Cannot share file with yourself',
+        code: 400
+      })
+    }
+
+    // Check if already shared
+    const { data: existingShare } = await supabase
+      .from('file_shares')
+      .select('*')
+      .eq('file_id', id)
+      .eq('shared_with', sharedWithUser.id)
+      .single()
+
+    if (existingShare) {
+      return res.status(409).json({
+        status: 'error',
+        action: 'share_file',
+        error: 'File is already shared with this user',
+        code: 409
+      })
+    }
+
+    // Create share
+    const { data: share, error: shareError } = await supabase
+      .from('file_shares')
+      .insert([{
+        file_id: id,
+        shared_by: userId,
+        shared_with: sharedWithUser.id,
+        permission: permission,
+        share_type: 'user',
+        link_enabled: false,
+        allow_download: allow_download
+      }])
+      .select()
+      .single()
+
+    if (shareError) {
+      throw shareError
+    }
+
+    return res.json({
+      status: 'success',
+      action: 'share_file',
+      data: {
+        share_id: share.id,
+        file_id: id,
+        shared_with: {
+          id: sharedWithUser.id,
+          name: sharedWithUser.name,
+          email: sharedWithUser.email
+        },
+        permission: permission
+      },
+      message: 'File shared successfully'
+    })
+  } catch (error) {
+    console.error('Share file error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'share_file',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Get users a file is shared with
+const getFileShares = async (req, res) => {
+  try {
+    const { id } = req.params
+    const userId = req.user.id
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'get_file_shares',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Get shares with user details
+    const { data: shares, error: sharesError } = await supabase
+      .from('file_shares')
+      .select(`
+        *,
+        shared_with_user:shared_with (id, name, email)
+      `)
+      .eq('file_id', id)
+
+    if (sharesError) {
+      throw sharesError
+    }
+
+    const formattedShares = (shares || []).map(share => ({
+      id: share.id,
+      shared_with: share.shared_with_user,
+      permission: share.permission,
+      share_type: share.share_type || 'user',
+      link_enabled: share.link_enabled || false,
+      allow_download: share.allow_download !== false,
+      expires_at: share.expires_at,
+      created_at: share.created_at
+    }))
+
+    return res.json({
+      status: 'success',
+      action: 'get_file_shares',
+      data: { shares: formattedShares },
+      message: 'File shares retrieved successfully'
+    })
+  } catch (error) {
+    console.error('Get file shares error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'get_file_shares',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Remove a share
+const unshareFile = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { share_id } = req.body
+    const userId = req.user.id
+
+    if (!share_id) {
+      return res.status(400).json({
+        status: 'error',
+        action: 'unshare_file',
+        error: 'share_id is required',
+        code: 400
+      })
+    }
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'unshare_file',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Verify share exists and belongs to this file
+    const { data: share, error: shareError } = await supabase
+      .from('file_shares')
+      .select('*')
+      .eq('id', share_id)
+      .eq('file_id', id)
+      .single()
+
+    if (shareError || !share) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'unshare_file',
+        error: 'Share not found',
+        code: 404
+      })
+    }
+
+    // Delete share
+    const { error: deleteError } = await supabase
+      .from('file_shares')
+      .delete()
+      .eq('id', share_id)
+
+    if (deleteError) {
+      throw deleteError
+    }
+
+    return res.json({
+      status: 'success',
+      action: 'unshare_file',
+      data: { share_id: share_id },
+      message: 'File share removed successfully'
+    })
+  } catch (error) {
+    console.error('Unshare file error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'unshare_file',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Get shared files (files shared with me and files I shared)
+const getSharedFiles = async (req, res) => {
+  try {
+    const userId = req.user.id
+
+    // Check if file_shares table exists - if not, return empty arrays
+    // This allows the app to work even if migration hasn't been run
+    let sharedWithMe = []
+    let sharedByMe = []
+    let sharedWithMeError = null
+    let sharedByMeError = null
+
+    try {
+      // Get files shared WITH me - use simpler query first
+      const result1 = await supabase
+        .from('file_shares')
+        .select('*')
+        .eq('shared_with', userId)
+
+      sharedWithMe = result1.data || []
+      sharedWithMeError = result1.error
+
+      // Get files shared BY me
+      const result2 = await supabase
+        .from('file_shares')
+        .select('*')
+        .eq('shared_by', userId)
+
+      sharedByMe = result2.data || []
+      sharedByMeError = result2.error
+
+      // If table doesn't exist, return empty arrays
+      if (sharedWithMeError && (sharedWithMeError.code === 'PGRST116' || sharedWithMeError.message?.includes('does not exist'))) {
+        console.log('⚠️ file_shares table does not exist yet. Run the migration: file_shares_migration.sql')
+        return res.json({
+          status: 'success',
+          action: 'get_shared_files',
+          data: {
+            sharedWithMe: [],
+            sharedByMe: []
+          },
+          message: 'Shared files retrieved successfully'
+        })
+      }
+
+      // Fetch file details for sharedWithMe
+      if (sharedWithMe.length > 0) {
+        const fileIds = sharedWithMe.map(s => s.file_id)
+        const { data: files, error: filesError } = await supabase
+          .from('files')
+          .select('*')
+          .in('id', fileIds)
+
+        if (!filesError && files) {
+          // Fetch user details for shared_by
+          const userIds = [...new Set(sharedWithMe.map(s => s.shared_by))]
+          const { data: users, error: usersError } = await supabase
+            .from('users')
+            .select('id, name, email')
+            .in('id', userIds)
+
+          const userMap = {}
+          if (!usersError && users) {
+            users.forEach(u => { userMap[u.id] = u })
+          }
+
+          // Combine share and file data
+          sharedWithMe = sharedWithMe.map(share => {
+            const file = files.find(f => f.id === share.file_id)
+            return {
+              ...share,
+              files: file,
+              file: file,
+              shared_by_user: userMap[share.shared_by] || null
+            }
+          }).filter(item => item.file && !item.file.deleted_at)
+        }
+      }
+
+      // Fetch file details for sharedByMe
+      if (sharedByMe.length > 0) {
+        const fileIds = sharedByMe.map(s => s.file_id)
+        const { data: files, error: filesError } = await supabase
+          .from('files')
+          .select('*')
+          .in('id', fileIds)
+
+        if (!filesError && files) {
+          // Fetch user details for shared_with
+          const userIds = [...new Set(sharedByMe.map(s => s.shared_with))]
+          const { data: users, error: usersError } = await supabase
+            .from('users')
+            .select('id, name, email')
+            .in('id', userIds)
+
+          const userMap = {}
+          if (!usersError && users) {
+            users.forEach(u => { userMap[u.id] = u })
+          }
+
+          // Combine share and file data
+          sharedByMe = sharedByMe.map(share => {
+            const file = files.find(f => f.id === share.file_id)
+            return {
+              ...share,
+              files: file,
+              file: file,
+              shared_with_user: userMap[share.shared_with] || null
+            }
+          }).filter(item => item.file && !item.file.deleted_at)
+        }
+      }
+
+      // If table exists but has other errors, handle them
+      if (sharedWithMeError && sharedWithMeError.code !== 'PGRST116') {
+        throw sharedWithMeError
+      }
+      if (sharedByMeError && sharedByMeError.code !== 'PGRST116') {
+        throw sharedByMeError
+      }
+    } catch (tableError) {
+      // Table doesn't exist or other error - return empty arrays
+      console.error('Error fetching shared files:', tableError.message || tableError)
+      if (tableError.message && tableError.message.includes('does not exist')) {
+        console.log('⚠️ file_shares table does not exist yet. Run the migration: file_shares_migration.sql')
+        return res.json({
+          status: 'success',
+          action: 'get_shared_files',
+          data: {
+            sharedWithMe: [],
+            sharedByMe: []
+          },
+          message: 'Shared files retrieved successfully'
+        })
+      }
+      throw tableError
+    }
+
+    // Format files shared with me
+    const filesSharedWithMe = (sharedWithMe || [])
+      .filter(item => {
+        const file = item.files || item.file
+        return file && !file.deleted_at
+      })
+      .map(item => {
+        const file = item.files || item.file
+        return {
+          id: file.id,
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          folder_id: file.folder_id,
+          path: file.path,
+          created_at: file.created_at,
+          updated_at: file.updated_at,
+          sharedBy: item.shared_by_user,
+          permission: item.permission,
+          sharedWithMe: true,
+          sharedByMe: false
+        }
+      })
+
+    // Format files shared by me
+    const filesSharedByMe = (sharedByMe || [])
+      .filter(item => {
+        const file = item.files || item.file
+        return file && !file.deleted_at
+      })
+      .map(item => {
+        const file = item.files || item.file
+        return {
+          id: file.id,
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          folder_id: file.folder_id,
+          path: file.path,
+          created_at: file.created_at,
+          updated_at: file.updated_at,
+          sharedWith: item.shared_with_user,
+          permission: item.permission,
+          sharedWithMe: false,
+          sharedByMe: true
+        }
+      })
+
+    return res.json({
+      status: 'success',
+      action: 'get_shared_files',
+      data: {
+        sharedWithMe: filesSharedWithMe,
+        sharedByMe: filesSharedByMe
+      },
+      message: 'Shared files retrieved successfully'
+    })
+  } catch (error) {
+    console.error('Get shared files error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'get_shared_files',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Generate or get share link for a file
+const createShareLink = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { permission = 'view', expires_at = null, allow_download = true } = req.body
+    const userId = req.user.id
+    
+    console.log('🔗 Creating share link for file:', id, 'by user:', userId)
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'create_share_link',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Check if link already exists for this file
+    // Use maybeSingle() to handle case where link doesn't exist
+    const { data: existingLink, error: existingLinkError } = await supabase
+      .from('file_shares')
+      .select('*')
+      .eq('file_id', id)
+      .eq('shared_by', userId)
+      .eq('link_enabled', true)
+      .eq('share_type', 'link')
+      .maybeSingle()
+
+    let shareToken
+    let shareId
+
+    // Handle case where columns might not exist yet (migration not run)
+    if (existingLinkError && existingLinkError.code !== 'PGRST116') {
+      // Check if error is about missing columns
+      if (existingLinkError.message && existingLinkError.message.includes('column')) {
+        console.error('⚠️ Link sharing columns not found. Run migration: file_shares_link_migration.sql')
+        return res.status(400).json({
+          status: 'error',
+          action: 'create_share_link',
+          error: 'Link sharing not enabled. Please run the database migration: file_shares_link_migration.sql',
+          code: 400
+        })
+      }
+      throw existingLinkError
+    }
+
+    if (existingLink) {
+      // Update existing link
+      shareToken = existingLink.share_token
+      shareId = existingLink.id
+      
+      const { error: updateError } = await supabase
+        .from('file_shares')
+        .update({
+          permission: permission,
+          expires_at: expires_at,
+          allow_download: allow_download,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', shareId)
+
+      if (updateError) {
+        // Check if it's a column error
+        if (updateError.message && updateError.message.includes('column')) {
+          return res.status(400).json({
+            status: 'error',
+            action: 'create_share_link',
+            error: 'Link sharing columns not found. Please run the database migration: file_shares_link_migration.sql',
+            code: 400
+          })
+        }
+        throw updateError
+      }
+    } else {
+      // Generate new share token with retry logic for uniqueness
+      const crypto = require('crypto')
+      let shareCreated = false
+      let maxRetries = 5
+      let retryCount = 0
+
+      while (!shareCreated && retryCount < maxRetries) {
+        shareToken = crypto.randomBytes(32).toString('hex')
+
+        // Create new link share
+        const { data: share, error: shareError } = await supabase
+          .from('file_shares')
+          .insert([{
+            file_id: id,
+            shared_by: userId,
+            shared_with: null, // Link shares don't have a specific user
+            share_token: shareToken,
+            share_type: 'link',
+            link_enabled: true,
+            permission: permission,
+            expires_at: expires_at,
+            allow_download: allow_download
+          }])
+          .select()
+          .single()
+
+        if (shareError) {
+          // Log the full error for debugging
+          console.error('Share link creation error (attempt ' + (retryCount + 1) + '):', shareError)
+          
+          // Check if it's a unique constraint violation on share_token (retry)
+          if (shareError.code === '23505' || (shareError.message && shareError.message.includes('duplicate key value'))) {
+            retryCount++
+            if (retryCount >= maxRetries) {
+              return res.status(500).json({
+                status: 'error',
+                action: 'create_share_link',
+                error: 'Failed to generate unique share token. Please try again.',
+                code: 500
+              })
+            }
+            continue // Retry with new token
+          }
+          
+          // Check if it's a column error
+          if (shareError.message && shareError.message.includes('column')) {
+            return res.status(400).json({
+              status: 'error',
+              action: 'create_share_link',
+              error: 'Link sharing columns not found. Please run the database migration: file_shares_link_migration.sql',
+              code: 400
+            })
+          }
+          
+          // Check if it's a NOT NULL constraint error for shared_with
+          if (shareError.message && (shareError.message.includes('null value') || shareError.message.includes('NOT NULL'))) {
+            return res.status(400).json({
+              status: 'error',
+              action: 'create_share_link',
+              error: 'shared_with column must allow NULL values. Please run: file_shares_link_migration.sql',
+              code: 400,
+              details: shareError.message
+            })
+          }
+          
+          // Return detailed error
+          return res.status(500).json({
+            status: 'error',
+            action: 'create_share_link',
+            error: shareError.message || 'Failed to create share link',
+            code: 500,
+            details: shareError
+          })
+        }
+        
+        // Success!
+        shareId = share.id
+        shareCreated = true
+        console.log('✅ Share link created successfully:', shareToken)
+      }
+
+      if (!shareCreated) {
+        return res.status(500).json({
+          status: 'error',
+          action: 'create_share_link',
+          error: 'Failed to create share link after multiple attempts',
+          code: 500
+        })
+      }
+    }
+
+    // Generate share URL
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+    const shareUrl = `${frontendUrl}/shared/${shareToken}`
+    
+    console.log('🔗 Returning share URL:', shareUrl)
+
+    return res.json({
+      status: 'success',
+      action: 'create_share_link',
+      data: {
+        share_id: shareId,
+        share_token: shareToken,
+        share_url: shareUrl,
+        permission: permission,
+        expires_at: expires_at,
+        allow_download: allow_download
+      },
+      message: 'Share link created successfully'
+    })
+  } catch (error) {
+    console.error('Create share link error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'create_share_link',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Get share link for a file
+const getShareLink = async (req, res) => {
+  try {
+    const { id } = req.params
+    const userId = req.user.id
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'get_share_link',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Get existing link share
+    const { data: linkShare, error: linkError } = await supabase
+      .from('file_shares')
+      .select('*')
+      .eq('file_id', id)
+      .eq('shared_by', userId)
+      .eq('link_enabled', true)
+      .eq('share_type', 'link')
+      .maybeSingle()
+
+    // Handle case where link doesn't exist (PGRST116 is the code for no rows)
+    if (linkError && linkError.code !== 'PGRST116') {
+      console.error('Get share link query error:', linkError)
+      throw linkError
+    }
+
+    if (!linkShare) {
+      return res.json({
+        status: 'success',
+        action: 'get_share_link',
+        data: {
+          share_url: null,
+          link_enabled: false
+        },
+        message: 'No share link exists'
+      })
+    }
+
+    // Check if link has expired
+    const isExpired = linkShare.expires_at && new Date(linkShare.expires_at) < new Date()
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+    const shareUrl = `${frontendUrl}/shared/${linkShare.share_token}`
+
+    return res.json({
+      status: 'success',
+      action: 'get_share_link',
+      data: {
+        share_id: linkShare.id,
+        share_token: linkShare.share_token,
+        share_url: shareUrl,
+        permission: linkShare.permission,
+        expires_at: linkShare.expires_at,
+        allow_download: linkShare.allow_download,
+        is_expired: isExpired,
+        link_enabled: true
+      },
+      message: 'Share link retrieved successfully'
+    })
+  } catch (error) {
+    console.error('Get share link error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'get_share_link',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Disable share link
+const disableShareLink = async (req, res) => {
+  try {
+    const { id } = req.params
+    const userId = req.user.id
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'disable_share_link',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Disable link share
+    const { error: updateError } = await supabase
+      .from('file_shares')
+      .update({ link_enabled: false })
+      .eq('file_id', id)
+      .eq('shared_by', userId)
+      .eq('share_type', 'link')
+
+    if (updateError) {
+      throw updateError
+    }
+
+    return res.json({
+      status: 'success',
+      action: 'disable_share_link',
+      data: { file_id: id },
+      message: 'Share link disabled successfully'
+    })
+  } catch (error) {
+    console.error('Disable share link error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'disable_share_link',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Access file via share token (public endpoint)
+const accessSharedFile = async (req, res) => {
+  try {
+    const { token } = req.params
+
+    // Find share by token
+    const { data: share, error: shareError } = await supabase
+      .from('file_shares')
+      .select(`
+        *,
+        file:files!file_id (*)
+      `)
+      .eq('share_token', token)
+      .eq('link_enabled', true)
+      .single()
+
+    if (shareError || !share) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'access_shared_file',
+        error: 'Share link not found or disabled',
+        code: 404
+      })
+    }
+
+    // Check if expired
+    if (share.expires_at && new Date(share.expires_at) < new Date()) {
+      return res.status(410).json({
+        status: 'error',
+        action: 'access_shared_file',
+        error: 'Share link has expired',
+        code: 410
+      })
+    }
+
+    // Check if file exists and is not deleted
+    if (!share.file || share.file.deleted_at) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'access_shared_file',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    return res.json({
+      status: 'success',
+      action: 'access_shared_file',
+      data: {
+        file: {
+          id: share.file.id,
+          name: share.file.name,
+          type: share.file.type,
+          size: share.file.size,
+          created_at: share.file.created_at
+        },
+        permission: share.permission,
+        allow_download: share.allow_download
+      },
+      message: 'Shared file accessed successfully'
+    })
+  } catch (error) {
+    console.error('Access shared file error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'access_shared_file',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Share a file with a user by email
+const shareFile = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { email, permission = 'view', allow_download = true } = req.body
+    const userId = req.user.id
+    
+    console.log('📧 Share file request:', { fileId: id, email, userId })
+
+    if (!email) {
+      return res.status(400).json({
+        status: 'error',
+        action: 'share_file',
+        error: 'Email is required',
+        code: 400
+      })
+    }
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'share_file',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Find user by email
+    const { data: sharedWithUser, error: userError } = await supabase
+      .from('users')
+      .select('id, name, email')
+      .eq('email', email)
+      .single()
+
+    if (userError || !sharedWithUser) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'share_file',
+        error: 'User with this email not found',
+        code: 404
+      })
+    }
+
+    // Don't allow sharing with yourself
+    if (sharedWithUser.id === userId) {
+      return res.status(400).json({
+        status: 'error',
+        action: 'share_file',
+        error: 'Cannot share file with yourself',
+        code: 400
+      })
+    }
+
+    // Check if already shared
+    const { data: existingShare } = await supabase
+      .from('file_shares')
+      .select('*')
+      .eq('file_id', id)
+      .eq('shared_with', sharedWithUser.id)
+      .single()
+
+    if (existingShare) {
+      return res.status(409).json({
+        status: 'error',
+        action: 'share_file',
+        error: 'File is already shared with this user',
+        code: 409
+      })
+    }
+
+    // Create share
+    const { data: share, error: shareError } = await supabase
+      .from('file_shares')
+      .insert([{
+        file_id: id,
+        shared_by: userId,
+        shared_with: sharedWithUser.id,
+        permission: permission,
+        share_type: 'user',
+        link_enabled: false,
+        allow_download: allow_download
+      }])
+      .select()
+      .single()
+
+    if (shareError) {
+      throw shareError
+    }
+
+    return res.json({
+      status: 'success',
+      action: 'share_file',
+      data: {
+        share_id: share.id,
+        file_id: id,
+        shared_with: {
+          id: sharedWithUser.id,
+          name: sharedWithUser.name,
+          email: sharedWithUser.email
+        },
+        permission: permission
+      },
+      message: 'File shared successfully'
+    })
+  } catch (error) {
+    console.error('Share file error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'share_file',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Get users a file is shared with
+const getFileShares = async (req, res) => {
+  try {
+    const { id } = req.params
+    const userId = req.user.id
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'get_file_shares',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Get shares with user details
+    const { data: shares, error: sharesError } = await supabase
+      .from('file_shares')
+      .select(`
+        *,
+        shared_with_user:shared_with (id, name, email)
+      `)
+      .eq('file_id', id)
+
+    if (sharesError) {
+      throw sharesError
+    }
+
+    const formattedShares = (shares || []).map(share => ({
+      id: share.id,
+      shared_with: share.shared_with_user,
+      permission: share.permission,
+      share_type: share.share_type || 'user',
+      link_enabled: share.link_enabled || false,
+      allow_download: share.allow_download !== false,
+      expires_at: share.expires_at,
+      created_at: share.created_at
+    }))
+
+    return res.json({
+      status: 'success',
+      action: 'get_file_shares',
+      data: { shares: formattedShares },
+      message: 'File shares retrieved successfully'
+    })
+  } catch (error) {
+    console.error('Get file shares error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'get_file_shares',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Remove a share
+const unshareFile = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { share_id } = req.body
+    const userId = req.user.id
+
+    if (!share_id) {
+      return res.status(400).json({
+        status: 'error',
+        action: 'unshare_file',
+        error: 'share_id is required',
+        code: 400
+      })
+    }
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'unshare_file',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Verify share exists and belongs to this file
+    const { data: share, error: shareError } = await supabase
+      .from('file_shares')
+      .select('*')
+      .eq('id', share_id)
+      .eq('file_id', id)
+      .single()
+
+    if (shareError || !share) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'unshare_file',
+        error: 'Share not found',
+        code: 404
+      })
+    }
+
+    // Delete share
+    const { error: deleteError } = await supabase
+      .from('file_shares')
+      .delete()
+      .eq('id', share_id)
+
+    if (deleteError) {
+      throw deleteError
+    }
+
+    return res.json({
+      status: 'success',
+      action: 'unshare_file',
+      data: { share_id: share_id },
+      message: 'File share removed successfully'
+    })
+  } catch (error) {
+    console.error('Unshare file error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'unshare_file',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Get shared files (files shared with me and files I shared)
+const getSharedFiles = async (req, res) => {
+  try {
+    const userId = req.user.id
+
+    // Check if file_shares table exists - if not, return empty arrays
+    // This allows the app to work even if migration hasn't been run
+    let sharedWithMe = []
+    let sharedByMe = []
+    let sharedWithMeError = null
+    let sharedByMeError = null
+
+    try {
+      // Get files shared WITH me - use simpler query first
+      const result1 = await supabase
+        .from('file_shares')
+        .select('*')
+        .eq('shared_with', userId)
+
+      sharedWithMe = result1.data || []
+      sharedWithMeError = result1.error
+
+      // Get files shared BY me
+      const result2 = await supabase
+        .from('file_shares')
+        .select('*')
+        .eq('shared_by', userId)
+
+      sharedByMe = result2.data || []
+      sharedByMeError = result2.error
+
+      // If table doesn't exist, return empty arrays
+      if (sharedWithMeError && (sharedWithMeError.code === 'PGRST116' || sharedWithMeError.message?.includes('does not exist'))) {
+        console.log('⚠️ file_shares table does not exist yet. Run the migration: file_shares_migration.sql')
+        return res.json({
+          status: 'success',
+          action: 'get_shared_files',
+          data: {
+            sharedWithMe: [],
+            sharedByMe: []
+          },
+          message: 'Shared files retrieved successfully'
+        })
+      }
+
+      // Fetch file details for sharedWithMe
+      if (sharedWithMe.length > 0) {
+        const fileIds = sharedWithMe.map(s => s.file_id)
+        const { data: files, error: filesError } = await supabase
+          .from('files')
+          .select('*')
+          .in('id', fileIds)
+
+        if (!filesError && files) {
+          // Fetch user details for shared_by
+          const userIds = [...new Set(sharedWithMe.map(s => s.shared_by))]
+          const { data: users, error: usersError } = await supabase
+            .from('users')
+            .select('id, name, email')
+            .in('id', userIds)
+
+          const userMap = {}
+          if (!usersError && users) {
+            users.forEach(u => { userMap[u.id] = u })
+          }
+
+          // Combine share and file data
+          sharedWithMe = sharedWithMe.map(share => {
+            const file = files.find(f => f.id === share.file_id)
+            return {
+              ...share,
+              files: file,
+              file: file,
+              shared_by_user: userMap[share.shared_by] || null
+            }
+          }).filter(item => item.file && !item.file.deleted_at)
+        }
+      }
+
+      // Fetch file details for sharedByMe
+      if (sharedByMe.length > 0) {
+        const fileIds = sharedByMe.map(s => s.file_id)
+        const { data: files, error: filesError } = await supabase
+          .from('files')
+          .select('*')
+          .in('id', fileIds)
+
+        if (!filesError && files) {
+          // Fetch user details for shared_with
+          const userIds = [...new Set(sharedByMe.map(s => s.shared_with))]
+          const { data: users, error: usersError } = await supabase
+            .from('users')
+            .select('id, name, email')
+            .in('id', userIds)
+
+          const userMap = {}
+          if (!usersError && users) {
+            users.forEach(u => { userMap[u.id] = u })
+          }
+
+          // Combine share and file data
+          sharedByMe = sharedByMe.map(share => {
+            const file = files.find(f => f.id === share.file_id)
+            return {
+              ...share,
+              files: file,
+              file: file,
+              shared_with_user: userMap[share.shared_with] || null
+            }
+          }).filter(item => item.file && !item.file.deleted_at)
+        }
+      }
+
+      // If table exists but has other errors, handle them
+      if (sharedWithMeError && sharedWithMeError.code !== 'PGRST116') {
+        throw sharedWithMeError
+      }
+      if (sharedByMeError && sharedByMeError.code !== 'PGRST116') {
+        throw sharedByMeError
+      }
+    } catch (tableError) {
+      // Table doesn't exist or other error - return empty arrays
+      console.error('Error fetching shared files:', tableError.message || tableError)
+      if (tableError.message && tableError.message.includes('does not exist')) {
+        console.log('⚠️ file_shares table does not exist yet. Run the migration: file_shares_migration.sql')
+        return res.json({
+          status: 'success',
+          action: 'get_shared_files',
+          data: {
+            sharedWithMe: [],
+            sharedByMe: []
+          },
+          message: 'Shared files retrieved successfully'
+        })
+      }
+      throw tableError
+    }
+
+    // Format files shared with me
+    const filesSharedWithMe = (sharedWithMe || [])
+      .filter(item => {
+        const file = item.files || item.file
+        return file && !file.deleted_at
+      })
+      .map(item => {
+        const file = item.files || item.file
+        return {
+          id: file.id,
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          folder_id: file.folder_id,
+          path: file.path,
+          created_at: file.created_at,
+          updated_at: file.updated_at,
+          sharedBy: item.shared_by_user,
+          permission: item.permission,
+          sharedWithMe: true,
+          sharedByMe: false
+        }
+      })
+
+    // Format files shared by me
+    const filesSharedByMe = (sharedByMe || [])
+      .filter(item => {
+        const file = item.files || item.file
+        return file && !file.deleted_at
+      })
+      .map(item => {
+        const file = item.files || item.file
+        return {
+          id: file.id,
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          folder_id: file.folder_id,
+          path: file.path,
+          created_at: file.created_at,
+          updated_at: file.updated_at,
+          sharedWith: item.shared_with_user,
+          permission: item.permission,
+          sharedWithMe: false,
+          sharedByMe: true
+        }
+      })
+
+    return res.json({
+      status: 'success',
+      action: 'get_shared_files',
+      data: {
+        sharedWithMe: filesSharedWithMe,
+        sharedByMe: filesSharedByMe
+      },
+      message: 'Shared files retrieved successfully'
+    })
+  } catch (error) {
+    console.error('Get shared files error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'get_shared_files',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Generate or get share link for a file
+const createShareLink = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { permission = 'view', expires_at = null, allow_download = true } = req.body
+    const userId = req.user.id
+    
+    console.log('🔗 Creating share link for file:', id, 'by user:', userId)
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'create_share_link',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Check if link already exists for this file
+    // Use maybeSingle() to handle case where link doesn't exist
+    const { data: existingLink, error: existingLinkError } = await supabase
+      .from('file_shares')
+      .select('*')
+      .eq('file_id', id)
+      .eq('shared_by', userId)
+      .eq('link_enabled', true)
+      .eq('share_type', 'link')
+      .maybeSingle()
+
+    let shareToken
+    let shareId
+
+    // Handle case where columns might not exist yet (migration not run)
+    if (existingLinkError && existingLinkError.code !== 'PGRST116') {
+      // Check if error is about missing columns
+      if (existingLinkError.message && existingLinkError.message.includes('column')) {
+        console.error('⚠️ Link sharing columns not found. Run migration: file_shares_link_migration.sql')
+        return res.status(400).json({
+          status: 'error',
+          action: 'create_share_link',
+          error: 'Link sharing not enabled. Please run the database migration: file_shares_link_migration.sql',
+          code: 400
+        })
+      }
+      throw existingLinkError
+    }
+
+    if (existingLink) {
+      // Update existing link
+      shareToken = existingLink.share_token
+      shareId = existingLink.id
+      
+      const { error: updateError } = await supabase
+        .from('file_shares')
+        .update({
+          permission: permission,
+          expires_at: expires_at,
+          allow_download: allow_download,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', shareId)
+
+      if (updateError) {
+        // Check if it's a column error
+        if (updateError.message && updateError.message.includes('column')) {
+          return res.status(400).json({
+            status: 'error',
+            action: 'create_share_link',
+            error: 'Link sharing columns not found. Please run the database migration: file_shares_link_migration.sql',
+            code: 400
+          })
+        }
+        throw updateError
+      }
+    } else {
+      // Generate new share token with retry logic for uniqueness
+      const crypto = require('crypto')
+      let shareCreated = false
+      let maxRetries = 5
+      let retryCount = 0
+
+      while (!shareCreated && retryCount < maxRetries) {
+        shareToken = crypto.randomBytes(32).toString('hex')
+
+        // Create new link share
+        const { data: share, error: shareError } = await supabase
+          .from('file_shares')
+          .insert([{
+            file_id: id,
+            shared_by: userId,
+            shared_with: null, // Link shares don't have a specific user
+            share_token: shareToken,
+            share_type: 'link',
+            link_enabled: true,
+            permission: permission,
+            expires_at: expires_at,
+            allow_download: allow_download
+          }])
+          .select()
+          .single()
+
+        if (shareError) {
+          // Log the full error for debugging
+          console.error('Share link creation error (attempt ' + (retryCount + 1) + '):', shareError)
+          
+          // Check if it's a unique constraint violation on share_token (retry)
+          if (shareError.code === '23505' || (shareError.message && shareError.message.includes('duplicate key value'))) {
+            retryCount++
+            if (retryCount >= maxRetries) {
+              return res.status(500).json({
+                status: 'error',
+                action: 'create_share_link',
+                error: 'Failed to generate unique share token. Please try again.',
+                code: 500
+              })
+            }
+            continue // Retry with new token
+          }
+          
+          // Check if it's a column error
+          if (shareError.message && shareError.message.includes('column')) {
+            return res.status(400).json({
+              status: 'error',
+              action: 'create_share_link',
+              error: 'Link sharing columns not found. Please run the database migration: file_shares_link_migration.sql',
+              code: 400
+            })
+          }
+          
+          // Check if it's a NOT NULL constraint error for shared_with
+          if (shareError.message && (shareError.message.includes('null value') || shareError.message.includes('NOT NULL'))) {
+            return res.status(400).json({
+              status: 'error',
+              action: 'create_share_link',
+              error: 'shared_with column must allow NULL values. Please run: file_shares_link_migration.sql',
+              code: 400,
+              details: shareError.message
+            })
+          }
+          
+          // Return detailed error
+          return res.status(500).json({
+            status: 'error',
+            action: 'create_share_link',
+            error: shareError.message || 'Failed to create share link',
+            code: 500,
+            details: shareError
+          })
+        }
+        
+        // Success!
+        shareId = share.id
+        shareCreated = true
+        console.log('✅ Share link created successfully:', shareToken)
+      }
+
+      if (!shareCreated) {
+        return res.status(500).json({
+          status: 'error',
+          action: 'create_share_link',
+          error: 'Failed to create share link after multiple attempts',
+          code: 500
+        })
+      }
+    }
+
+    // Generate share URL
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+    const shareUrl = `${frontendUrl}/shared/${shareToken}`
+    
+    console.log('🔗 Returning share URL:', shareUrl)
+
+    return res.json({
+      status: 'success',
+      action: 'create_share_link',
+      data: {
+        share_id: shareId,
+        share_token: shareToken,
+        share_url: shareUrl,
+        permission: permission,
+        expires_at: expires_at,
+        allow_download: allow_download
+      },
+      message: 'Share link created successfully'
+    })
+  } catch (error) {
+    console.error('Create share link error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'create_share_link',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Get share link for a file
+const getShareLink = async (req, res) => {
+  try {
+    const { id } = req.params
+    const userId = req.user.id
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'get_share_link',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Get existing link share
+    const { data: linkShare, error: linkError } = await supabase
+      .from('file_shares')
+      .select('*')
+      .eq('file_id', id)
+      .eq('shared_by', userId)
+      .eq('link_enabled', true)
+      .eq('share_type', 'link')
+      .maybeSingle()
+
+    // Handle case where link doesn't exist (PGRST116 is the code for no rows)
+    if (linkError && linkError.code !== 'PGRST116') {
+      console.error('Get share link query error:', linkError)
+      throw linkError
+    }
+
+    if (!linkShare) {
+      return res.json({
+        status: 'success',
+        action: 'get_share_link',
+        data: {
+          share_url: null,
+          link_enabled: false
+        },
+        message: 'No share link exists'
+      })
+    }
+
+    // Check if link has expired
+    const isExpired = linkShare.expires_at && new Date(linkShare.expires_at) < new Date()
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+    const shareUrl = `${frontendUrl}/shared/${linkShare.share_token}`
+
+    return res.json({
+      status: 'success',
+      action: 'get_share_link',
+      data: {
+        share_id: linkShare.id,
+        share_token: linkShare.share_token,
+        share_url: shareUrl,
+        permission: linkShare.permission,
+        expires_at: linkShare.expires_at,
+        allow_download: linkShare.allow_download,
+        is_expired: isExpired,
+        link_enabled: true
+      },
+      message: 'Share link retrieved successfully'
+    })
+  } catch (error) {
+    console.error('Get share link error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'get_share_link',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Disable share link
+const disableShareLink = async (req, res) => {
+  try {
+    const { id } = req.params
+    const userId = req.user.id
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'disable_share_link',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Disable link share
+    const { error: updateError } = await supabase
+      .from('file_shares')
+      .update({ link_enabled: false })
+      .eq('file_id', id)
+      .eq('shared_by', userId)
+      .eq('share_type', 'link')
+
+    if (updateError) {
+      throw updateError
+    }
+
+    return res.json({
+      status: 'success',
+      action: 'disable_share_link',
+      data: { file_id: id },
+      message: 'Share link disabled successfully'
+    })
+  } catch (error) {
+    console.error('Disable share link error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'disable_share_link',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Access file via share token (public endpoint)
+const accessSharedFile = async (req, res) => {
+  try {
+    const { token } = req.params
+
+    // Find share by token
+    const { data: share, error: shareError } = await supabase
+      .from('file_shares')
+      .select(`
+        *,
+        file:files!file_id (*)
+      `)
+      .eq('share_token', token)
+      .eq('link_enabled', true)
+      .single()
+
+    if (shareError || !share) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'access_shared_file',
+        error: 'Share link not found or disabled',
+        code: 404
+      })
+    }
+
+    // Check if expired
+    if (share.expires_at && new Date(share.expires_at) < new Date()) {
+      return res.status(410).json({
+        status: 'error',
+        action: 'access_shared_file',
+        error: 'Share link has expired',
+        code: 410
+      })
+    }
+
+    // Check if file exists and is not deleted
+    if (!share.file || share.file.deleted_at) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'access_shared_file',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    return res.json({
+      status: 'success',
+      action: 'access_shared_file',
+      data: {
+        file: {
+          id: share.file.id,
+          name: share.file.name,
+          type: share.file.type,
+          size: share.file.size,
+          created_at: share.file.created_at
+        },
+        permission: share.permission,
+        allow_download: share.allow_download
+      },
+      message: 'Shared file accessed successfully'
+    })
+  } catch (error) {
+    console.error('Access shared file error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'access_shared_file',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Share a file with a user by email
+const shareFile = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { email, permission = 'view', allow_download = true } = req.body
+    const userId = req.user.id
+    
+    console.log('📧 Share file request:', { fileId: id, email, userId })
+
+    if (!email) {
+      return res.status(400).json({
+        status: 'error',
+        action: 'share_file',
+        error: 'Email is required',
+        code: 400
+      })
+    }
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'share_file',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Find user by email
+    const { data: sharedWithUser, error: userError } = await supabase
+      .from('users')
+      .select('id, name, email')
+      .eq('email', email)
+      .single()
+
+    if (userError || !sharedWithUser) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'share_file',
+        error: 'User with this email not found',
+        code: 404
+      })
+    }
+
+    // Don't allow sharing with yourself
+    if (sharedWithUser.id === userId) {
+      return res.status(400).json({
+        status: 'error',
+        action: 'share_file',
+        error: 'Cannot share file with yourself',
+        code: 400
+      })
+    }
+
+    // Check if already shared
+    const { data: existingShare } = await supabase
+      .from('file_shares')
+      .select('*')
+      .eq('file_id', id)
+      .eq('shared_with', sharedWithUser.id)
+      .single()
+
+    if (existingShare) {
+      return res.status(409).json({
+        status: 'error',
+        action: 'share_file',
+        error: 'File is already shared with this user',
+        code: 409
+      })
+    }
+
+    // Create share
+    const { data: share, error: shareError } = await supabase
+      .from('file_shares')
+      .insert([{
+        file_id: id,
+        shared_by: userId,
+        shared_with: sharedWithUser.id,
+        permission: permission,
+        share_type: 'user',
+        link_enabled: false,
+        allow_download: allow_download
+      }])
+      .select()
+      .single()
+
+    if (shareError) {
+      throw shareError
+    }
+
+    return res.json({
+      status: 'success',
+      action: 'share_file',
+      data: {
+        share_id: share.id,
+        file_id: id,
+        shared_with: {
+          id: sharedWithUser.id,
+          name: sharedWithUser.name,
+          email: sharedWithUser.email
+        },
+        permission: permission
+      },
+      message: 'File shared successfully'
+    })
+  } catch (error) {
+    console.error('Share file error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'share_file',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Get users a file is shared with
+const getFileShares = async (req, res) => {
+  try {
+    const { id } = req.params
+    const userId = req.user.id
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'get_file_shares',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Get shares with user details
+    const { data: shares, error: sharesError } = await supabase
+      .from('file_shares')
+      .select(`
+        *,
+        shared_with_user:shared_with (id, name, email)
+      `)
+      .eq('file_id', id)
+
+    if (sharesError) {
+      throw sharesError
+    }
+
+    const formattedShares = (shares || []).map(share => ({
+      id: share.id,
+      shared_with: share.shared_with_user,
+      permission: share.permission,
+      share_type: share.share_type || 'user',
+      link_enabled: share.link_enabled || false,
+      allow_download: share.allow_download !== false,
+      expires_at: share.expires_at,
+      created_at: share.created_at
+    }))
+
+    return res.json({
+      status: 'success',
+      action: 'get_file_shares',
+      data: { shares: formattedShares },
+      message: 'File shares retrieved successfully'
+    })
+  } catch (error) {
+    console.error('Get file shares error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'get_file_shares',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Remove a share
+const unshareFile = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { share_id } = req.body
+    const userId = req.user.id
+
+    if (!share_id) {
+      return res.status(400).json({
+        status: 'error',
+        action: 'unshare_file',
+        error: 'share_id is required',
+        code: 400
+      })
+    }
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'unshare_file',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Verify share exists and belongs to this file
+    const { data: share, error: shareError } = await supabase
+      .from('file_shares')
+      .select('*')
+      .eq('id', share_id)
+      .eq('file_id', id)
+      .single()
+
+    if (shareError || !share) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'unshare_file',
+        error: 'Share not found',
+        code: 404
+      })
+    }
+
+    // Delete share
+    const { error: deleteError } = await supabase
+      .from('file_shares')
+      .delete()
+      .eq('id', share_id)
+
+    if (deleteError) {
+      throw deleteError
+    }
+
+    return res.json({
+      status: 'success',
+      action: 'unshare_file',
+      data: { share_id: share_id },
+      message: 'File share removed successfully'
+    })
+  } catch (error) {
+    console.error('Unshare file error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'unshare_file',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Get shared files (files shared with me and files I shared)
+const getSharedFiles = async (req, res) => {
+  try {
+    const userId = req.user.id
+
+    // Check if file_shares table exists - if not, return empty arrays
+    // This allows the app to work even if migration hasn't been run
+    let sharedWithMe = []
+    let sharedByMe = []
+    let sharedWithMeError = null
+    let sharedByMeError = null
+
+    try {
+      // Get files shared WITH me - use simpler query first
+      const result1 = await supabase
+        .from('file_shares')
+        .select('*')
+        .eq('shared_with', userId)
+
+      sharedWithMe = result1.data || []
+      sharedWithMeError = result1.error
+
+      // Get files shared BY me
+      const result2 = await supabase
+        .from('file_shares')
+        .select('*')
+        .eq('shared_by', userId)
+
+      sharedByMe = result2.data || []
+      sharedByMeError = result2.error
+
+      // If table doesn't exist, return empty arrays
+      if (sharedWithMeError && (sharedWithMeError.code === 'PGRST116' || sharedWithMeError.message?.includes('does not exist'))) {
+        console.log('⚠️ file_shares table does not exist yet. Run the migration: file_shares_migration.sql')
+        return res.json({
+          status: 'success',
+          action: 'get_shared_files',
+          data: {
+            sharedWithMe: [],
+            sharedByMe: []
+          },
+          message: 'Shared files retrieved successfully'
+        })
+      }
+
+      // Fetch file details for sharedWithMe
+      if (sharedWithMe.length > 0) {
+        const fileIds = sharedWithMe.map(s => s.file_id)
+        const { data: files, error: filesError } = await supabase
+          .from('files')
+          .select('*')
+          .in('id', fileIds)
+
+        if (!filesError && files) {
+          // Fetch user details for shared_by
+          const userIds = [...new Set(sharedWithMe.map(s => s.shared_by))]
+          const { data: users, error: usersError } = await supabase
+            .from('users')
+            .select('id, name, email')
+            .in('id', userIds)
+
+          const userMap = {}
+          if (!usersError && users) {
+            users.forEach(u => { userMap[u.id] = u })
+          }
+
+          // Combine share and file data
+          sharedWithMe = sharedWithMe.map(share => {
+            const file = files.find(f => f.id === share.file_id)
+            return {
+              ...share,
+              files: file,
+              file: file,
+              shared_by_user: userMap[share.shared_by] || null
+            }
+          }).filter(item => item.file && !item.file.deleted_at)
+        }
+      }
+
+      // Fetch file details for sharedByMe
+      if (sharedByMe.length > 0) {
+        const fileIds = sharedByMe.map(s => s.file_id)
+        const { data: files, error: filesError } = await supabase
+          .from('files')
+          .select('*')
+          .in('id', fileIds)
+
+        if (!filesError && files) {
+          // Fetch user details for shared_with
+          const userIds = [...new Set(sharedByMe.map(s => s.shared_with))]
+          const { data: users, error: usersError } = await supabase
+            .from('users')
+            .select('id, name, email')
+            .in('id', userIds)
+
+          const userMap = {}
+          if (!usersError && users) {
+            users.forEach(u => { userMap[u.id] = u })
+          }
+
+          // Combine share and file data
+          sharedByMe = sharedByMe.map(share => {
+            const file = files.find(f => f.id === share.file_id)
+            return {
+              ...share,
+              files: file,
+              file: file,
+              shared_with_user: userMap[share.shared_with] || null
+            }
+          }).filter(item => item.file && !item.file.deleted_at)
+        }
+      }
+
+      // If table exists but has other errors, handle them
+      if (sharedWithMeError && sharedWithMeError.code !== 'PGRST116') {
+        throw sharedWithMeError
+      }
+      if (sharedByMeError && sharedByMeError.code !== 'PGRST116') {
+        throw sharedByMeError
+      }
+    } catch (tableError) {
+      // Table doesn't exist or other error - return empty arrays
+      console.error('Error fetching shared files:', tableError.message || tableError)
+      if (tableError.message && tableError.message.includes('does not exist')) {
+        console.log('⚠️ file_shares table does not exist yet. Run the migration: file_shares_migration.sql')
+        return res.json({
+          status: 'success',
+          action: 'get_shared_files',
+          data: {
+            sharedWithMe: [],
+            sharedByMe: []
+          },
+          message: 'Shared files retrieved successfully'
+        })
+      }
+      throw tableError
+    }
+
+    // Format files shared with me
+    const filesSharedWithMe = (sharedWithMe || [])
+      .filter(item => {
+        const file = item.files || item.file
+        return file && !file.deleted_at
+      })
+      .map(item => {
+        const file = item.files || item.file
+        return {
+          id: file.id,
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          folder_id: file.folder_id,
+          path: file.path,
+          created_at: file.created_at,
+          updated_at: file.updated_at,
+          sharedBy: item.shared_by_user,
+          permission: item.permission,
+          sharedWithMe: true,
+          sharedByMe: false
+        }
+      })
+
+    // Format files shared by me
+    const filesSharedByMe = (sharedByMe || [])
+      .filter(item => {
+        const file = item.files || item.file
+        return file && !file.deleted_at
+      })
+      .map(item => {
+        const file = item.files || item.file
+        return {
+          id: file.id,
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          folder_id: file.folder_id,
+          path: file.path,
+          created_at: file.created_at,
+          updated_at: file.updated_at,
+          sharedWith: item.shared_with_user,
+          permission: item.permission,
+          sharedWithMe: false,
+          sharedByMe: true
+        }
+      })
+
+    return res.json({
+      status: 'success',
+      action: 'get_shared_files',
+      data: {
+        sharedWithMe: filesSharedWithMe,
+        sharedByMe: filesSharedByMe
+      },
+      message: 'Shared files retrieved successfully'
+    })
+  } catch (error) {
+    console.error('Get shared files error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'get_shared_files',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Generate or get share link for a file
+const createShareLink = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { permission = 'view', expires_at = null, allow_download = true } = req.body
+    const userId = req.user.id
+    
+    console.log('🔗 Creating share link for file:', id, 'by user:', userId)
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'create_share_link',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Check if link already exists for this file
+    // Use maybeSingle() to handle case where link doesn't exist
+    const { data: existingLink, error: existingLinkError } = await supabase
+      .from('file_shares')
+      .select('*')
+      .eq('file_id', id)
+      .eq('shared_by', userId)
+      .eq('link_enabled', true)
+      .eq('share_type', 'link')
+      .maybeSingle()
+
+    let shareToken
+    let shareId
+
+    // Handle case where columns might not exist yet (migration not run)
+    if (existingLinkError && existingLinkError.code !== 'PGRST116') {
+      // Check if error is about missing columns
+      if (existingLinkError.message && existingLinkError.message.includes('column')) {
+        console.error('⚠️ Link sharing columns not found. Run migration: file_shares_link_migration.sql')
+        return res.status(400).json({
+          status: 'error',
+          action: 'create_share_link',
+          error: 'Link sharing not enabled. Please run the database migration: file_shares_link_migration.sql',
+          code: 400
+        })
+      }
+      throw existingLinkError
+    }
+
+    if (existingLink) {
+      // Update existing link
+      shareToken = existingLink.share_token
+      shareId = existingLink.id
+      
+      const { error: updateError } = await supabase
+        .from('file_shares')
+        .update({
+          permission: permission,
+          expires_at: expires_at,
+          allow_download: allow_download,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', shareId)
+
+      if (updateError) {
+        // Check if it's a column error
+        if (updateError.message && updateError.message.includes('column')) {
+          return res.status(400).json({
+            status: 'error',
+            action: 'create_share_link',
+            error: 'Link sharing columns not found. Please run the database migration: file_shares_link_migration.sql',
+            code: 400
+          })
+        }
+        throw updateError
+      }
+    } else {
+      // Generate new share token with retry logic for uniqueness
+      const crypto = require('crypto')
+      let shareCreated = false
+      let maxRetries = 5
+      let retryCount = 0
+
+      while (!shareCreated && retryCount < maxRetries) {
+        shareToken = crypto.randomBytes(32).toString('hex')
+
+        // Create new link share
+        const { data: share, error: shareError } = await supabase
+          .from('file_shares')
+          .insert([{
+            file_id: id,
+            shared_by: userId,
+            shared_with: null, // Link shares don't have a specific user
+            share_token: shareToken,
+            share_type: 'link',
+            link_enabled: true,
+            permission: permission,
+            expires_at: expires_at,
+            allow_download: allow_download
+          }])
+          .select()
+          .single()
+
+        if (shareError) {
+          // Log the full error for debugging
+          console.error('Share link creation error (attempt ' + (retryCount + 1) + '):', shareError)
+          
+          // Check if it's a unique constraint violation on share_token (retry)
+          if (shareError.code === '23505' || (shareError.message && shareError.message.includes('duplicate key value'))) {
+            retryCount++
+            if (retryCount >= maxRetries) {
+              return res.status(500).json({
+                status: 'error',
+                action: 'create_share_link',
+                error: 'Failed to generate unique share token. Please try again.',
+                code: 500
+              })
+            }
+            continue // Retry with new token
+          }
+          
+          // Check if it's a column error
+          if (shareError.message && shareError.message.includes('column')) {
+            return res.status(400).json({
+              status: 'error',
+              action: 'create_share_link',
+              error: 'Link sharing columns not found. Please run the database migration: file_shares_link_migration.sql',
+              code: 400
+            })
+          }
+          
+          // Check if it's a NOT NULL constraint error for shared_with
+          if (shareError.message && (shareError.message.includes('null value') || shareError.message.includes('NOT NULL'))) {
+            return res.status(400).json({
+              status: 'error',
+              action: 'create_share_link',
+              error: 'shared_with column must allow NULL values. Please run: file_shares_link_migration.sql',
+              code: 400,
+              details: shareError.message
+            })
+          }
+          
+          // Return detailed error
+          return res.status(500).json({
+            status: 'error',
+            action: 'create_share_link',
+            error: shareError.message || 'Failed to create share link',
+            code: 500,
+            details: shareError
+          })
+        }
+        
+        // Success!
+        shareId = share.id
+        shareCreated = true
+        console.log('✅ Share link created successfully:', shareToken)
+      }
+
+      if (!shareCreated) {
+        return res.status(500).json({
+          status: 'error',
+          action: 'create_share_link',
+          error: 'Failed to create share link after multiple attempts',
+          code: 500
+        })
+      }
+    }
+
+    // Generate share URL
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+    const shareUrl = `${frontendUrl}/shared/${shareToken}`
+    
+    console.log('🔗 Returning share URL:', shareUrl)
+
+    return res.json({
+      status: 'success',
+      action: 'create_share_link',
+      data: {
+        share_id: shareId,
+        share_token: shareToken,
+        share_url: shareUrl,
+        permission: permission,
+        expires_at: expires_at,
+        allow_download: allow_download
+      },
+      message: 'Share link created successfully'
+    })
+  } catch (error) {
+    console.error('Create share link error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'create_share_link',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Get share link for a file
+const getShareLink = async (req, res) => {
+  try {
+    const { id } = req.params
+    const userId = req.user.id
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'get_share_link',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Get existing link share
+    const { data: linkShare, error: linkError } = await supabase
+      .from('file_shares')
+      .select('*')
+      .eq('file_id', id)
+      .eq('shared_by', userId)
+      .eq('link_enabled', true)
+      .eq('share_type', 'link')
+      .maybeSingle()
+
+    // Handle case where link doesn't exist (PGRST116 is the code for no rows)
+    if (linkError && linkError.code !== 'PGRST116') {
+      console.error('Get share link query error:', linkError)
+      throw linkError
+    }
+
+    if (!linkShare) {
+      return res.json({
+        status: 'success',
+        action: 'get_share_link',
+        data: {
+          share_url: null,
+          link_enabled: false
+        },
+        message: 'No share link exists'
+      })
+    }
+
+    // Check if link has expired
+    const isExpired = linkShare.expires_at && new Date(linkShare.expires_at) < new Date()
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+    const shareUrl = `${frontendUrl}/shared/${linkShare.share_token}`
+
+    return res.json({
+      status: 'success',
+      action: 'get_share_link',
+      data: {
+        share_id: linkShare.id,
+        share_token: linkShare.share_token,
+        share_url: shareUrl,
+        permission: linkShare.permission,
+        expires_at: linkShare.expires_at,
+        allow_download: linkShare.allow_download,
+        is_expired: isExpired,
+        link_enabled: true
+      },
+      message: 'Share link retrieved successfully'
+    })
+  } catch (error) {
+    console.error('Get share link error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'get_share_link',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Disable share link
+const disableShareLink = async (req, res) => {
+  try {
+    const { id } = req.params
+    const userId = req.user.id
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'disable_share_link',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Disable link share
+    const { error: updateError } = await supabase
+      .from('file_shares')
+      .update({ link_enabled: false })
+      .eq('file_id', id)
+      .eq('shared_by', userId)
+      .eq('share_type', 'link')
+
+    if (updateError) {
+      throw updateError
+    }
+
+    return res.json({
+      status: 'success',
+      action: 'disable_share_link',
+      data: { file_id: id },
+      message: 'Share link disabled successfully'
+    })
+  } catch (error) {
+    console.error('Disable share link error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'disable_share_link',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Access file via share token (public endpoint)
+const accessSharedFile = async (req, res) => {
+  try {
+    const { token } = req.params
+
+    // Find share by token
+    const { data: share, error: shareError } = await supabase
+      .from('file_shares')
+      .select(`
+        *,
+        file:files!file_id (*)
+      `)
+      .eq('share_token', token)
+      .eq('link_enabled', true)
+      .single()
+
+    if (shareError || !share) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'access_shared_file',
+        error: 'Share link not found or disabled',
+        code: 404
+      })
+    }
+
+    // Check if expired
+    if (share.expires_at && new Date(share.expires_at) < new Date()) {
+      return res.status(410).json({
+        status: 'error',
+        action: 'access_shared_file',
+        error: 'Share link has expired',
+        code: 410
+      })
+    }
+
+    // Check if file exists and is not deleted
+    if (!share.file || share.file.deleted_at) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'access_shared_file',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    return res.json({
+      status: 'success',
+      action: 'access_shared_file',
+      data: {
+        file: {
+          id: share.file.id,
+          name: share.file.name,
+          type: share.file.type,
+          size: share.file.size,
+          created_at: share.file.created_at
+        },
+        permission: share.permission,
+        allow_download: share.allow_download
+      },
+      message: 'Shared file accessed successfully'
+    })
+  } catch (error) {
+    console.error('Access shared file error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'access_shared_file',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Share a file with a user by email
+const shareFile = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { email, permission = 'view', allow_download = true } = req.body
+    const userId = req.user.id
+    
+    console.log('📧 Share file request:', { fileId: id, email, userId })
+
+    if (!email) {
+      return res.status(400).json({
+        status: 'error',
+        action: 'share_file',
+        error: 'Email is required',
+        code: 400
+      })
+    }
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'share_file',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Find user by email
+    const { data: sharedWithUser, error: userError } = await supabase
+      .from('users')
+      .select('id, name, email')
+      .eq('email', email)
+      .single()
+
+    if (userError || !sharedWithUser) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'share_file',
+        error: 'User with this email not found',
+        code: 404
+      })
+    }
+
+    // Don't allow sharing with yourself
+    if (sharedWithUser.id === userId) {
+      return res.status(400).json({
+        status: 'error',
+        action: 'share_file',
+        error: 'Cannot share file with yourself',
+        code: 400
+      })
+    }
+
+    // Check if already shared
+    const { data: existingShare } = await supabase
+      .from('file_shares')
+      .select('*')
+      .eq('file_id', id)
+      .eq('shared_with', sharedWithUser.id)
+      .single()
+
+    if (existingShare) {
+      return res.status(409).json({
+        status: 'error',
+        action: 'share_file',
+        error: 'File is already shared with this user',
+        code: 409
+      })
+    }
+
+    // Create share
+    const { data: share, error: shareError } = await supabase
+      .from('file_shares')
+      .insert([{
+        file_id: id,
+        shared_by: userId,
+        shared_with: sharedWithUser.id,
+        permission: permission,
+        share_type: 'user',
+        link_enabled: false,
+        allow_download: allow_download
+      }])
+      .select()
+      .single()
+
+    if (shareError) {
+      throw shareError
+    }
+
+    return res.json({
+      status: 'success',
+      action: 'share_file',
+      data: {
+        share_id: share.id,
+        file_id: id,
+        shared_with: {
+          id: sharedWithUser.id,
+          name: sharedWithUser.name,
+          email: sharedWithUser.email
+        },
+        permission: permission
+      },
+      message: 'File shared successfully'
+    })
+  } catch (error) {
+    console.error('Share file error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'share_file',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Get users a file is shared with
+const getFileShares = async (req, res) => {
+  try {
+    const { id } = req.params
+    const userId = req.user.id
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'get_file_shares',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Get shares with user details
+    const { data: shares, error: sharesError } = await supabase
+      .from('file_shares')
+      .select(`
+        *,
+        shared_with_user:shared_with (id, name, email)
+      `)
+      .eq('file_id', id)
+
+    if (sharesError) {
+      throw sharesError
+    }
+
+    const formattedShares = (shares || []).map(share => ({
+      id: share.id,
+      shared_with: share.shared_with_user,
+      permission: share.permission,
+      share_type: share.share_type || 'user',
+      link_enabled: share.link_enabled || false,
+      allow_download: share.allow_download !== false,
+      expires_at: share.expires_at,
+      created_at: share.created_at
+    }))
+
+    return res.json({
+      status: 'success',
+      action: 'get_file_shares',
+      data: { shares: formattedShares },
+      message: 'File shares retrieved successfully'
+    })
+  } catch (error) {
+    console.error('Get file shares error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'get_file_shares',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Remove a share
+const unshareFile = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { share_id } = req.body
+    const userId = req.user.id
+
+    if (!share_id) {
+      return res.status(400).json({
+        status: 'error',
+        action: 'unshare_file',
+        error: 'share_id is required',
+        code: 400
+      })
+    }
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'unshare_file',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Verify share exists and belongs to this file
+    const { data: share, error: shareError } = await supabase
+      .from('file_shares')
+      .select('*')
+      .eq('id', share_id)
+      .eq('file_id', id)
+      .single()
+
+    if (shareError || !share) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'unshare_file',
+        error: 'Share not found',
+        code: 404
+      })
+    }
+
+    // Delete share
+    const { error: deleteError } = await supabase
+      .from('file_shares')
+      .delete()
+      .eq('id', share_id)
+
+    if (deleteError) {
+      throw deleteError
+    }
+
+    return res.json({
+      status: 'success',
+      action: 'unshare_file',
+      data: { share_id: share_id },
+      message: 'File share removed successfully'
+    })
+  } catch (error) {
+    console.error('Unshare file error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'unshare_file',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Get shared files (files shared with me and files I shared)
+const getSharedFiles = async (req, res) => {
+  try {
+    const userId = req.user.id
+
+    // Check if file_shares table exists - if not, return empty arrays
+    // This allows the app to work even if migration hasn't been run
+    let sharedWithMe = []
+    let sharedByMe = []
+    let sharedWithMeError = null
+    let sharedByMeError = null
+
+    try {
+      // Get files shared WITH me - use simpler query first
+      const result1 = await supabase
+        .from('file_shares')
+        .select('*')
+        .eq('shared_with', userId)
+
+      sharedWithMe = result1.data || []
+      sharedWithMeError = result1.error
+
+      // Get files shared BY me
+      const result2 = await supabase
+        .from('file_shares')
+        .select('*')
+        .eq('shared_by', userId)
+
+      sharedByMe = result2.data || []
+      sharedByMeError = result2.error
+
+      // If table doesn't exist, return empty arrays
+      if (sharedWithMeError && (sharedWithMeError.code === 'PGRST116' || sharedWithMeError.message?.includes('does not exist'))) {
+        console.log('⚠️ file_shares table does not exist yet. Run the migration: file_shares_migration.sql')
+        return res.json({
+          status: 'success',
+          action: 'get_shared_files',
+          data: {
+            sharedWithMe: [],
+            sharedByMe: []
+          },
+          message: 'Shared files retrieved successfully'
+        })
+      }
+
+      // Fetch file details for sharedWithMe
+      if (sharedWithMe.length > 0) {
+        const fileIds = sharedWithMe.map(s => s.file_id)
+        const { data: files, error: filesError } = await supabase
+          .from('files')
+          .select('*')
+          .in('id', fileIds)
+
+        if (!filesError && files) {
+          // Fetch user details for shared_by
+          const userIds = [...new Set(sharedWithMe.map(s => s.shared_by))]
+          const { data: users, error: usersError } = await supabase
+            .from('users')
+            .select('id, name, email')
+            .in('id', userIds)
+
+          const userMap = {}
+          if (!usersError && users) {
+            users.forEach(u => { userMap[u.id] = u })
+          }
+
+          // Combine share and file data
+          sharedWithMe = sharedWithMe.map(share => {
+            const file = files.find(f => f.id === share.file_id)
+            return {
+              ...share,
+              files: file,
+              file: file,
+              shared_by_user: userMap[share.shared_by] || null
+            }
+          }).filter(item => item.file && !item.file.deleted_at)
+        }
+      }
+
+      // Fetch file details for sharedByMe
+      if (sharedByMe.length > 0) {
+        const fileIds = sharedByMe.map(s => s.file_id)
+        const { data: files, error: filesError } = await supabase
+          .from('files')
+          .select('*')
+          .in('id', fileIds)
+
+        if (!filesError && files) {
+          // Fetch user details for shared_with
+          const userIds = [...new Set(sharedByMe.map(s => s.shared_with))]
+          const { data: users, error: usersError } = await supabase
+            .from('users')
+            .select('id, name, email')
+            .in('id', userIds)
+
+          const userMap = {}
+          if (!usersError && users) {
+            users.forEach(u => { userMap[u.id] = u })
+          }
+
+          // Combine share and file data
+          sharedByMe = sharedByMe.map(share => {
+            const file = files.find(f => f.id === share.file_id)
+            return {
+              ...share,
+              files: file,
+              file: file,
+              shared_with_user: userMap[share.shared_with] || null
+            }
+          }).filter(item => item.file && !item.file.deleted_at)
+        }
+      }
+
+      // If table exists but has other errors, handle them
+      if (sharedWithMeError && sharedWithMeError.code !== 'PGRST116') {
+        throw sharedWithMeError
+      }
+      if (sharedByMeError && sharedByMeError.code !== 'PGRST116') {
+        throw sharedByMeError
+      }
+    } catch (tableError) {
+      // Table doesn't exist or other error - return empty arrays
+      console.error('Error fetching shared files:', tableError.message || tableError)
+      if (tableError.message && tableError.message.includes('does not exist')) {
+        console.log('⚠️ file_shares table does not exist yet. Run the migration: file_shares_migration.sql')
+        return res.json({
+          status: 'success',
+          action: 'get_shared_files',
+          data: {
+            sharedWithMe: [],
+            sharedByMe: []
+          },
+          message: 'Shared files retrieved successfully'
+        })
+      }
+      throw tableError
+    }
+
+    // Format files shared with me
+    const filesSharedWithMe = (sharedWithMe || [])
+      .filter(item => {
+        const file = item.files || item.file
+        return file && !file.deleted_at
+      })
+      .map(item => {
+        const file = item.files || item.file
+        return {
+          id: file.id,
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          folder_id: file.folder_id,
+          path: file.path,
+          created_at: file.created_at,
+          updated_at: file.updated_at,
+          sharedBy: item.shared_by_user,
+          permission: item.permission,
+          sharedWithMe: true,
+          sharedByMe: false
+        }
+      })
+
+    // Format files shared by me
+    const filesSharedByMe = (sharedByMe || [])
+      .filter(item => {
+        const file = item.files || item.file
+        return file && !file.deleted_at
+      })
+      .map(item => {
+        const file = item.files || item.file
+        return {
+          id: file.id,
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          folder_id: file.folder_id,
+          path: file.path,
+          created_at: file.created_at,
+          updated_at: file.updated_at,
+          sharedWith: item.shared_with_user,
+          permission: item.permission,
+          sharedWithMe: false,
+          sharedByMe: true
+        }
+      })
+
+    return res.json({
+      status: 'success',
+      action: 'get_shared_files',
+      data: {
+        sharedWithMe: filesSharedWithMe,
+        sharedByMe: filesSharedByMe
+      },
+      message: 'Shared files retrieved successfully'
+    })
+  } catch (error) {
+    console.error('Get shared files error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'get_shared_files',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Generate or get share link for a file
+const createShareLink = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { permission = 'view', expires_at = null, allow_download = true } = req.body
+    const userId = req.user.id
+    
+    console.log('🔗 Creating share link for file:', id, 'by user:', userId)
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'create_share_link',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Check if link already exists for this file
+    // Use maybeSingle() to handle case where link doesn't exist
+    const { data: existingLink, error: existingLinkError } = await supabase
+      .from('file_shares')
+      .select('*')
+      .eq('file_id', id)
+      .eq('shared_by', userId)
+      .eq('link_enabled', true)
+      .eq('share_type', 'link')
+      .maybeSingle()
+
+    let shareToken
+    let shareId
+
+    // Handle case where columns might not exist yet (migration not run)
+    if (existingLinkError && existingLinkError.code !== 'PGRST116') {
+      // Check if error is about missing columns
+      if (existingLinkError.message && existingLinkError.message.includes('column')) {
+        console.error('⚠️ Link sharing columns not found. Run migration: file_shares_link_migration.sql')
+        return res.status(400).json({
+          status: 'error',
+          action: 'create_share_link',
+          error: 'Link sharing not enabled. Please run the database migration: file_shares_link_migration.sql',
+          code: 400
+        })
+      }
+      throw existingLinkError
+    }
+
+    if (existingLink) {
+      // Update existing link
+      shareToken = existingLink.share_token
+      shareId = existingLink.id
+      
+      const { error: updateError } = await supabase
+        .from('file_shares')
+        .update({
+          permission: permission,
+          expires_at: expires_at,
+          allow_download: allow_download,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', shareId)
+
+      if (updateError) {
+        // Check if it's a column error
+        if (updateError.message && updateError.message.includes('column')) {
+          return res.status(400).json({
+            status: 'error',
+            action: 'create_share_link',
+            error: 'Link sharing columns not found. Please run the database migration: file_shares_link_migration.sql',
+            code: 400
+          })
+        }
+        throw updateError
+      }
+    } else {
+      // Generate new share token with retry logic for uniqueness
+      const crypto = require('crypto')
+      let shareCreated = false
+      let maxRetries = 5
+      let retryCount = 0
+
+      while (!shareCreated && retryCount < maxRetries) {
+        shareToken = crypto.randomBytes(32).toString('hex')
+
+        // Create new link share
+        const { data: share, error: shareError } = await supabase
+          .from('file_shares')
+          .insert([{
+            file_id: id,
+            shared_by: userId,
+            shared_with: null, // Link shares don't have a specific user
+            share_token: shareToken,
+            share_type: 'link',
+            link_enabled: true,
+            permission: permission,
+            expires_at: expires_at,
+            allow_download: allow_download
+          }])
+          .select()
+          .single()
+
+        if (shareError) {
+          // Log the full error for debugging
+          console.error('Share link creation error (attempt ' + (retryCount + 1) + '):', shareError)
+          
+          // Check if it's a unique constraint violation on share_token (retry)
+          if (shareError.code === '23505' || (shareError.message && shareError.message.includes('duplicate key value'))) {
+            retryCount++
+            if (retryCount >= maxRetries) {
+              return res.status(500).json({
+                status: 'error',
+                action: 'create_share_link',
+                error: 'Failed to generate unique share token. Please try again.',
+                code: 500
+              })
+            }
+            continue // Retry with new token
+          }
+          
+          // Check if it's a column error
+          if (shareError.message && shareError.message.includes('column')) {
+            return res.status(400).json({
+              status: 'error',
+              action: 'create_share_link',
+              error: 'Link sharing columns not found. Please run the database migration: file_shares_link_migration.sql',
+              code: 400
+            })
+          }
+          
+          // Check if it's a NOT NULL constraint error for shared_with
+          if (shareError.message && (shareError.message.includes('null value') || shareError.message.includes('NOT NULL'))) {
+            return res.status(400).json({
+              status: 'error',
+              action: 'create_share_link',
+              error: 'shared_with column must allow NULL values. Please run: file_shares_link_migration.sql',
+              code: 400,
+              details: shareError.message
+            })
+          }
+          
+          // Return detailed error
+          return res.status(500).json({
+            status: 'error',
+            action: 'create_share_link',
+            error: shareError.message || 'Failed to create share link',
+            code: 500,
+            details: shareError
+          })
+        }
+        
+        // Success!
+        shareId = share.id
+        shareCreated = true
+        console.log('✅ Share link created successfully:', shareToken)
+      }
+
+      if (!shareCreated) {
+        return res.status(500).json({
+          status: 'error',
+          action: 'create_share_link',
+          error: 'Failed to create share link after multiple attempts',
+          code: 500
+        })
+      }
+    }
+
+    // Generate share URL
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+    const shareUrl = `${frontendUrl}/shared/${shareToken}`
+    
+    console.log('🔗 Returning share URL:', shareUrl)
+
+    return res.json({
+      status: 'success',
+      action: 'create_share_link',
+      data: {
+        share_id: shareId,
+        share_token: shareToken,
+        share_url: shareUrl,
+        permission: permission,
+        expires_at: expires_at,
+        allow_download: allow_download
+      },
+      message: 'Share link created successfully'
+    })
+  } catch (error) {
+    console.error('Create share link error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'create_share_link',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Get share link for a file
+const getShareLink = async (req, res) => {
+  try {
+    const { id } = req.params
+    const userId = req.user.id
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'get_share_link',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Get existing link share
+    const { data: linkShare, error: linkError } = await supabase
+      .from('file_shares')
+      .select('*')
+      .eq('file_id', id)
+      .eq('shared_by', userId)
+      .eq('link_enabled', true)
+      .eq('share_type', 'link')
+      .maybeSingle()
+
+    // Handle case where link doesn't exist (PGRST116 is the code for no rows)
+    if (linkError && linkError.code !== 'PGRST116') {
+      console.error('Get share link query error:', linkError)
+      throw linkError
+    }
+
+    if (!linkShare) {
+      return res.json({
+        status: 'success',
+        action: 'get_share_link',
+        data: {
+          share_url: null,
+          link_enabled: false
+        },
+        message: 'No share link exists'
+      })
+    }
+
+    // Check if link has expired
+    const isExpired = linkShare.expires_at && new Date(linkShare.expires_at) < new Date()
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+    const shareUrl = `${frontendUrl}/shared/${linkShare.share_token}`
+
+    return res.json({
+      status: 'success',
+      action: 'get_share_link',
+      data: {
+        share_id: linkShare.id,
+        share_token: linkShare.share_token,
+        share_url: shareUrl,
+        permission: linkShare.permission,
+        expires_at: linkShare.expires_at,
+        allow_download: linkShare.allow_download,
+        is_expired: isExpired,
+        link_enabled: true
+      },
+      message: 'Share link retrieved successfully'
+    })
+  } catch (error) {
+    console.error('Get share link error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'get_share_link',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Disable share link
+const disableShareLink = async (req, res) => {
+  try {
+    const { id } = req.params
+    const userId = req.user.id
+
+    // Verify file exists and belongs to user
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (fileError || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'disable_share_link',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Disable link share
+    const { error: updateError } = await supabase
+      .from('file_shares')
+      .update({ link_enabled: false })
+      .eq('file_id', id)
+      .eq('shared_by', userId)
+      .eq('share_type', 'link')
+
+    if (updateError) {
+      throw updateError
+    }
+
+    return res.json({
+      status: 'success',
+      action: 'disable_share_link',
+      data: { file_id: id },
+      message: 'Share link disabled successfully'
+    })
+  } catch (error) {
+    console.error('Disable share link error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'disable_share_link',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+// Access file via share token (public endpoint)
+const accessSharedFile = async (req, res) => {
+  try {
+    const { token } = req.params
+
+    // Find share by token
+    const { data: share, error: shareError } = await supabase
+      .from('file_shares')
+      .select(`
+        *,
+        file:files!file_id (*)
+      `)
+      .eq('share_token', token)
+      .eq('link_enabled', true)
+      .single()
+
+    if (shareError || !share) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'access_shared_file',
+        error: 'Share link not found or disabled',
+        code: 404
+      })
+    }
+
+    // Check if expired
+    if (share.expires_at && new Date(share.expires_at) < new Date()) {
+      return res.status(410).json({
+        status: 'error',
+        action: 'access_shared_file',
+        error: 'Share link has expired',
+        code: 410
+      })
+    }
+
+    // Check if file exists and is not deleted
+    if (!share.file || share.file.deleted_at) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'access_shared_file',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    return res.json({
+      status: 'success',
+      action: 'access_shared_file',
+      data: {
+        file: {
+          id: share.file.id,
+          name: share.file.name,
+          type: share.file.type,
+          size: share.file.size,
+          created_at: share.file.created_at
+        },
+        permission: share.permission,
+        allow_download: share.allow_download
+      },
+      message: 'Shared file accessed successfully'
+    })
+  } catch (error) {
+    console.error('Access shared file error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'access_shared_file',
+      error: error.message,
+      code: 500
+    })
+  }
+}
 
 module.exports = {
   uploadFile,
@@ -979,4 +4527,12 @@ module.exports = {
   getRecycleBinItems,
   restoreItem,
   createEmptyFile,
-};
+  shareFile,
+  getFileShares,
+  unshareFile,
+  getSharedFiles,
+  createShareLink,
+  getShareLink,
+  disableShareLink,
+  accessSharedFile
+}

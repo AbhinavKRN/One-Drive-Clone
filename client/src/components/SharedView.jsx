@@ -9,6 +9,7 @@ const SharedView = ({
   onSelectionChange,
   onItemClick,
   onDownload,
+  onShare,
   onFilesUpload,
   onFolderUpload,
   onMoveFileToFolder,
@@ -49,7 +50,8 @@ const SharedView = ({
     (file) =>
       file.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (file.sharedBy &&
-        file.sharedBy.toLowerCase().includes(searchQuery.toLowerCase()))
+        (file.sharedBy.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+         file.sharedBy.name?.toLowerCase().includes(searchQuery.toLowerCase())))
   );
 
   // Drag and drop handlers
@@ -539,6 +541,7 @@ const SharedView = ({
             onSelectionChange={onSelectionChange}
             onItemClick={onItemClick}
             onDownload={onDownload}
+            onShare={onShare}
             onFilesUpload={onFilesUpload}
             onFolderUpload={onFolderUpload}
             onMoveFileToFolder={onMoveFileToFolder}
