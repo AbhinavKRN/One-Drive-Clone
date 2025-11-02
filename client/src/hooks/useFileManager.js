@@ -392,6 +392,36 @@ export const useFileManager = () => {
     }
   }, [])
 
+  // Create empty file with specific category
+  const createEmptyFile = useCallback(async (category) => {
+    try {
+      const token = getToken()
+      if (!token) return
+
+      const response = await fetch(`${API_BASE_URL}/files/create`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          category: category,
+          folder_id: currentFolderId || null
+        })
+      })
+
+      const data = await response.json()
+      if (data.status === 'success') {
+        loadData()
+      } else {
+        alert(data.error || 'Failed to create file')
+      }
+    } catch (error) {
+      console.error('Create file error:', error)
+      alert('Failed to create file')
+    }
+  }, [getToken, currentFolderId, loadData])
+
   // Refresh files and folders
   const refreshFiles = useCallback(() => {
     loadData()
@@ -415,7 +445,8 @@ export const useFileManager = () => {
     downloadFile,
     refreshFiles,
     loading,
-    nameToSlug // Export helper for Dashboard
+    nameToSlug, // Export helper for Dashboard
+    createEmptyFile
   }
 }
 
