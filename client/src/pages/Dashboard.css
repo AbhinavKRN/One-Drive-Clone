@@ -228,6 +228,15 @@
               box-shadow var(--transition-base);
 }
 
+/* Allow Recent view to scroll within files-white-box */
+.files-white-box .recent-view {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 100%;
+}
+
 .toolbar {
   display: flex;
   justify-content: space-between;
@@ -347,6 +356,115 @@
   color: var(--text-primary);
 }
 
+/* Action Bar - Show when items are selected in My Files folder */
+.action-bar {
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-sm);
+  transition: background-color var(--transition-base),
+              box-shadow var(--transition-base),
+              opacity var(--transition-fast),
+              transform var(--transition-fast);
+  opacity: 1;
+  transform: translateY(0);
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.action-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background-color: transparent;
+  border: none;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast),
+              color var(--transition-base);
+  border-radius: 4px;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.action-btn:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.action-separator {
+  width: 1px;
+  height: 20px;
+  background-color: var(--border-color-medium);
+  margin: 0 4px;
+  transition: background-color var(--transition-base);
+}
+
+.selected-count-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background-color: var(--bg-hover);
+  border: 1px solid var(--border-color-medium);
+  border-radius: 16px;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast),
+              border-color var(--transition-base),
+              color var(--transition-base);
+  font-family: inherit;
+}
+
+.selected-count-btn:hover {
+  background-color: var(--bg-active);
+  border-color: var(--border-color-hover);
+}
+
+.selected-count-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.view-toggle-btn {
+  padding: 4px;
+}
+
 @media (max-width: 768px) {
   .dashboard-content {
     flex-direction: column;
@@ -365,5 +483,16 @@
   .toolbar-actions {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .action-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .action-bar-left {
+    width: 100%;
+    flex-wrap: wrap;
   }
 }

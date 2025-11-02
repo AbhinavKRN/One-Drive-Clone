@@ -11,7 +11,6 @@ import {
   ImageRegular,
   AlbumRegular,
   ClockRegular,
-  ChevronDownRegular,
   QuestionCircleRegular,
   PersonFeedbackRegular,
 } from "@fluentui/react-icons";
@@ -35,6 +34,7 @@ const Navbar = ({
   const [showProfilePopup, setShowProfilePopup] = useState(false);
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
   const [showAppsLauncher, setShowAppsLauncher] = useState(false);
+  const [appsSearchQuery, setAppsSearchQuery] = useState("");
   const profilePopupRef = useRef(null);
   const settingsDropdownRef = useRef(null);
   const appsLauncherRef = useRef(null);
@@ -42,6 +42,73 @@ const Navbar = ({
   const settingsButtonRef = useRef(null);
   const avatarRef = useRef(null);
   const [darkThemeForPhotos, setDarkThemeForPhotos] = useState(false);
+
+  const allApps = [
+    {
+      name: "Microsoft 365 Copilot",
+      icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/M365_24x_da036bc4.svg",
+    },
+    {
+      name: "Outlook",
+      icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/outlook_24x1_16f15926.svg",
+    },
+    {
+      name: "OneDrive",
+      icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/onedrive_24x1_3dca28ce.svg",
+    },
+    {
+      name: "Teams",
+      icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/teams_24x1_737122d8.svg",
+    },
+    {
+      name: "Word",
+      icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/word_24x1_4f14d4f1.svg",
+    },
+    {
+      name: "Excel",
+      icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/excel_24x1_ef67616b.svg",
+    },
+    {
+      name: "PowerPoint",
+      icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/powerpoint_24x1_088c0a01.svg",
+    },
+    {
+      name: "OneNote",
+      icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/onenote_24x1_917c6a51.svg",
+    },
+    {
+      name: "To Do",
+      icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/todo_24x1_22d5b93f.svg",
+    },
+    {
+      name: "Family Safety",
+      icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/FamilySafety_24x_449a71b9.svg",
+    },
+    {
+      name: "Calendar",
+      icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/Calendar_24x_e50a5ecb.svg",
+    },
+    {
+      name: "Clipchamp",
+      icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/clipchamp_24x1_2eb14be3.svg",
+    },
+    {
+      name: "Designer",
+      icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/Designer_24x_ac7eb4e6.svg",
+    },
+    {
+      name: "Skype",
+      icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/Skype_24x_905a0e94.svg",
+    },
+    {
+      name: "More apps",
+      icon: "https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/MoreAppsDark_50f3694f.svg",
+    },
+  ];
+
+  const filteredApps = allApps.filter((app) =>
+    app.name.toLowerCase().includes(appsSearchQuery.toLowerCase())
+  );
 
   const handleLogout = () => {
     logout();
@@ -126,9 +193,9 @@ const Navbar = ({
   return (
     <nav className={`navbar ${activeTab === "Photos" ? "photos-mode" : ""}`}>
       <div className="navbar-left">
-        <button 
+        <button
           ref={appsButtonRef}
-          className="navbar-icon-btn apps-icon" 
+          className="navbar-icon-btn apps-icon"
           title="Apps"
           onClick={() => setShowAppsLauncher(!showAppsLauncher)}
         >
@@ -152,106 +219,156 @@ const Navbar = ({
             {/* Search Bar */}
             <div className="apps-search-container">
               <div className="apps-search-bar">
-                <SearchRegular />
-                <input type="text" placeholder="Find Microsoft 365 apps" />
-                <button className="apps-search-clear">×</button>
+                <div className="apps-search-icon">
+                  <svg
+                    fill="currentColor"
+                    aria-hidden="true"
+                    width="1em"
+                    height="1em"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12.73 13.44a6.5 6.5 0 1 1 .7-.7l3.42 3.4a.5.5 0 0 1-.63.77l-.07-.06-3.42-3.41Zm-.71-.71A5.54 5.54 0 0 0 14 8.5a5.5 5.5 0 1 0-1.98 4.23Z"
+                      fill="currentColor"
+                    ></path>
+                  </svg>
+                </div>
+                <input
+                  type="search"
+                  placeholder="Find Microsoft 365 apps"
+                  className="apps-search-input"
+                  value={appsSearchQuery}
+                  onChange={(e) => setAppsSearchQuery(e.target.value)}
+                />
+                {appsSearchQuery && (
+                  <button
+                    className="apps-search-clear"
+                    aria-label="clear"
+                    onClick={() => setAppsSearchQuery("")}
+                    tabIndex={-1}
+                  >
+                    <svg
+                      fill="currentColor"
+                      aria-hidden="true"
+                      width="1em"
+                      height="1em"
+                      viewBox="0 0 20 20"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="m4.09 4.22.06-.07a.5.5 0 0 1 .63-.06l.07.06L10 9.29l5.15-5.14a.5.5 0 0 1 .63-.06l.07.06c.18.17.2.44.06.63l-.06.07L10.71 10l5.14 5.15c.18.17.2.44.06.63l-.06.07a.5.5 0 0 1-.63.06l-.07-.06L10 10.71l-5.15 5.14a.5.5 0 0 1-.63.06l-.07-.06a.5.5 0 0 1-.06-.63l.06-.07L9.29 10 4.15 4.85a.5.5 0 0 1-.06-.63l.06-.07-.06.07Z"
+                        fill="currentColor"
+                      ></path>
+                    </svg>
+                  </button>
+                )}
               </div>
             </div>
 
             {/* Apps Grid */}
-            <div className="apps-grid">
-              {/* Row 1 */}
-              <button className="app-item">
-                <div className="app-icon copilot-icon"></div>
-                <span>Microsoft 365 Copilot</span>
-              </button>
-              <button className="app-item">
-                <div className="app-icon outlook-icon"></div>
-                <span>Outlook</span>
-              </button>
-              <button className="app-item">
-                <div className="app-icon onedrive-icon"></div>
-                <span>OneDrive</span>
-              </button>
-              <button className="app-item">
-                <div className="app-icon teams-icon"></div>
-                <span>Teams</span>
-              </button>
-              <button className="app-item">
-                <div className="app-icon word-icon"></div>
-                <span>Word</span>
-              </button>
-
-              {/* Row 2 */}
-              <button className="app-item">
-                <div className="app-icon excel-icon"></div>
-                <span>Excel</span>
-              </button>
-              <button className="app-item">
-                <div className="app-icon powerpoint-icon"></div>
-                <span>PowerPoint</span>
-              </button>
-              <button className="app-item">
-                <div className="app-icon onenote-icon"></div>
-                <span>OneNote</span>
-              </button>
-              <button className="app-item">
-                <div className="app-icon todo-icon"></div>
-                <span>To Do</span>
-              </button>
-              <button className="app-item">
-                <div className="app-icon family-safety-icon"></div>
-                <span>Family Safety</span>
-              </button>
-
-              {/* Row 3 */}
-              <button className="app-item">
-                <div className="app-icon calendar-icon"></div>
-                <span>Calendar</span>
-              </button>
-              <button className="app-item">
-                <div className="app-icon clipchamp-icon"></div>
-                <span>Clipchamp</span>
-              </button>
-              <button className="app-item">
-                <div className="app-icon designer-icon"></div>
-                <span>Designer</span>
-              </button>
-              <button className="app-item">
-                <div className="app-icon skype-icon"></div>
-                <span>Skype</span>
-              </button>
-              <button className="app-item">
-                <div className="app-icon more-apps-icon"></div>
-                <span>More apps</span>
-              </button>
+            <div className="apps-grid-wrapper">
+              <div className="apps-grid">
+                {filteredApps.length > 0 ? (
+                  filteredApps.map((app, index) => (
+                    <a
+                      key={index}
+                      href="#"
+                      className="app-item"
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      <div className="app-icon-container">
+                        <img
+                          src={app.icon}
+                          className="app-icon-img"
+                          alt={app.name}
+                        />
+                      </div>
+                      <span className="app-label">{app.name}</span>
+                    </a>
+                  ))
+                ) : (
+                  <div className="no-results">No apps found</div>
+                )}
+              </div>
             </div>
-
             {/* Separator */}
             <div className="apps-separator"></div>
 
             {/* Document Creation */}
-            <div className="apps-create-section">
-              <button className="app-item">
-                <div className="app-icon document-icon"></div>
-                <span>Document</span>
-              </button>
-              <button className="app-item">
-                <div className="app-icon workbook-icon"></div>
-                <span>Workbook</span>
-              </button>
-              <button className="app-item">
-                <div className="app-icon presentation-icon"></div>
-                <span>Presentation</span>
-              </button>
-              <button className="app-item">
-                <div className="app-icon survey-icon"></div>
-                <span>Survey</span>
-              </button>
-              <button className="app-item">
-                <div className="app-icon create-more-icon"></div>
-                <span>Create more</span>
-              </button>
+            <div className="apps-create-wrapper">
+              <div className="apps-create-section">
+                <a
+                  href="#"
+                  className="app-item"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  <div className="app-icon-container">
+                    <img
+                      src="https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/word_24x1_4f14d4f1.svg"
+                      className="app-icon-img"
+                      alt="Document"
+                    />
+                  </div>
+                  <span className="app-label">Document</span>
+                </a>
+                <a
+                  href="#"
+                  className="app-item"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  <div className="app-icon-container">
+                    <img
+                      src="https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/excel_24x1_ef67616b.svg"
+                      className="app-icon-img"
+                      alt="Workbook"
+                    />
+                  </div>
+                  <span className="app-label">Workbook</span>
+                </a>
+                <a
+                  href="#"
+                  className="app-item"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  <div className="app-icon-container">
+                    <img
+                      src="https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/powerpoint_24x1_088c0a01.svg"
+                      className="app-icon-img"
+                      alt="Presentation"
+                    />
+                  </div>
+                  <span className="app-label">Presentation</span>
+                </a>
+                <a
+                  href="#"
+                  className="app-item"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  <div className="app-icon-container">
+                    <img
+                      src="https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/forms_24x1_7713cded.svg"
+                      className="app-icon-img"
+                      alt="Survey"
+                    />
+                  </div>
+                  <span className="app-label">Survey</span>
+                </a>
+                <a
+                  href="#"
+                  className="app-item"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  <div className="app-icon-container">
+                    <img
+                      src="https://res-1.public.onecdn.static.microsoft/files/odsp-web-prod_2025-10-17.010/odbspartan/images/CreateMore_f4049e25.svg"
+                      className="app-icon-img"
+                      alt="Create more"
+                    />
+                  </div>
+                  <span className="app-label">Create more</span>
+                </a>
+              </div>
             </div>
           </div>
         )}

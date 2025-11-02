@@ -9,11 +9,20 @@ import {
 } from '@fluentui/react-icons'
 import './FileGrid.css'
 
-const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemClick, onDownload, onDelete }) => {
+const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemClick, onDownload, onDelete, sortBy, filterType, currentPath, user, onSortChange }) => {
   const [showNameMenu, setShowNameMenu] = useState(false)
   const [showColumnSettings, setShowColumnSettings] = useState(false)
-  const [sortOrder, setSortOrder] = useState('ascending')
+  const [sortOrder, setSortOrder] = useState('descending') // Default descending for Name
   const [nameColumnWidth, setNameColumnWidth] = useState(2) // Default 2fr
+  const [modifiedSortOrder, setModifiedSortOrder] = useState('descending')
+  const [sizeSortOrder, setSizeSortOrder] = useState('ascending')
+  const [sharingSortOrder, setSharingSortOrder] = useState('descending')
+
+  // Check if we're in My Files view (root or inside folder) - MUST be declared early
+  // Check if we're in Recent/Home view - MUST be declared early
+  // Use direct filterType check to avoid TDZ issues
+  const isMyFilesView = filterType === 'myfiles'
+  const isRecentView = filterType === 'all'
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -81,13 +90,40 @@ const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemCli
     // Could implement context menu here
   }
 
-  // Sort files based on sort order
+  // Sort files based on sort order and sortBy prop
+  // Use filterType directly to avoid TDZ issues
   const sortedFiles = [...files].sort((a, b) => {
-    if (sortOrder === 'ascending') {
-      return a.name.localeCompare(b.name)
-    } else {
-      return b.name.localeCompare(a.name)
+    if (filterType === 'all') {
+      // Recent view sorting
+      if (sortBy === 'name' || !sortBy) {
+        return sortOrder === 'ascending' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
+      } else if (sortBy === 'date') {
+        const dateA = new Date(a.modified || a.updated_at || a.created_at || 0)
+        const dateB = new Date(b.modified || b.updated_at || b.created_at || 0)
+        return modifiedSortOrder === 'ascending' ? dateA - dateB : dateB - dateA
+      }
+      // Default to name sorting for Recent view
+      return sortOrder === 'ascending' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
     }
+    
+    // Standard My Files sorting
+    if (sortBy === 'name') {
+      if (sortOrder === 'ascending') {
+        return a.name.localeCompare(b.name)
+      } else {
+        return b.name.localeCompare(a.name)
+      }
+    } else if (sortBy === 'date') {
+      const dateA = new Date(a.modified || a.createdAt || 0)
+      const dateB = new Date(b.modified || b.createdAt || 0)
+      return modifiedSortOrder === 'ascending' ? dateA - dateB : dateB - dateA
+    } else if (sortBy === 'size') {
+      const sizeA = a.size || 0
+      const sizeB = b.size || 0
+      return sizeSortOrder === 'ascending' ? sizeA - sizeB : sizeB - sizeA
+    }
+    // Default to name sorting
+    return sortOrder === 'ascending' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
   })
 
   const handleSortChange = (order) => {
@@ -201,10 +237,148 @@ const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemCli
     )
   }
 
+
+  // Format date for Recent view (shorter format like "Aug 26", "Jan 8, 2024")
+  const formatRecentDate = (date) => {
+    if (!date) return 'Invalid Date'
+    try {
+      const d = new Date(date)
+      if (isNaN(d.getTime())) return 'Invalid Date'
+      
+      const now = new Date()
+      const diffTime = Math.abs(now - d)
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      
+      // If within current year, show "Mon DD"
+      if (d.getFullYear() === now.getFullYear()) {
+        return d.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric'
+        })
+      }
+      // Otherwise show "Mon DD, YYYY"
+      return d.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      })
+    } catch (e) {
+      return 'Invalid Date'
+    }
+  }
+
+  // Get owner name - use current user's name formatted like "AAYUSH KHOP."
+  const getOwnerName = (file) => {
+    if (user?.name) {
+      // Format name like "AAYUSH KHOP." (first name + first 4 chars of last name)
+      const parts = user.name.split(' ')
+      if (parts.length >= 2) {
+        const firstName = parts[0].toUpperCase()
+        const lastName = parts[parts.length - 1].toUpperCase().substring(0, 4)
+        return `${firstName} ${lastName}.`
+      }
+      return user.name.toUpperCase()
+    }
+    return 'My Files' // Default fallback
+  }
+
+  // Get file location/subtitle
+  const getFileLocation = (file) => {
+    if (file.folder_name) return file.folder_name
+    if (file.parent_folder) return file.parent_folder
+    if (file.owner && file.owner !== 'My Files') return `${file.owner}'s Files`
+    return 'My Files'
+  }
+
+  // Recent View Layout (Name, Opened, Owner)
+  if (isRecentView) {
+    return (
+      <div className="recent-view">
+        <div
+          className="file-list-header recent-header"
+          style={{ gridTemplateColumns: '2fr 1fr 1fr' }}
+        >
+          <div className="file-list-col col-name sortable-header" onClick={() => handleSortChange(sortOrder === 'ascending' ? 'descending' : 'ascending')}>
+            Name
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style={{ marginLeft: '6px' }}>
+              <path d="M6 8.5L1 3.5L11 3.5L6 8.5Z" />
+            </svg>
+          </div>
+          <div 
+            className="file-list-col col-opened sortable-header"
+            onClick={(e) => {
+              e.stopPropagation()
+              const newOrder = modifiedSortOrder === 'ascending' ? 'descending' : 'ascending'
+              setModifiedSortOrder(newOrder)
+              // Trigger sort change for date
+              if (onSortChange) {
+                onSortChange('date')
+              }
+            }}
+          >
+            Opened
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style={{ marginLeft: '6px' }}>
+              {modifiedSortOrder === 'ascending' ? (
+                <path d="M6 3.5L1 8.5L11 8.5L6 3.5Z" />
+              ) : (
+                <path d="M6 8.5L1 3.5L11 3.5L6 8.5Z" />
+              )}
+            </svg>
+          </div>
+          <div 
+            className="file-list-col col-owner sortable-header"
+            onClick={(e) => {
+              e.stopPropagation()
+              // Owner sort logic could go here
+            }}
+          >
+            Owner
+          </div>
+        </div>
+
+        {sortedFiles.map(file => {
+          const isSelected = selectedItems.includes(file.id)
+          
+          return (
+            <div
+              key={file.id}
+              className={`file-list-row recent-row ${isSelected ? 'selected' : ''}`}
+              style={{ gridTemplateColumns: '2fr 1fr 1fr' }}
+              onClick={(e) => {
+                if (e.target.type !== 'checkbox' && !e.target.closest('.btn-icon')) {
+                  onItemClick(file)
+                }
+              }}
+            >
+              <div className="file-list-col col-name">
+                <div style={{ color: file.type === 'folder' ? '#ffb900' : '#0078d4', marginRight: '12px' }}>
+                  {getFileIcon(file)}
+                </div>
+                <div className="file-name-wrapper">
+                  <div className="file-name-primary">{file.name}</div>
+                  <div className="file-name-secondary">{getFileLocation(file)}</div>
+                </div>
+              </div>
+
+              <div className="file-list-col col-opened">
+                {formatRecentDate(file.modified || file.updated_at || file.created_at)}
+              </div>
+
+              <div className="file-list-col col-owner">
+                {getOwnerName(file)}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
+  // Standard My Files View Layout
   return (
     <div className="file-list">
-      <div
-        className="file-list-header"
+        <div
+        className={`file-list-header ${isMyFilesView ? 'my-files-header' : ''}`}
         style={{ gridTemplateColumns: `${nameColumnWidth}fr 1fr 1fr 1fr` }}
       >
         <div className="file-list-col col-name">
@@ -262,90 +436,155 @@ const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemCli
             )}
           </div>
         </div>
-        <div className="file-list-col col-modified">Modified</div>
-        <div className="file-list-col col-size">File size</div>
-        <div className="file-list-col col-sharing">Sharing</div>
+        <div 
+          className="file-list-col col-modified sortable-header"
+          onClick={(e) => {
+            e.stopPropagation()
+            setModifiedSortOrder(modifiedSortOrder === 'ascending' ? 'descending' : 'ascending')
+          }}
+        >
+          Modified
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style={{ marginLeft: '6px', marginRight: '2px' }}>
+            <circle cx="6" cy="6" r="5.5" stroke="currentColor" fill="none" strokeWidth="0.8"/>
+            <text x="6" y="8" textAnchor="middle" fontSize="8" fill="currentColor" fontWeight="bold">i</text>
+          </svg>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style={{ marginLeft: '2px' }}>
+            <path d="M6 8.5L1 3.5L11 3.5L6 8.5Z" />
+          </svg>
+        </div>
+        <div 
+          className="file-list-col col-size sortable-header"
+          onClick={(e) => {
+            e.stopPropagation()
+            setSizeSortOrder(sizeSortOrder === 'ascending' ? 'descending' : 'ascending')
+          }}
+        >
+          File size
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style={{ marginLeft: '6px' }}>
+            <path d="M6 3.5L1 8.5L11 8.5L6 3.5Z" />
+          </svg>
+        </div>
+        <div 
+          className="file-list-col col-sharing sortable-header"
+          onClick={(e) => {
+            e.stopPropagation()
+            setSharingSortOrder(sharingSortOrder === 'ascending' ? 'descending' : 'ascending')
+          }}
+        >
+          Sharing
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style={{ marginLeft: '6px' }}>
+            <path d="M6 8.5L1 3.5L11 3.5L6 8.5Z" />
+          </svg>
+        </div>
       </div>
 
-      {sortedFiles.map(file => (
-        <div
-          key={file.id}
-          className={`file-list-row ${selectedItems.includes(file.id) ? 'selected' : ''}`}
-          style={{ gridTemplateColumns: `${nameColumnWidth}fr 1fr 1fr 1fr` }}
-          onClick={() => onItemClick(file)}
-          onContextMenu={(e) => handleContextMenu(e, file)}
-        >
-          <div className="file-list-col col-name">
-            <input
-              type="checkbox"
-              checked={selectedItems.includes(file.id)}
-              onChange={(e) => handleSelection(file.id, e)}
-              onClick={(e) => e.stopPropagation()}
-            />
-            <div style={{ color: file.type === 'folder' ? '#ffb900' : '#0078d4' }}>{getFileIcon(file)}</div>
-            <span className="file-name">{file.name}</span>
-            <div className="inline-actions">
+      {sortedFiles.map(file => {
+        const isSelected = selectedItems.includes(file.id)
+        const isInMyFilesView = isMyFilesView
+        
+        // Calculate folder item count (placeholder - would need backend data)
+        const folderItemCount = file.type === 'folder' ? '3 items' : null
+        
+        return (
+          <div
+            key={file.id}
+            className={`file-list-row ${isSelected ? 'selected' : ''} ${isInMyFilesView && isSelected ? 'my-files-selected' : ''}`}
+            style={{ gridTemplateColumns: `${nameColumnWidth}fr 1fr 1fr 1fr` }}
+            onClick={(e) => {
+              // Only handle row click if not clicking on interactive elements
+              if (
+                e.target.type === 'checkbox' ||
+                e.target.closest('.circular-checkbox-wrapper') ||
+                e.target.closest('.btn-icon') ||
+                e.target.closest('.file-icon-clickable') ||
+                e.target.closest('.file-name-clickable')
+              ) {
+                return // Let those elements handle their own clicks
+              }
+              
+              // In My Files view, clicking empty space toggles selection
+              if (isInMyFilesView) {
+                handleSelection(file.id, e)
+              } else {
+                // Outside My Files, clicking row opens/navigates
+                onItemClick(file)
+              }
+            }}
+            onContextMenu={(e) => handleContextMenu(e, file)}
+          >
+            <div className="file-list-col col-name">
+              <label 
+                className="circular-checkbox-wrapper"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleSelection(file.id, e)
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={(e) => handleSelection(file.id, e)}
+                  onClick={(e) => e.stopPropagation()}
+                  className="circular-checkbox"
+                />
+                <span className="circular-checkbox-checkmark">
+                  {isSelected && (
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <path d="M2 6l2.5 2.5L10 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </span>
+              </label>
+              <div 
+                className="file-icon-clickable"
+                style={{ color: file.type === 'folder' ? '#ffb900' : '#0078d4', cursor: 'pointer' }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onItemClick(file)
+                }}
+              >
+                {getFileIcon(file)}
+              </div>
+              <span 
+                className="file-name file-name-clickable"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onItemClick(file)
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                {file.name}
+              </span>
               <button
-                className="btn-icon action-icon"
+                className="btn-icon action-icon ellipsis-menu"
                 onClick={(e) => {
                   e.stopPropagation()
                   // More options
                 }}
                 title="More options"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <circle cx="12" cy="12" r="1.5"></circle>
-                  <circle cx="12" cy="6" r="1.5"></circle>
-                  <circle cx="12" cy="18" r="1.5"></circle>
-                </svg>
-              </button>
-              {onDelete && (
-                <button
-                  className="btn-icon action-icon delete-icon"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    if (window.confirm(`Delete "${file.name}"?`)) {
-                      onDelete([file.id])
-                    }
-                  }}
-                  title="Delete"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                  </svg>
-                </button>
-              )}
-              <button
-                className="btn-icon action-icon"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  // Share action
-                }}
-                title="Share"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                  <polyline points="16 6 12 2 8 6"></polyline>
-                  <line x1="12" y1="2" x2="12" y2="15"></line>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <circle cx="8" cy="3" r="1.5"></circle>
+                  <circle cx="8" cy="8" r="1.5"></circle>
+                  <circle cx="8" cy="13" r="1.5"></circle>
                 </svg>
               </button>
             </div>
-          </div>
 
-          <div className="file-list-col col-modified">
-            {formatDate(file.modified)}
-          </div>
+            <div className="file-list-col col-modified">
+              {formatDate(file.modified || file.createdAt)}
+            </div>
 
-          <div className="file-list-col col-size">
-            {file.type === 'folder' ? '0 items' : formatBytes(file.size)}
-          </div>
+            <div className="file-list-col col-size">
+              {file.type === 'folder' ? folderItemCount : formatBytes(file.size || 0)}
+            </div>
 
-          <div className="file-list-col col-sharing">
-            Private
+            <div className="file-list-col col-sharing">
+              Private
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
