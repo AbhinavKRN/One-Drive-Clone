@@ -267,219 +267,144 @@
   padding: 10px 20px;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
+  justify-content: flex-start;
+  gap: 8px;
   cursor: pointer;
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 13px;
   align-self: flex-start;
 }
 
+.create-btn-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .sidebar-create-btn:hover {
   filter: brightness(1.1);
 }
 
-/* Dropdown Styles */
+/* Dropdown Styles - OneDrive-like */
 .sidebar-create-dropdown {
   position: absolute;
   top: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
-  background-color: var(--bg-secondary);
+  background-color: #ffffff;
   border-radius: 8px;
-  box-shadow: var(--shadow-md);
-  min-width: 240px;
+  box-shadow: 0 6.4px 14.4px 0 rgba(0, 0, 0, 0.132), 0 1.2px 3.6px 0 rgba(0, 0, 0, 0.108);
+  min-width: 248px;
   z-index: 1000;
-  padding: 4px 0;
+  padding: 4px;
   margin-top: 4px;
+  animation: menuExpandContentsAnimation 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
   transition: background-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+@keyframes menuExpandContentsAnimation {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
 }
 
 .sidebar-closed .sidebar-create-dropdown {
   left: calc(100% + 8px);
   top: 0;
   transform: none;
+  animation: menuExpandContentsAnimationSide 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+@keyframes menuExpandContentsAnimationSide {
+  from {
+    opacity: 0;
+    transform: translateX(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
 }
 
 .sidebar-dropdown-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 16px;
+  padding: 0 12px;
+  height: 36px;
   cursor: pointer;
-  transition: background-color var(--transition-fast),
-              color var(--transition-base);
+  border-radius: 4px;
+  transition: background-color 0.1s ease;
   font-size: 14px;
-  font-family: inherit;
-  color: var(--text-primary);
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', sans-serif;
+  color: #424242;
+  position: relative;
 }
 
 .sidebar-dropdown-item:hover {
-  background-color: var(--bg-hover);
+  background-color: #f3f2f1;
 }
 
 .sidebar-dropdown-item:active {
-  background-color: var(--bg-active);
+  background-color: #edebe9;
 }
 
 .sidebar-dropdown-icon {
-  width: 32px;
-  height: 32px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
   flex-shrink: 0;
   position: relative;
 }
 
+.sidebar-dropdown-icon img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  display: block;
+}
+
 .sidebar-dropdown-icon svg {
-  width: 20px;
-  height: 20px;
-  color: inherit;
-}
-
-.sidebar-dropdown-icon svg:first-child {
-  width: 18px;
-  height: 18px;
-}
-
-/* Folder icon - Yellow */
-.sidebar-dropdown-icon.folder-icon {
-  background-color: #ffb900;
-  color: #ffffff;
-}
-
-/* Document upload icon */
-.sidebar-dropdown-icon.document-upload-icon {
-  background-color: var(--bg-hover);
-  color: var(--text-primary);
-  position: relative;
-  transition: background-color var(--transition-base), color var(--transition-base);
-}
-
-.sidebar-dropdown-icon.document-upload-icon svg:first-child {
-  color: var(--text-primary);
-}
-
-.sidebar-dropdown-icon.document-upload-icon .upload-overlay {
-  position: absolute;
-  bottom: -4px;
-  right: -4px;
   width: 16px;
   height: 16px;
-  background-color: var(--text-primary);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-sm);
-  transition: background-color var(--transition-base);
+  color: #424242;
+  display: block;
 }
 
-.sidebar-dropdown-icon.document-upload-icon .upload-overlay svg {
-  width: 10px;
-  height: 10px;
-  color: #ffffff;
-}
-
-/* Folder upload icon */
-.sidebar-dropdown-icon.folder-upload-icon {
-  background-color: #ffb900;
-  color: #ffffff;
-  position: relative;
-}
-
-.sidebar-dropdown-icon.folder-upload-icon .upload-overlay {
-  position: absolute;
-  bottom: -4px;
-  right: -4px;
-  width: 16px;
-  height: 16px;
-  background-color: var(--text-primary);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-sm);
-  transition: background-color var(--transition-base);
-}
-
-.sidebar-dropdown-icon.folder-upload-icon .upload-overlay svg {
-  width: 10px;
-  height: 10px;
-  color: #ffffff;
-}
-
-/* Word icon - Blue */
-.sidebar-dropdown-icon.word-icon {
-  background-color: #2B579A;
-  color: #ffffff;
-}
-
-.sidebar-dropdown-icon.word-icon svg {
-  width: 20px;
-  height: 20px;
-  color: #ffffff;
-}
-
-/* Excel icon - Green */
-.sidebar-dropdown-icon.excel-icon {
-  background-color: #217346;
-  color: #ffffff;
-}
-
-.sidebar-dropdown-icon.excel-icon svg {
-  width: 20px;
-  height: 20px;
-  color: #ffffff;
-}
-
-/* PowerPoint icon - Red */
-.sidebar-dropdown-icon.powerpoint-icon {
-  background-color: #D04423;
-  color: #ffffff;
-}
-
-.sidebar-dropdown-icon.powerpoint-icon svg {
-  width: 20px;
-  height: 20px;
-  color: #ffffff;
-}
-
-/* OneNote icon - Purple */
-.sidebar-dropdown-icon.onenote-icon {
-  background-color: #7719AA;
-  color: #ffffff;
-}
-
-.sidebar-dropdown-icon.onenote-icon svg {
-  width: 20px;
-  height: 20px;
-  color: #ffffff;
-}
-
-/* Text icon */
+/* Icon styles - OneDrive-like (no background colors, just icons) */
+.sidebar-dropdown-icon.folder-icon,
+.sidebar-dropdown-icon.document-upload-icon,
+.sidebar-dropdown-icon.folder-upload-icon,
+.sidebar-dropdown-icon.word-icon,
+.sidebar-dropdown-icon.excel-icon,
+.sidebar-dropdown-icon.powerpoint-icon,
+.sidebar-dropdown-icon.onenote-icon,
 .sidebar-dropdown-icon.text-icon {
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color-light);
-  transition: background-color var(--transition-base),
-              color var(--transition-base),
-              border-color var(--transition-base);
-}
-
-.sidebar-dropdown-icon.text-icon svg {
-  width: 20px;
-  height: 20px;
-  color: var(--text-primary);
+  background-color: transparent;
+  color: inherit;
 }
 
 .sidebar-dropdown-separator {
   height: 1px;
-  background-color: var(--border-color-light);
-  margin: 4px 0;
+  background-color: #f0f0f0;
+  margin: 4px;
   transition: background-color var(--transition-base);
+}
+
+.sidebar-dropdown-item span {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
 }
 
 .sidebar-menu {

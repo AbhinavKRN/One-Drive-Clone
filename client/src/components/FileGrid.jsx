@@ -11,6 +11,9 @@ import './FileGrid.css'
 
 const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemClick, onDownload, onDelete, sortBy, filterType, currentPath, user, onSortChange }) => {
   const [showNameMenu, setShowNameMenu] = useState(false)
+  const [showModifiedMenu, setShowModifiedMenu] = useState(false)
+  const [showSizeMenu, setShowSizeMenu] = useState(false)
+  const [showSharingMenu, setShowSharingMenu] = useState(false)
   const [showColumnSettings, setShowColumnSettings] = useState(false)
   const [sortOrder, setSortOrder] = useState('descending') // Default descending for Name
   const [nameColumnWidth, setNameColumnWidth] = useState(2) // Default 2fr
@@ -27,20 +30,26 @@ const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemCli
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (!e.target.closest('.name-header-wrapper')) {
+      if (!e.target.closest('.name-header-wrapper') &&
+          !e.target.closest('.col-modified') &&
+          !e.target.closest('.col-size') &&
+          !e.target.closest('.col-sharing')) {
         setShowNameMenu(false)
+        setShowModifiedMenu(false)
+        setShowSizeMenu(false)
+        setShowSharingMenu(false)
         setShowColumnSettings(false)
       }
     }
 
-    if (showNameMenu) {
+    if (showNameMenu || showModifiedMenu || showSizeMenu || showSharingMenu) {
       document.addEventListener('click', handleClickOutside)
     }
 
     return () => {
       document.removeEventListener('click', handleClickOutside)
     }
-  }, [showNameMenu])
+  }, [showNameMenu, showModifiedMenu, showSizeMenu, showSharingMenu])
   const getFileIcon = (file) => {
     if (file.type === 'folder') {
       return <FolderRegular />
@@ -374,23 +383,58 @@ const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemCli
     )
   }
 
+  // Handle select all checkbox
+  const handleSelectAll = (e) => {
+    e.stopPropagation()
+    if (selectedItems.length === files.length) {
+      // Deselect all
+      onSelectionChange([])
+    } else {
+      // Select all
+      onSelectionChange(files.map(f => f.id))
+    }
+  }
+
   // Standard My Files View Layout
   return (
     <div className="file-list">
         <div
         className={`file-list-header ${isMyFilesView ? 'my-files-header' : ''}`}
-        style={{ gridTemplateColumns: `${nameColumnWidth}fr 1fr 1fr 1fr` }}
+        style={{ gridTemplateColumns: `48px ${nameColumnWidth}fr 1fr 1fr 1fr` }}
       >
+        {/* Select All Checkbox Column */}
+        <div className="file-list-col col-checkbox">
+          <label
+            className="circular-checkbox-wrapper select-all-checkbox"
+            onClick={handleSelectAll}
+            style={{ opacity: 1, cursor: 'pointer' }}
+          >
+            <input
+              type="checkbox"
+              checked={selectedItems.length === files.length && files.length > 0}
+              onChange={handleSelectAll}
+              className="circular-checkbox"
+            />
+            <span className="circular-checkbox-checkmark">
+              {selectedItems.length === files.length && files.length > 0 && (
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M2 6l2.5 2.5L10 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              )}
+            </span>
+          </label>
+        </div>
+
         <div className="file-list-col col-name">
           <div className="name-header-wrapper">
             <span
               className="name-header-text"
               onClick={() => setShowNameMenu(!showNameMenu)}
             >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style={{ marginRight: '4px' }}>
+              Name
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style={{ marginLeft: '4px' }}>
                 <path d="M6 8.5L1 3.5L11 3.5L6 8.5Z" />
               </svg>
-              Name
             </span>
             {showNameMenu && (
               <div className="name-dropdown-menu">
@@ -436,60 +480,177 @@ const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemCli
             )}
           </div>
         </div>
-        <div 
-          className="file-list-col col-modified sortable-header"
-          onClick={(e) => {
-            e.stopPropagation()
-            setModifiedSortOrder(modifiedSortOrder === 'ascending' ? 'descending' : 'ascending')
-          }}
-        >
-          Modified
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style={{ marginLeft: '6px', marginRight: '2px' }}>
-            <circle cx="6" cy="6" r="5.5" stroke="currentColor" fill="none" strokeWidth="0.8"/>
-            <text x="6" y="8" textAnchor="middle" fontSize="8" fill="currentColor" fontWeight="bold">i</text>
-          </svg>
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style={{ marginLeft: '2px' }}>
-            <path d="M6 8.5L1 3.5L11 3.5L6 8.5Z" />
-          </svg>
+        <div className="file-list-col col-modified">
+          <div className="name-header-wrapper">
+            <span
+              className="name-header-text"
+              onClick={() => setShowModifiedMenu(!showModifiedMenu)}
+            >
+              Modified
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style={{ marginLeft: '6px', marginRight: '2px' }}>
+                <circle cx="6" cy="6" r="5.5" stroke="currentColor" fill="none" strokeWidth="0.8"/>
+                <text x="6" y="8" textAnchor="middle" fontSize="8" fill="currentColor" fontWeight="bold">i</text>
+              </svg>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style={{ marginLeft: '2px' }}>
+                <path d="M6 8.5L1 3.5L11 3.5L6 8.5Z" />
+              </svg>
+            </span>
+            {showModifiedMenu && (
+              <div className="name-dropdown-menu">
+                <div
+                  className="menu-item"
+                  onClick={() => {
+                    setModifiedSortOrder('ascending')
+                    setShowModifiedMenu(false)
+                  }}
+                >
+                  Ascending
+                </div>
+                <div
+                  className="menu-item"
+                  onClick={() => {
+                    setModifiedSortOrder('descending')
+                    setShowModifiedMenu(false)
+                  }}
+                >
+                  Descending
+                </div>
+                <div
+                  className="menu-item menu-item-with-arrow"
+                  onMouseEnter={() => setShowColumnSettings(true)}
+                  onMouseLeave={() => setShowColumnSettings(false)}
+                >
+                  Column settings
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                    <path d="M4 2L9 6L4 10V2Z" />
+                  </svg>
+                  {showColumnSettings && (
+                    <div className="column-settings-submenu">
+                      <div className="menu-item">Widen column</div>
+                      <div className="menu-item">Narrow column</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-        <div 
-          className="file-list-col col-size sortable-header"
-          onClick={(e) => {
-            e.stopPropagation()
-            setSizeSortOrder(sizeSortOrder === 'ascending' ? 'descending' : 'ascending')
-          }}
-        >
-          File size
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style={{ marginLeft: '6px' }}>
-            <path d="M6 3.5L1 8.5L11 8.5L6 3.5Z" />
-          </svg>
+        <div className="file-list-col col-size">
+          <div className="name-header-wrapper">
+            <span
+              className="name-header-text"
+              onClick={() => setShowSizeMenu(!showSizeMenu)}
+            >
+              File size
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style={{ marginLeft: '4px' }}>
+                <path d="M6 8.5L1 3.5L11 3.5L6 8.5Z" />
+              </svg>
+            </span>
+            {showSizeMenu && (
+              <div className="name-dropdown-menu">
+                <div
+                  className="menu-item"
+                  onClick={() => {
+                    setSizeSortOrder('ascending')
+                    setShowSizeMenu(false)
+                  }}
+                >
+                  Ascending
+                </div>
+                <div
+                  className="menu-item"
+                  onClick={() => {
+                    setSizeSortOrder('descending')
+                    setShowSizeMenu(false)
+                  }}
+                >
+                  Descending
+                </div>
+                <div
+                  className="menu-item menu-item-with-arrow"
+                  onMouseEnter={() => setShowColumnSettings(true)}
+                  onMouseLeave={() => setShowColumnSettings(false)}
+                >
+                  Column settings
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                    <path d="M4 2L9 6L4 10V2Z" />
+                  </svg>
+                  {showColumnSettings && (
+                    <div className="column-settings-submenu">
+                      <div className="menu-item">Widen column</div>
+                      <div className="menu-item">Narrow column</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-        <div 
-          className="file-list-col col-sharing sortable-header"
-          onClick={(e) => {
-            e.stopPropagation()
-            setSharingSortOrder(sharingSortOrder === 'ascending' ? 'descending' : 'ascending')
-          }}
-        >
-          Sharing
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style={{ marginLeft: '6px' }}>
-            <path d="M6 8.5L1 3.5L11 3.5L6 8.5Z" />
-          </svg>
+        <div className="file-list-col col-sharing">
+          <div className="name-header-wrapper">
+            <span
+              className="name-header-text"
+              onClick={() => setShowSharingMenu(!showSharingMenu)}
+            >
+              Sharing
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style={{ marginLeft: '4px' }}>
+                <path d="M6 8.5L1 3.5L11 3.5L6 8.5Z" />
+              </svg>
+            </span>
+            {showSharingMenu && (
+              <div className="name-dropdown-menu">
+                <div
+                  className="menu-item"
+                  onClick={() => {
+                    setSharingSortOrder('ascending')
+                    setShowSharingMenu(false)
+                  }}
+                >
+                  Ascending
+                </div>
+                <div
+                  className="menu-item"
+                  onClick={() => {
+                    setSharingSortOrder('descending')
+                    setShowSharingMenu(false)
+                  }}
+                >
+                  Descending
+                </div>
+                <div
+                  className="menu-item menu-item-with-arrow"
+                  onMouseEnter={() => setShowColumnSettings(true)}
+                  onMouseLeave={() => setShowColumnSettings(false)}
+                >
+                  Column settings
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                    <path d="M4 2L9 6L4 10V2Z" />
+                  </svg>
+                  {showColumnSettings && (
+                    <div className="column-settings-submenu">
+                      <div className="menu-item">Widen column</div>
+                      <div className="menu-item">Narrow column</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {sortedFiles.map(file => {
         const isSelected = selectedItems.includes(file.id)
         const isInMyFilesView = isMyFilesView
-        
+
         // Calculate folder item count (placeholder - would need backend data)
         const folderItemCount = file.type === 'folder' ? '3 items' : null
-        
+
         return (
           <div
             key={file.id}
             className={`file-list-row ${isSelected ? 'selected' : ''} ${isInMyFilesView && isSelected ? 'my-files-selected' : ''}`}
-            style={{ gridTemplateColumns: `${nameColumnWidth}fr 1fr 1fr 1fr` }}
+            style={{ gridTemplateColumns: `48px ${nameColumnWidth}fr 1fr 1fr 1fr` }}
             onClick={(e) => {
               // Only handle row click if not clicking on interactive elements
               if (
@@ -501,7 +662,7 @@ const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemCli
               ) {
                 return // Let those elements handle their own clicks
               }
-              
+
               // In My Files view, clicking empty space toggles selection
               if (isInMyFilesView) {
                 handleSelection(file.id, e)
@@ -512,8 +673,9 @@ const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemCli
             }}
             onContextMenu={(e) => handleContextMenu(e, file)}
           >
-            <div className="file-list-col col-name">
-              <label 
+            {/* Checkbox Column */}
+            <div className="file-list-col col-checkbox">
+              <label
                 className="circular-checkbox-wrapper"
                 onClick={(e) => {
                   e.stopPropagation()
@@ -535,6 +697,9 @@ const FileGrid = ({ files, viewMode, selectedItems, onSelectionChange, onItemCli
                   )}
                 </span>
               </label>
+            </div>
+
+            <div className="file-list-col col-name">
               <div 
                 className="file-icon-clickable"
                 style={{ color: file.type === 'folder' ? '#ffb900' : '#0078d4', cursor: 'pointer' }}

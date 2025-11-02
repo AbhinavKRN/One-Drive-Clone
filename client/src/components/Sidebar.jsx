@@ -3,11 +3,16 @@ import { useAuth } from '../context/AuthContext'
 import {
   ArrowLeftRegular,
   HomeRegular,
+  HomeFilled,
   FolderRegular,
+  FolderFilled,
   ImageMultipleRegular,
   PeopleRegular,
+  PeopleFilled,
   DeleteRegular,
+  DeleteFilled,
   PersonRegular,
+  PersonFilled,
   DiamondRegular,
   ArrowRightRegular,
   ChevronRightRegular,
@@ -15,7 +20,9 @@ import {
   DocumentRegular,
   ArrowUploadRegular,
   TableRegular,
-  SlideTextRegular
+  SlideTextRegular,
+  DocumentArrowUpRegular,
+  FolderArrowUpRegular
 } from '@fluentui/react-icons'
 import './Sidebar.css'
 
@@ -136,59 +143,57 @@ const Sidebar = ({
                 <div ref={dropdownRef} className="sidebar-create-dropdown">
                   <div className="sidebar-dropdown-item" onClick={handleFolderClick}>
                     <div className="sidebar-dropdown-icon folder-icon">
-                      <FolderRegular />
+                      <img src="https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/assets/item-types/16/folder.svg" alt="folder" />
                     </div>
                     <span>Folder</span>
                   </div>
                   <div className="sidebar-dropdown-separator"></div>
                   <div className="sidebar-dropdown-item" onClick={handleFilesUploadClick}>
                     <div className="sidebar-dropdown-icon document-upload-icon">
-                      <DocumentRegular />
-                      <ArrowUploadRegular className="upload-overlay" />
+                      <DocumentArrowUpRegular />
                     </div>
                     <span>Files upload</span>
                   </div>
                   <div className="sidebar-dropdown-item" onClick={handleFolderUploadClick}>
                     <div className="sidebar-dropdown-icon folder-upload-icon">
-                      <FolderRegular />
-                      <ArrowUploadRegular className="upload-overlay" />
+                      <FolderArrowUpRegular />
                     </div>
                     <span>Folder upload</span>
                   </div>
                   <div className="sidebar-dropdown-separator"></div>
                   <div className="sidebar-dropdown-item" onClick={() => { if (onWordDocument) onWordDocument(); setShowCreateDropdown(false); }}>
                     <div className="sidebar-dropdown-icon word-icon">
-                      <DocumentRegular />
+                      <img src="https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/assets/item-types/16/docx.svg" alt="docx" />
                     </div>
                     <span>Word document</span>
                   </div>
                   <div className="sidebar-dropdown-item" onClick={() => { if (onExcelWorkbook) onExcelWorkbook(); setShowCreateDropdown(false); }}>
                     <div className="sidebar-dropdown-icon excel-icon">
-                      <TableRegular />
+                      <img src="https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/assets/item-types/16/xlsx.svg" alt="xlsx" />
                     </div>
                     <span>Excel workbook</span>
                   </div>
                   <div className="sidebar-dropdown-item" onClick={() => { if (onPowerPointPresentation) onPowerPointPresentation(); setShowCreateDropdown(false); }}>
                     <div className="sidebar-dropdown-icon powerpoint-icon">
-                      <SlideTextRegular />
+                      <img src="https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/assets/item-types/16/pptx.svg" alt="pptx" />
                     </div>
                     <span>PowerPoint presentation</span>
                   </div>
                   <div className="sidebar-dropdown-item" onClick={() => { if (onOneNoteNotebook) onOneNoteNotebook(); setShowCreateDropdown(false); }}>
                     <div className="sidebar-dropdown-icon onenote-icon">
-                      <DocumentRegular />
+                      <img src="https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/assets/item-types/16/onetoc.svg" alt="onetoc" />
                     </div>
                     <span>OneNote notebook</span>
                   </div>
                   <div className="sidebar-dropdown-item" onClick={() => { if (onExcelSurvey) onExcelSurvey(); setShowCreateDropdown(false); }}>
                     <div className="sidebar-dropdown-icon excel-icon">
-                      <TableRegular />
+                      <img src="https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/assets/item-types/16/xlsx.svg" alt="xlsx" />
                     </div>
                     <span>Excel survey</span>
                   </div>
                   <div className="sidebar-dropdown-item" onClick={() => { if (onTextDocument) onTextDocument(); setShowCreateDropdown(false); }}>
                     <div className="sidebar-dropdown-icon text-icon">
-                      <DocumentRegular />
+                      <img src="https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/assets/item-types/16/txt.svg" alt="txt" />
                     </div>
                     <span>Text Document</span>
                   </div>
@@ -205,16 +210,16 @@ const Sidebar = ({
             </div>
             <ul className="sidebar-menu">
               <li className={filterType === 'all' ? 'active' : ''} onClick={() => onFilterChange('all')}>
-                <HomeRegular />
+                {filterType === 'all' ? <HomeFilled /> : <HomeRegular />}
               </li>
               <li className={filterType === 'folders' ? 'active' : ''} onClick={() => onFilterChange('folders')}>
-                <FolderRegular />
+                {filterType === 'folders' ? <FolderFilled /> : <FolderRegular />}
               </li>
               <li className={filterType === 'shared' ? 'active' : ''} onClick={() => onFilterChange('shared')}>
-                <PeopleRegular />
+                {filterType === 'shared' ? <PeopleFilled /> : <PeopleRegular />}
               </li>
               <li className={filterType === 'recycle' ? 'active' : ''} onClick={() => onFilterChange('recycle')}>
-                <DeleteRegular />
+                {filterType === 'recycle' ? <DeleteFilled /> : <DeleteRegular />}
               </li>
             </ul>
           </div>
@@ -231,7 +236,7 @@ const Sidebar = ({
             {isBrowseFilesExpanded && (
               <ul className="sidebar-menu">
                 <li className={filterType === 'people' ? 'active' : ''} onClick={() => onFilterChange('people')}>
-                  <PersonRegular />
+                  {filterType === 'people' ? <PersonFilled /> : <PersonRegular />}
                 </li>
               </ul>
             )}
@@ -270,7 +275,7 @@ const Sidebar = ({
                 className="sidebar-create-btn" 
                 onClick={handleCreateButtonClick}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" fill="white" viewBox="0 0 24 24">
+                <svg className="create-btn-icon" xmlns="http://www.w3.org/2000/svg" height="20" width="20" fill="white" viewBox="0 0 24 24">
                   <path d="M12 5v14m-7-7h14" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none" />
                 </svg>
                 <span>Create or upload</span>
@@ -279,59 +284,57 @@ const Sidebar = ({
                 <div ref={dropdownRef} className="sidebar-create-dropdown">
                   <div className="sidebar-dropdown-item" onClick={handleFolderClick}>
                     <div className="sidebar-dropdown-icon folder-icon">
-                      <FolderRegular />
+                      <img src="https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/assets/item-types/16/folder.svg" alt="folder" />
                     </div>
                     <span>Folder</span>
                   </div>
                   <div className="sidebar-dropdown-separator"></div>
                   <div className="sidebar-dropdown-item" onClick={handleFilesUploadClick}>
                     <div className="sidebar-dropdown-icon document-upload-icon">
-                      <DocumentRegular />
-                      <ArrowUploadRegular className="upload-overlay" />
+                      <DocumentArrowUpRegular />
                     </div>
                     <span>Files upload</span>
                   </div>
                   <div className="sidebar-dropdown-item" onClick={handleFolderUploadClick}>
                     <div className="sidebar-dropdown-icon folder-upload-icon">
-                      <FolderRegular />
-                      <ArrowUploadRegular className="upload-overlay" />
+                      <FolderArrowUpRegular />
                     </div>
                     <span>Folder upload</span>
                   </div>
                   <div className="sidebar-dropdown-separator"></div>
                   <div className="sidebar-dropdown-item" onClick={() => { if (onWordDocument) onWordDocument(); setShowCreateDropdown(false); }}>
                     <div className="sidebar-dropdown-icon word-icon">
-                      <DocumentRegular />
+                      <img src="https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/assets/item-types/16/docx.svg" alt="docx" />
                     </div>
                     <span>Word document</span>
                   </div>
                   <div className="sidebar-dropdown-item" onClick={() => { if (onExcelWorkbook) onExcelWorkbook(); setShowCreateDropdown(false); }}>
                     <div className="sidebar-dropdown-icon excel-icon">
-                      <TableRegular />
+                      <img src="https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/assets/item-types/16/xlsx.svg" alt="xlsx" />
                     </div>
                     <span>Excel workbook</span>
                   </div>
                   <div className="sidebar-dropdown-item" onClick={() => { if (onPowerPointPresentation) onPowerPointPresentation(); setShowCreateDropdown(false); }}>
                     <div className="sidebar-dropdown-icon powerpoint-icon">
-                      <SlideTextRegular />
+                      <img src="https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/assets/item-types/16/pptx.svg" alt="pptx" />
                     </div>
                     <span>PowerPoint presentation</span>
                   </div>
                   <div className="sidebar-dropdown-item" onClick={() => { if (onOneNoteNotebook) onOneNoteNotebook(); setShowCreateDropdown(false); }}>
                     <div className="sidebar-dropdown-icon onenote-icon">
-                      <DocumentRegular />
+                      <img src="https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/assets/item-types/16/onetoc.svg" alt="onetoc" />
                     </div>
                     <span>OneNote notebook</span>
                   </div>
                   <div className="sidebar-dropdown-item" onClick={() => { if (onExcelSurvey) onExcelSurvey(); setShowCreateDropdown(false); }}>
                     <div className="sidebar-dropdown-icon excel-icon">
-                      <TableRegular />
+                      <img src="https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/assets/item-types/16/xlsx.svg" alt="xlsx" />
                     </div>
                     <span>Excel survey</span>
                   </div>
                   <div className="sidebar-dropdown-item" onClick={() => { if (onTextDocument) onTextDocument(); setShowCreateDropdown(false); }}>
                     <div className="sidebar-dropdown-icon text-icon">
-                      <DocumentRegular />
+                      <img src="https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/assets/item-types/16/txt.svg" alt="txt" />
                     </div>
                     <span>Text Document</span>
                   </div>
@@ -349,19 +352,19 @@ const Sidebar = ({
             </div>
             <ul className="sidebar-menu">
               <li className={filterType === 'all' ? 'active' : ''} onClick={() => onFilterChange('all')}>
-                <HomeRegular />
+                {filterType === 'all' ? <HomeFilled /> : <HomeRegular />}
                 <span>Home</span>
               </li>
               <li className={filterType === 'myfiles' ? 'active' : ''} onClick={() => onFilterChange('myfiles')}>
-                <FolderRegular />
+                {filterType === 'myfiles' ? <FolderFilled /> : <FolderRegular />}
                 <span>My files</span>
               </li>
               <li className={filterType === 'shared' ? 'active' : ''} onClick={() => onFilterChange('shared')}>
-                <PeopleRegular />
+                {filterType === 'shared' ? <PeopleFilled /> : <PeopleRegular />}
                 <span>Shared</span>
               </li>
               <li className={filterType === 'recycle' ? 'active' : ''} onClick={() => onFilterChange('recycle')}>
-                <DeleteRegular />
+                {filterType === 'recycle' ? <DeleteFilled /> : <DeleteRegular />}
                 <span>Recycle bin</span>
               </li>
             </ul>
@@ -379,17 +382,17 @@ const Sidebar = ({
             {isBrowseFilesExpanded && (
               <ul className="sidebar-menu">
                 {folders.filter(f => !f.parentId).length > 0 && folders.filter(f => !f.parentId).map(folder => (
-                  <li 
-                    key={folder.id} 
-                    className={filterType === folder.name.toLowerCase() ? 'active' : ''} 
+                  <li
+                    key={folder.id}
+                    className={filterType === folder.name.toLowerCase() ? 'active' : ''}
                     onClick={() => onFolderClick ? onFolderClick(folder.id) : null}
                   >
-                    <FolderRegular />
+                    {filterType === folder.name.toLowerCase() ? <FolderFilled /> : <FolderRegular />}
                     <span>{folder.name}</span>
                   </li>
                 ))}
                 <li className={filterType === 'people' ? 'active' : ''} onClick={() => onFilterChange('people')}>
-                  <PersonRegular />
+                  {filterType === 'people' ? <PersonFilled /> : <PersonRegular />}
                   <span>People</span>
                 </li>
               </ul>
