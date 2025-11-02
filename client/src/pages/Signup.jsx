@@ -25,7 +25,7 @@ const Signup = () => {
     setStep(2)
   }
 
-  const handleSignupSubmit = (e) => {
+  const handleSignupSubmit = async (e) => {
     e.preventDefault()
     setError('')
 
@@ -44,7 +44,7 @@ const Signup = () => {
       return
     }
 
-    const result = signup(name, email, password)
+    const result = await signup(name, email, password)
     if (result.success) {
       navigate('/dashboard')
     } else {

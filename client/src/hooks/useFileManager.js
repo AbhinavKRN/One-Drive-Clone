@@ -45,8 +45,8 @@ export const useFileManager = () => {
           file.folder_id === currentFolderId
         )
         const currentFoldersList = allFolders.filter(folder => 
-          (currentFolderId === null && !folder.parentId) || 
-          folder.parentId === currentFolderId
+          (currentFolderId === null && !folder.parent_id) || 
+          folder.parent_id === currentFolderId
         )
 
         // Combine and sort
@@ -56,7 +56,10 @@ export const useFileManager = () => {
             id: folder.id,
             name: folder.name,
             type: 'folder',
-            modified: folder.createdAt
+            modified: folder.created_at,
+            parentId: folder.parent_id,
+            createdAt: folder.created_at,
+            updatedAt: folder.updated_at
           })),
           ...currentFiles.map(file => ({
             ...file,
@@ -74,7 +77,14 @@ export const useFileManager = () => {
         })
 
         setFiles(combined)
-        setFolders(allFolders)
+        // Normalize folder field names from snake_case to camelCase
+        const normalizedFolders = allFolders.map(folder => ({
+          ...folder,
+          parentId: folder.parent_id,
+          createdAt: folder.created_at,
+          updatedAt: folder.updated_at
+        }))
+        setFolders(normalizedFolders)
 
         // Calculate storage
         const totalSize = allFiles.reduce((sum, file) => sum + file.size, 0)
@@ -82,7 +92,7 @@ export const useFileManager = () => {
 
         // Build breadcrumbs
         if (currentFolderId) {
-          const path = buildPathToFolder(currentFolderId, allFolders)
+          const path = buildPathToFolder(currentFolderId, normalizedFolders)
           setBreadcrumbs([{ id: null, name: 'My Files' }, ...path])
         } else {
           setBreadcrumbs([{ id: null, name: 'My Files' }])
