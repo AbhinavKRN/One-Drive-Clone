@@ -69,6 +69,7 @@ const Dashboard = () => {
     navigateToPath,
     downloadFile,
     createEmptyFile,
+    moveFileToFolder,
   } = useFileManager();
 
   // Store navigateToFolderBySlug in ref for stable reference
@@ -261,28 +262,28 @@ const Dashboard = () => {
 
   // Handlers for Office document creation
   const handleWordDocument = () => {
-    createEmptyFile('word');
+    createEmptyFile("word");
   };
 
   const handleExcelWorkbook = () => {
-    createEmptyFile('excel');
+    createEmptyFile("excel");
   };
 
   const handlePowerPointPresentation = () => {
-    createEmptyFile('powerpoint');
+    createEmptyFile("powerpoint");
   };
 
   const handleOneNoteNotebook = () => {
-    createEmptyFile('onenote');
+    createEmptyFile("onenote");
   };
 
   const handleExcelSurvey = () => {
     // Excel survey is the same as Excel workbook
-    createEmptyFile('excel');
+    createEmptyFile("excel");
   };
 
   const handleTextDocument = () => {
-    createEmptyFile('text');
+    createEmptyFile("text");
   };
 
   const handleDelete = (itemIds = null) => {
@@ -458,7 +459,11 @@ const Dashboard = () => {
                         {breadcrumbs.map((crumb, index) => (
                           <React.Fragment key={crumb.id}>
                             <span
-                              className={`breadcrumb ${index === breadcrumbs.length - 1 ? 'breadcrumb-current' : ''}`}
+                              className={`breadcrumb ${
+                                index === breadcrumbs.length - 1
+                                  ? "breadcrumb-current"
+                                  : ""
+                              }`}
                               onClick={() => handleBreadcrumbClick(crumb.id)}
                             >
                               {crumb.name}
@@ -471,8 +476,11 @@ const Dashboard = () => {
                       </div>
                     ) : (
                       <h1 className="files-title-inline">
-                        {filterType === "all" ? "Recent" :
-                         filterType === "folders" ? "Folders" : "Files"}
+                        {filterType === "all"
+                          ? "Recent"
+                          : filterType === "folders"
+                          ? "Folders"
+                          : "Files"}
                       </h1>
                     )}
                     <h1 className="files-title-inline">
@@ -674,6 +682,7 @@ const Dashboard = () => {
                     onSortChange={handleSort}
                     onFilesUpload={handleFilesUpload}
                     onFolderUpload={handleFolderUpload}
+                    onMoveFileToFolder={moveFileToFolder}
                   />
                 </div>
               </div>

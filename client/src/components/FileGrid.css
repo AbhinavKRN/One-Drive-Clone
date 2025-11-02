@@ -91,6 +91,29 @@
   background-color: rgba(0, 120, 212, 0.05);
 }
 
+/* Drag over folder styling */
+.file-card.drag-over-folder,
+.file-list-row.drag-over-folder {
+  border: 2px solid var(--accent-primary);
+  background-color: rgba(0, 120, 212, 0.1);
+  box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+}
+
+.file-card[draggable="true"],
+.file-list-row[draggable="true"] {
+  cursor: move;
+}
+
+.file-card[draggable="true"]:hover,
+.file-list-row[draggable="true"]:hover {
+  cursor: grab;
+}
+
+.file-card[draggable="true"]:active,
+.file-list-row[draggable="true"]:active {
+  cursor: grabbing;
+}
+
 .files-white-box .file-grid {
   background-color: var(--bg-secondary);
 }

@@ -25,6 +25,7 @@ const FileGrid = ({
   onSortChange,
   onFilesUpload,
   onFolderUpload,
+  onMoveFileToFolder,
 }) => {
   const [showNameMenu, setShowNameMenu] = useState(false);
   const [showModifiedMenu, setShowModifiedMenu] = useState(false);
@@ -38,6 +39,8 @@ const FileGrid = ({
   const [sharingSortOrder, setSharingSortOrder] = useState("descending");
   const [isDragOver, setIsDragOver] = useState(false);
   const dragCounterRef = useRef(0);
+  const [draggedFileId, setDraggedFileId] = useState(null);
+  const [dragOverFolderId, setDragOverFolderId] = useState(null);
 
   // Check if we're in My Files view (root or inside folder) - MUST be declared early
   // Check if we're in Recent/Home view - MUST be declared early
@@ -71,7 +74,7 @@ const FileGrid = ({
     };
   }, [showNameMenu, showModifiedMenu, showSizeMenu, showSharingMenu]);
 
-  // Drag and drop handlers
+  // Drag and drop handlers for file upload (from outside)
   const handleDragEnter = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -127,6 +130,73 @@ const FileGrid = ({
     } else if (droppedFiles.length > 0 && onFilesUpload) {
       // Handle file upload
       onFilesUpload(droppedFiles);
+    }
+  };
+
+  // Drag and drop handlers for moving files to folders (internal)
+  const handleFileDragStart = (e, fileId) => {
+    if (!onMoveFileToFolder || filterType !== "myfiles") return;
+    setDraggedFileId(fileId);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", fileId);
+    // Make the dragged element semi-transparent
+    e.target.style.opacity = "0.5";
+  };
+
+  const handleFileDragEnd = (e) => {
+    setDraggedFileId(null);
+    setDragOverFolderId(null);
+    e.target.style.opacity = "1";
+  };
+
+  const handleFolderDragEnter = (e, folderId) => {
+    if (!draggedFileId || draggedFileId === folderId) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOverFolderId(folderId);
+  };
+
+  const handleFolderDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Only clear if we're leaving the folder element, not entering a child
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setDragOverFolderId(null);
+    }
+  };
+
+  const handleFolderDragOver = (e, folderId) => {
+    if (!draggedFileId || draggedFileId === folderId) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "move";
+    setDragOverFolderId(folderId);
+  };
+
+  const handleFolderDrop = async (e, folderId) => {
+    if (!draggedFileId || !onMoveFileToFolder) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const fileId = draggedFileId;
+    setDraggedFileId(null);
+    setDragOverFolderId(null);
+
+    // Don't move if dropping on the same folder
+    const draggedFile = files.find((f) => f.id === fileId);
+    if (draggedFile) {
+      // Check if file is already in this folder
+      const currentFolderId = draggedFile.folder_id || null;
+      if (
+        currentFolderId === folderId ||
+        (currentFolderId === null && folderId === null)
+      ) {
+        return;
+      }
+
+      // Move the file to the folder
+      await onMoveFileToFolder(fileId, folderId);
     }
   };
   const getFileIcon = (file) => {
@@ -208,7 +278,7 @@ const FileGrid = ({
     // First, ensure folders come before files
     if (a.type === "folder" && b.type !== "folder") return -1;
     if (a.type !== "folder" && b.type === "folder") return 1;
-    
+
     // If both are folders or both are files, sort by selected criteria
     if (sortBy === "name") {
       if (sortOrder === "ascending") {
@@ -283,9 +353,34 @@ const FileGrid = ({
             key={file.id}
             className={`file-card ${
               selectedItems.includes(file.id) ? "selected" : ""
+            } ${
+              file.type === "folder" && dragOverFolderId === file.id
+                ? "drag-over-folder"
+                : ""
             }`}
             onClick={() => onItemClick(file)}
             onContextMenu={(e) => handleContextMenu(e, file)}
+            draggable={
+              file.type !== "folder" &&
+              filterType === "myfiles" &&
+              !!onMoveFileToFolder
+            }
+            onDragStart={(e) =>
+              file.type !== "folder" && handleFileDragStart(e, file.id)
+            }
+            onDragEnd={handleFileDragEnd}
+            onDragEnter={(e) =>
+              file.type === "folder" && handleFolderDragEnter(e, file.id)
+            }
+            onDragLeave={
+              file.type === "folder" ? handleFolderDragLeave : undefined
+            }
+            onDragOver={(e) =>
+              file.type === "folder" && handleFolderDragOver(e, file.id)
+            }
+            onDrop={(e) =>
+              file.type === "folder" && handleFolderDrop(e, file.id)
+            }
           >
             <div className="file-card-checkbox">
               <input
@@ -896,10 +991,35 @@ const FileGrid = ({
             key={file.id}
             className={`file-list-row ${isSelected ? "selected" : ""} ${
               isInMyFilesView && isSelected ? "my-files-selected" : ""
+            } ${
+              file.type === "folder" && dragOverFolderId === file.id
+                ? "drag-over-folder"
+                : ""
             }`}
             style={{
               gridTemplateColumns: `48px ${nameColumnWidth}fr 1fr 1fr 1fr`,
             }}
+            draggable={
+              file.type !== "folder" &&
+              filterType === "myfiles" &&
+              !!onMoveFileToFolder
+            }
+            onDragStart={(e) =>
+              file.type !== "folder" && handleFileDragStart(e, file.id)
+            }
+            onDragEnd={handleFileDragEnd}
+            onDragEnter={(e) =>
+              file.type === "folder" && handleFolderDragEnter(e, file.id)
+            }
+            onDragLeave={
+              file.type === "folder" ? handleFolderDragLeave : undefined
+            }
+            onDragOver={(e) =>
+              file.type === "folder" && handleFolderDragOver(e, file.id)
+            }
+            onDrop={(e) =>
+              file.type === "folder" && handleFolderDrop(e, file.id)
+            }
             onClick={(e) => {
               // Only handle row click if not clicking on interactive elements
               if (
