@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import API_BASE_URL from '../config/api'
 
 const AuthContext = createContext()
@@ -92,9 +92,9 @@ export const AuthProvider = ({ children }) => {
   }
 
   // Get auth token for API requests
-  const getToken = () => {
+  const getToken = useCallback(() => {
     return localStorage.getItem('token')
-  }
+  }, [])
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, user, login, signup, logout, loading, getToken }}>

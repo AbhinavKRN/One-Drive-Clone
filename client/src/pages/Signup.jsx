@@ -46,7 +46,7 @@ const Signup = () => {
 
     const result = await signup(name, email, password)
     if (result.success) {
-      navigate('/dashboard')
+      navigate('/dashboard/home')
     } else {
       setError(result.message)
     }

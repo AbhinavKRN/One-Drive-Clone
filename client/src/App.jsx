@@ -7,13 +7,15 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 
 const PrivateRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, loading } = useAuth()
+  if (loading) return <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh'}}>Loading...</div>
   return isAuthenticated ? children : <Navigate to="/login" />
 }
 
 const PublicRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth()
-  return !isAuthenticated ? children : <Navigate to="/dashboard" />
+  const { isAuthenticated, loading } = useAuth()
+  if (loading) return <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh'}}>Loading...</div>
+  return !isAuthenticated ? children : <Navigate to="/dashboard/home" />
 }
 
 function App() {

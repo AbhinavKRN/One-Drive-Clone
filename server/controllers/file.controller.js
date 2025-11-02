@@ -2,6 +2,72 @@ const supabase = require('../config/database')
 const fs = require('fs').promises
 const path = require('path')
 
+// Helper function to determine file category
+const getFileCategory = (mimetype, filename) => {
+  // Images
+  if (mimetype.startsWith('image/')) {
+    return 'Pictures'
+  }
+  
+  // Videos
+  if (mimetype.startsWith('video/')) {
+    return 'Videos'
+  }
+  
+  // Documents (PDF, Word, Excel, PowerPoint, Text, etc.)
+  if (
+    mimetype.includes('pdf') ||
+    mimetype.includes('document') ||
+    mimetype.includes('text') ||
+    mimetype.includes('word') ||
+    mimetype.includes('excel') ||
+    mimetype.includes('powerpoint') ||
+    mimetype.includes('spreadsheet') ||
+    mimetype.includes('presentation') ||
+    mimetype.includes('opendocument')
+  ) {
+    return 'Documents'
+  }
+  
+  // Default: My Files (no auto-organization)
+  return null
+}
+
+// Helper function to get or create system folder
+const getOrCreateSystemFolder = async (userId, folderName) => {
+  // Check if folder exists (use maybeSingle to handle multiple or none)
+  const { data: existingFolders } = await supabase
+    .from('folders')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('name', folderName)
+    .is('parent_id', null)
+
+  if (existingFolders && existingFolders.length > 0) {
+    // Return first existing folder if duplicates exist
+    console.log('📁 Found existing system folder:', folderName)
+    return existingFolders[0]
+  }
+
+  // Create folder if it doesn't exist
+  const { data: newFolder, error } = await supabase
+    .from('folders')
+    .insert([{
+      name: folderName,
+      user_id: userId,
+      parent_id: null
+    }])
+    .select()
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  console.log('📁 Created system folder:', folderName)
+  return newFolder
+}
+
 const uploadFile = async (req, res) => {
   try {
     const userId = req.user.id
@@ -16,12 +82,26 @@ const uploadFile = async (req, res) => {
       })
     }
 
-    // Validate folder if provided
-    if (folderId) {
+    // If no folder_id specified, auto-organize based on file type
+    let targetFolderId = folderId
+    
+    if (!targetFolderId) {
+      const category = getFileCategory(req.file.mimetype, req.file.originalname)
+      console.log('📤 Upload:', req.file.originalname, 'MIME:', req.file.mimetype, 'Category:', category || 'none')
+      
+      if (category) {
+        const systemFolder = await getOrCreateSystemFolder(userId, category)
+        targetFolderId = systemFolder.id
+        console.log('📂 Auto-routing to:', category, '(folder ID:', systemFolder.id.substring(0, 8) + '...)')
+      }
+    }
+
+    // Validate folder if provided or auto-determined
+    if (targetFolderId) {
       const { data: folder } = await supabase
         .from('folders')
         .select('*')
-        .eq('id', folderId)
+        .eq('id', targetFolderId)
         .eq('user_id', userId)
         .single()
 
@@ -45,7 +125,7 @@ const uploadFile = async (req, res) => {
         size: req.file.size,
         path: req.file.path,
         user_id: userId,
-        folder_id: folderId || null
+        folder_id: targetFolderId || null
       }])
       .select()
       .single()
@@ -84,6 +164,7 @@ const uploadFile = async (req, res) => {
 const getAllFiles = async (req, res) => {
   try {
     const userId = req.user.id
+    console.log('📥 getAllFiles called for user:', userId)
 
     const { data: files, error } = await supabase
       .from('files')
@@ -93,6 +174,12 @@ const getAllFiles = async (req, res) => {
       `)
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
+
+    console.log('📊 Files query result:', { 
+      count: files?.length || 0, 
+      error: error?.message || null,
+      files: files?.slice(0, 2).map(f => ({ name: f.name, type: f.type }))
+    })
 
     if (error) {
       throw error
@@ -111,6 +198,8 @@ const getAllFiles = async (req, res) => {
       updated_at: file.updated_at
     }))
 
+    console.log('✅ Returning', formattedFiles.length, 'files to frontend')
+
     return res.json({
       status: 'success',
       action: 'get_files',
@@ -118,7 +207,7 @@ const getAllFiles = async (req, res) => {
       message: 'Files retrieved successfully'
     })
   } catch (error) {
-    console.error('Get files error:', error)
+    console.error('❌ Get files error:', error)
     return res.status(500).json({
       status: 'error',
       action: 'get_files',
