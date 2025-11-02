@@ -6,7 +6,8 @@ const MomentsPage = () => {
   return (
     <div className="photos-page">
       <div className="photos-hero">
-        <h2>Explore Highlights From Your photo Collection</h2>
+        <h2 className="h2">Explore Highlights From Your photo Collection</h2>
+        <h4 className="h4">Add photos to relieve specila times , revisit favourite places , and celebrate what matters most </h4>
         <div className="photos-stack">
           <img src="/images/img2Hackathon.png" alt="Memories" />
         </div>
