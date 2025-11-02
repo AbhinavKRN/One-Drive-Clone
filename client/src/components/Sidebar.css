@@ -4,11 +4,16 @@
   background-color: #faf9f8;
   border-right: none;
   padding: 12px 8px;
+  overflow: hidden;
   overflow-y: auto;
   height: 100%;
   display: flex;
   flex-direction: column;
-  transition: width 0.5s ease, padding 0.5s ease;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: width, padding;
+  transform: translateX(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 /* ─────────────── Collapsed Sidebar ─────────────── */
@@ -17,27 +22,86 @@
   background-color: #faf9f8;
   border-right: none;
   padding: 12px 4px;
+  overflow: hidden;
   overflow-y: auto;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: width 0.5s ease, padding 0.3s ease;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: width, padding;
+  transform: translateX(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
-/* Hide text labels and reduce padding in collapsed mode */
-.sidebar-closed span,
+/* Smooth text fade out in collapsed mode */
+.sidebar-closed .sidebar-menu li span,
+.sidebar-closed .sidebar-user-heading span,
 .sidebar-closed .sidebar-heading,
 .sidebar-closed .storage-promo-text {
-  display: none;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  visibility: hidden;
+  max-width: 0;
+  overflow: hidden;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+/* Hide browse heading container in collapsed mode */
+.sidebar-closed .sidebar-heading-container {
+  display: none;
+}
+
+/* Smooth text fade in when expanded */
+.sidebar .sidebar-menu li span,
+.sidebar .sidebar-user-heading span,
+.sidebar .sidebar-heading,
+.sidebar .storage-promo-text {
+  opacity: 1;
+  visibility: visible;
+  max-width: 200px;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s, 
+              visibility 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s,
+              max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s;
+}
+
+/* Hide storage text when collapsed, show only bar */
+.sidebar-closed .storage-heading,
+.sidebar-closed .storage-text {
+  opacity: 0;
+  visibility: hidden;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar .storage-heading,
+.sidebar .storage-text {
+  opacity: 1;
+  visibility: visible;
+  max-height: 50px;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s, 
+              visibility 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s,
+              max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s;
 }
 
 /* Center items in collapsed mode */
 .sidebar-closed .sidebar-menu li {
   justify-content: center;
   padding: 8px;
+  transition: padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              justify-content 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar .sidebar-menu li {
+  justify-content: flex-start;
+  transition: padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              justify-content 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-closed .sidebar-menu li svg {
@@ -53,17 +117,38 @@
   justify-content: center;
   gap: 0;
   background: linear-gradient(90deg, #0078D4, #5C2D91);
-  transition: all 0.3s ease;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-closed .sidebar-create-btn span {
-  display: none;
+  opacity: 0;
+  visibility: hidden;
+  max-width: 0;
+  overflow: hidden;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar .sidebar-create-btn span {
+  opacity: 1;
+  visibility: visible;
+  max-width: 150px;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.15s, 
+              visibility 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.15s,
+              max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.15s;
 }
 
 /* ─────────────── Common Styles (From your CSS) ─────────────── */
 
 .sidebar-section {
   margin-bottom: 12px;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 1;
+}
+
+.sidebar-closed .sidebar-section {
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-heading {
@@ -74,6 +159,37 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   padding: 0 8px;
+}
+
+.sidebar-heading.browse-heading {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 0;
+}
+
+.sidebar-heading-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 0 8px;
+  margin-bottom: 8px;
+}
+
+.browse-arrow-icon {
+  width: 16px;
+  height: 16px;
+  color: #605e5c;
+  transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.sidebar:hover .browse-arrow-icon,
+.sidebar-closed:hover .browse-arrow-icon {
+  opacity: 1;
+  visibility: visible;
 }
 
 .sidebar-user-heading {
@@ -103,6 +219,14 @@
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.sidebar:hover .user-account-icon,
+.sidebar-closed:hover .user-account-icon {
+  opacity: 1;
+  visibility: visible;
 }
 
 .user-account-icon:hover {
@@ -124,7 +248,7 @@
   justify-content: center;
   gap: 6px;
   cursor: pointer;
-  transition: 0.3s ease;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 13px;
   margin-bottom: 20px;
   align-self: center;
@@ -138,6 +262,9 @@
   list-style: none;
   padding: 0;
   margin: 0;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-menu li {
@@ -147,7 +274,7 @@
   padding: 6px 8px;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   color: #323130;
   font-size: 13px;
   position: relative;
@@ -172,6 +299,7 @@
   width: 3px;
   background-color: #0078d4;
   border-radius: 0 2px 2px 0;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-menu li svg {
@@ -180,6 +308,7 @@
   height: 21px;
   color: #605e5c;
   flex-shrink: 0;
+  transition: color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-menu li.active svg {
@@ -190,8 +319,7 @@
 
 .storage-section {
   margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid #edebe9;
+  padding-top: 20px;
 }
 
 .storage-info {
@@ -242,6 +370,10 @@
   padding: 10px;
   margin-bottom: 12px;
   transition: opacity 0.3s ease;
+}
+
+.storage-section .sidebar-promo {
+  margin-bottom: 20px;
 }
 
 .storage-promo-text {

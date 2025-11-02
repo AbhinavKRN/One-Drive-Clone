@@ -9,13 +9,16 @@ import {
   DeleteRegular,
   PersonRegular,
   DiamondRegular,
-  ArrowRightRegular
+  ArrowRightRegular,
+  ChevronRightRegular,
+  ChevronDownRegular
 } from '@fluentui/react-icons'
 import './Sidebar.css'
 
 const Sidebar = ({ storageUsed, storageTotal, filterType, onFilterChange, onCreateClick }) => {
   const { user } = useAuth()
   const [openCloseArrow, setOpenCloseArrow] = useState(false)
+  const [isBrowseFilesExpanded, setIsBrowseFilesExpanded] = useState(false)
 
   const storagePercentage = (storageUsed / storageTotal) * 100
 
@@ -65,23 +68,31 @@ const Sidebar = ({ storageUsed, storageTotal, filterType, onFilterChange, onCrea
           </div>
 
           <div className="sidebar-section">
-            <h3 className="sidebar-heading browse-heading">BROWSE FILES BY</h3>
-            <ul className="sidebar-menu">
-              <li className={filterType === 'people' ? 'active' : ''} onClick={() => onFilterChange('people')}>
-                <PersonRegular />
-              </li>
-            </ul>
-          </div>
-
-          <div className="sidebar-section sidebar-promo">
-            <div className="storage-promo">
-              <button className="storage-promo-btn">
-                <DiamondRegular />
-              </button>
+            <div className="sidebar-heading-container" onClick={() => setIsBrowseFilesExpanded(!isBrowseFilesExpanded)}>
+              <h3 className="sidebar-heading browse-heading">BROWSE FILES BY</h3>
+              {isBrowseFilesExpanded ? (
+                <ChevronDownRegular className="browse-arrow-icon" />
+              ) : (
+                <ChevronRightRegular className="browse-arrow-icon" />
+              )}
             </div>
+            {isBrowseFilesExpanded && (
+              <ul className="sidebar-menu">
+                <li className={filterType === 'people' ? 'active' : ''} onClick={() => onFilterChange('people')}>
+                  <PersonRegular />
+                </li>
+              </ul>
+            )}
           </div>
 
           <div className="sidebar-section storage-section">
+            <div className="sidebar-promo">
+              <div className="storage-promo">
+                <button className="storage-promo-btn">
+                  <DiamondRegular />
+                </button>
+              </div>
+            </div>
             <h3 className="sidebar-heading storage-heading">STORAGE</h3>
             <div className="storage-info">
               <p className="storage-text">
@@ -135,26 +146,34 @@ const Sidebar = ({ storageUsed, storageTotal, filterType, onFilterChange, onCrea
           </div>
 
           <div className="sidebar-section">
-            <h3 className="sidebar-heading browse-heading">BROWSE FILES BY</h3>
-            <ul className="sidebar-menu">
-              <li className={filterType === 'people' ? 'active' : ''} onClick={() => onFilterChange('people')}>
-                <PersonRegular />
-                <span>People</span>
-              </li>
-            </ul>
-          </div>
-
-          <div className="sidebar-section sidebar-promo">
-            <div className="storage-promo">
-              <p className="storage-promo-text">Get storage for all your files and photos.</p>
-              <button className="storage-promo-btn">
-                <DiamondRegular />
-                <span>Buy storage</span>
-              </button>
+            <div className="sidebar-heading-container" onClick={() => setIsBrowseFilesExpanded(!isBrowseFilesExpanded)}>
+              <h3 className="sidebar-heading browse-heading">BROWSE FILES BY</h3>
+              {isBrowseFilesExpanded ? (
+                <ChevronDownRegular className="browse-arrow-icon" />
+              ) : (
+                <ChevronRightRegular className="browse-arrow-icon" />
+              )}
             </div>
+            {isBrowseFilesExpanded && (
+              <ul className="sidebar-menu">
+                <li className={filterType === 'people' ? 'active' : ''} onClick={() => onFilterChange('people')}>
+                  <PersonRegular />
+                  <span>People</span>
+                </li>
+              </ul>
+            )}
           </div>
 
           <div className="sidebar-section storage-section">
+            <div className="sidebar-promo">
+              <div className="storage-promo">
+                <p className="storage-promo-text">Get storage for all your files and photos.</p>
+                <button className="storage-promo-btn">
+                  <DiamondRegular />
+                  <span>Buy storage</span>
+                </button>
+              </div>
+            </div>
             <h3 className="sidebar-heading storage-heading">STORAGE</h3>
             <div className="storage-info">
               <p className="storage-text">
