@@ -220,7 +220,8 @@
 }
 
 .file-card-download,
-.file-card-delete {
+.file-card-delete,
+.file-card-more {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color-medium);
   border-radius: 4px;
@@ -240,10 +241,21 @@
 }
 
 .file-card-download svg,
-.file-card-delete svg {
+.file-card-delete svg,
+.file-card-more svg {
   width: 16px;
   height: 16px;
   color: inherit;
+}
+
+.file-card-more {
+  color: var(--text-secondary);
+}
+
+.file-card-more:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--border-color-medium);
+  color: var(--text-primary);
 }
 
 .file-card-download:hover {

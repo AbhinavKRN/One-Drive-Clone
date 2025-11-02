@@ -6,11 +6,13 @@ import {
 } from '@fluentui/react-icons'
 import { useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
 import API_BASE_URL from '../config/api'
 import './RecycleBin.css'
 
 const RecycleBin = () => {
   const { getToken } = useAuth()
+  const toast = useToast()
   const location = useLocation()
   const [showPersonalVault, setShowPersonalVault] = useState(false)
   const [sortBy, setSortBy] = useState('date')
@@ -89,21 +91,20 @@ const RecycleBin = () => {
       const data = await response.json()
       if (data.status === 'success') {
         loadRecycleBinItems() // Reload items
-        alert(`${item.item_type === 'folder' ? 'Folder' : 'File'} restored successfully`)
+        toast.success(`${item.item_type === 'folder' ? 'Folder' : 'File'} restored successfully`)
       } else {
-        alert(data.error || 'Failed to restore item')
+        toast.error(data.error || 'Failed to restore item')
       }
     } catch (error) {
       console.error('Error restoring item:', error)
-      alert('Failed to restore item')
+      toast.error('Failed to restore item')
     }
   }
 
   // Permanently delete item
   const handlePermanentDelete = async (item) => {
-    if (!window.confirm(`Permanently delete "${item.name}"? This action cannot be undone.`)) {
-      return
-    }
+    // Delete immediately without confirmation
+    // User will be notified via toast
 
     try {
       const token = getToken()
@@ -123,13 +124,13 @@ const RecycleBin = () => {
       const data = await response.json()
       if (data.status === 'success') {
         loadRecycleBinItems() // Reload items
-        alert('Item permanently deleted')
+        toast.success(`"${item.name}" permanently deleted`)
       } else {
-        alert(data.error || 'Failed to delete item')
+        toast.error(data.error || 'Failed to delete item')
       }
     } catch (error) {
       console.error('Error deleting item:', error)
-      alert('Failed to delete item')
+      toast.error('Failed to delete item')
     }
   }
 

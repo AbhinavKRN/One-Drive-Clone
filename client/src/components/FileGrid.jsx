@@ -7,7 +7,9 @@ import {
   MusicNote2Regular,
   ArchiveRegular,
   ShareRegular,
+  MoreVerticalRegular,
 } from "@fluentui/react-icons";
+import FileContextMenu from "./FileContextMenu";
 import "./FileGrid.css";
 
 const FileGrid = ({
@@ -444,10 +446,7 @@ const FileGrid = ({
                   className="file-card-delete"
                   onClick={(e) => {
                     e.stopPropagation();
-                    const itemType = file.type === "folder" ? "folder" : "file";
-                    if (window.confirm(`Delete ${itemType} "${file.name}"?`)) {
-                      onDelete([file.id]);
-                    }
+                    onDelete([file.id]);
                   }}
                   title="Delete"
                 >
@@ -466,6 +465,23 @@ const FileGrid = ({
                   </svg>
                 </button>
               )}
+              <button
+                className="file-card-more"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  setContextMenu({
+                    file,
+                    position: {
+                      x: rect.left,
+                      y: rect.bottom + 4,
+                    },
+                  });
+                }}
+                title="More options"
+              >
+                <MoreVerticalRegular />
+              </button>
             </div>
           </div>
         ))}
@@ -1113,7 +1129,14 @@ const FileGrid = ({
                   className="btn-icon action-icon ellipsis-menu"
                   onClick={(e) => {
                     e.stopPropagation();
-                    // More options
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setContextMenu({
+                      file,
+                      position: {
+                        x: rect.left,
+                        y: rect.bottom + 4,
+                      },
+                    });
                   }}
                   title="More options"
                 >
@@ -1145,6 +1168,41 @@ const FileGrid = ({
           </div>
         );
       })}
+      
+      {/* Context Menu */}
+      {contextMenu && (
+        <FileContextMenu
+          file={contextMenu.file}
+          position={contextMenu.position}
+          onShare={() => {
+            if (onShare) onShare();
+          }}
+          onCopyLink={() => {
+            if (onCopyLink) onCopyLink();
+          }}
+          onDelete={() => {
+            if (onDelete) onDelete([contextMenu.file.id]);
+          }}
+          onDownload={() => {
+            if (onDownload && contextMenu.file.type !== 'folder') {
+              onDownload(contextMenu.file);
+            }
+          }}
+          onMoveTo={() => {
+            if (onMoveTo) onMoveTo();
+          }}
+          onCopyTo={() => {
+            if (onCopyTo) onCopyTo();
+          }}
+          onRename={() => {
+            if (onRename) onRename(contextMenu.file);
+          }}
+          onDetails={() => {
+            if (onDetails) onDetails();
+          }}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
     </div>
   );
 };
