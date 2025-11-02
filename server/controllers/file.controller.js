@@ -248,6 +248,78 @@ const getFile = async (req, res) => {
   }
 }
 
+// Preview file (for inline display)
+const previewFile = async (req, res) => {
+  try {
+    const { id } = req.params
+    const userId = req.user.id
+
+    const { data: file, error } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .single()
+
+    if (error || !file) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'preview_file',
+        error: 'File not found',
+        code: 404
+      })
+    }
+
+    // Check if file exists on disk
+    try {
+      await fs.access(file.path)
+    } catch {
+      return res.status(404).json({
+        status: 'error',
+        action: 'preview_file',
+        error: 'File not found on disk',
+        code: 404
+      })
+    }
+
+    // Get file stats
+    const stats = await fs.stat(file.path)
+    const fileSize = stats.size
+    
+    // Set headers for inline preview
+    res.setHeader('Content-Type', file.type || 'application/octet-stream')
+    res.setHeader('Content-Length', fileSize)
+    res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(file.name)}"`)
+    res.setHeader('Cache-Control', 'private, max-age=3600')
+    
+    // Stream the file
+    const fileStream = require('fs').createReadStream(file.path)
+    fileStream.pipe(res)
+    
+    fileStream.on('error', (err) => {
+      console.error('Preview stream error:', err)
+      if (!res.headersSent) {
+        res.status(500).json({
+          status: 'error',
+          action: 'preview_file',
+          error: 'Error reading file',
+          code: 500
+        })
+      }
+    })
+  } catch (error) {
+    console.error('Preview file error:', error)
+    if (!res.headersSent) {
+      return res.status(500).json({
+        status: 'error',
+        action: 'preview_file',
+        error: error.message,
+        code: 500
+      })
+    }
+  }
+}
+
 const downloadFile = async (req, res) => {
   try {
     const { id } = req.params
@@ -792,6 +864,7 @@ module.exports = {
   getAllFiles,
   getFile,
   downloadFile,
+  previewFile,
   deleteFile,
   renameFile,
   getRecycleBinItems,
