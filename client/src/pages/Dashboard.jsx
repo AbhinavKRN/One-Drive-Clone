@@ -13,14 +13,15 @@ import PhotosPage from "./PhotosPage"; // 👈 new Photos page component
 import "./Dashboard.css";
 
 const Dashboard = () => {
-  const { user } = useAuth()
-  const [viewMode, setViewMode] = useState('grid') // 'grid' or 'list'
-  const [searchQuery, setSearchQuery] = useState('')
-  const [filterType, setFilterType] = useState('all') // 'all', 'folders', 'images', 'documents'
-  const [previewFile, setPreviewFile] = useState(null)
-  const [showCreateFolder, setShowCreateFolder] = useState(false)
-  const [renameItem, setRenameItem] = useState(null)
-  const [selectedItems, setSelectedItems] = useState([])
+  const { user } = useAuth();
+  const [viewMode, setViewMode] = useState("grid");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState("all");
+  const [previewFile, setPreviewFile] = useState(null);
+  const [showCreateFolder, setShowCreateFolder] = useState(false);
+  const [renameItem, setRenameItem] = useState(null);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [activeTab, setActiveTab] = useState("Files");
 
   const {
     files,
@@ -65,10 +66,51 @@ const Dashboard = () => {
     uploadedFiles.forEach((file) => uploadFile(file));
   };
 
+  const handleFilesUpload = (files) => {
+    files.forEach(file => uploadFile(file))
+  }
+
+  const handleFolderUpload = (files) => {
+    // Backend team will implement folder upload logic
+    console.log('Folder upload:', files)
+    alert('Folder upload feature will be implemented by backend team')
+  }
+
   const handleCreateFolder = (folderName) => {
     createFolder(folderName);
     setShowCreateFolder(false);
   };
+
+  // Handlers for Office document creation - Backend team will implement these
+  const handleWordDocument = () => {
+    console.log('Create Word document')
+    alert('Word document creation feature will be implemented by backend team')
+  }
+
+  const handleExcelWorkbook = () => {
+    console.log('Create Excel workbook')
+    alert('Excel workbook creation feature will be implemented by backend team')
+  }
+
+  const handlePowerPointPresentation = () => {
+    console.log('Create PowerPoint presentation')
+    alert('PowerPoint presentation creation feature will be implemented by backend team')
+  }
+
+  const handleOneNoteNotebook = () => {
+    console.log('Create OneNote notebook')
+    alert('OneNote notebook creation feature will be implemented by backend team')
+  }
+
+  const handleExcelSurvey = () => {
+    console.log('Create Excel survey')
+    alert('Excel survey creation feature will be implemented by backend team')
+  }
+
+  const handleTextDocument = () => {
+    console.log('Create Text document')
+    alert('Text document creation feature will be implemented by backend team')
+  }
 
   const handleDelete = () => {
     if (selectedItems.length > 0) {
@@ -119,10 +161,20 @@ const Dashboard = () => {
             filterType={filterType}
             onFilterChange={setFilterType}
             onCreateClick={() => setShowCreateFolder(true)}
+            onFilesUpload={handleFilesUpload}
+            onFolderUpload={handleFolderUpload}
+            onWordDocument={handleWordDocument}
+            onExcelWorkbook={handleExcelWorkbook}
+            onPowerPointPresentation={handlePowerPointPresentation}
+            onOneNoteNotebook={handleOneNoteNotebook}
+            onExcelSurvey={handleExcelSurvey}
+            onTextDocument={handleTextDocument}
           />
 
         <div className="main-content">
-          {filterType === 'shared' ? (
+          {filterType === 'recycle' ? (
+            <RecycleBin />
+          ) : filterType === 'shared' ? (
             <SharedView
               files={files}
               viewMode={viewMode}
@@ -148,69 +200,54 @@ const Dashboard = () => {
                   ))}
                 </div>
 
-                <div className="toolbar-actions">
-                  <label className="btn-upload">
-                    <i className="fas fa-upload"></i>
-                    Upload
-                    <input
-                      type="file"
-                      multiple
-                      onChange={handleFileUpload}
-                      style={{ display: 'none' }}
-                    />
-                  </label>
+                    <div className="toolbar-actions">
+                      <label className="btn-upload">
+                        <i className="fas fa-upload"></i>
+                        Upload
+                        <input
+                          type="file"
+                          multiple
+                          onChange={handleFileUpload}
+                          style={{ display: "none" }}
+                        />
+                      </label>
 
-                    <button
-                      className="btn-action"
-                      onClick={() => setShowCreateFolder(true)}
-                    >
-                      <i className="fas fa-folder-plus"></i>
-                      New folder
-                    </button>
-
-                  {selectedItems.length > 0 && (
-                    <>
                       <button
                         className="btn-action"
-                        onClick={handleDelete}
+                        onClick={() => setShowCreateFolder(true)}
                       >
-                        <i className="fas fa-trash"></i>
-                        Delete
+                        <i className="fas fa-folder-plus"></i>
+                        New folder
                       </button>
 
-                      {selectedItems.length === 1 && (
-                        <button
-                          className="btn-action"
-                          onClick={() => {
-                            const item = files.find(f => f.id === selectedItems[0])
-                            setRenameItem(item)
-                          }}
-                        >
-                          <i className="fas fa-edit"></i>
-                          Rename
-                        </button>
-                      )}
-                    </>
-                  )}
+                      {selectedItems.length > 0 && (
+                        <>
+                          <button
+                            className="btn-action"
+                            onClick={handleDelete}
+                          >
+                            <i className="fas fa-trash"></i>
+                            Delete
+                          </button>
 
-                  <div className="view-toggle">
-                    <button
-                      className={viewMode === 'grid' ? 'active' : ''}
-                      onClick={() => setViewMode('grid')}
-                      title="Grid view"
-                    >
-                      <i className="fas fa-th"></i>
-                    </button>
-                    <button
-                      className={viewMode === 'list' ? 'active' : ''}
-                      onClick={() => setViewMode('list')}
-                      title="List view"
-                    >
-                      <i className="fas fa-list"></i>
-                    </button>
+                          {selectedItems.length === 1 && (
+                            <button
+                              className="btn-action"
+                              onClick={() => {
+                                const item = files.find(
+                                  (f) => f.id === selectedItems[0]
+                                );
+                                setRenameItem(item);
+                              }}
+                            >
+                              <i className="fas fa-edit"></i>
+                              Rename
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </div>
 
               <FileGrid
                 files={filteredFiles}
@@ -223,7 +260,8 @@ const Dashboard = () => {
             </>
           )}
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Modals & Preview */}
       {previewFile && (

@@ -109,6 +109,10 @@
 }
 
 /* Create button in collapsed mode */
+.sidebar-closed .sidebar-create-btn-wrapper {
+  justify-content: center;
+}
+
 .sidebar-closed .sidebar-create-btn {
   width: 40px;
   height: 40px;
@@ -118,6 +122,7 @@
   gap: 0;
   background: linear-gradient(90deg, #0078D4, #5C2D91);
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  align-self: center;
 }
 
 .sidebar-closed .sidebar-create-btn span {
@@ -234,6 +239,14 @@
   border-color: #605e5c;
 }
 
+.sidebar-create-btn-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+  padding: 0 8px;
+}
+
 .sidebar-create-btn {
   width: auto;
   max-width: 180px;
@@ -250,12 +263,205 @@
   cursor: pointer;
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 13px;
-  margin-bottom: 20px;
-  align-self: center;
+  align-self: flex-start;
 }
 
 .sidebar-create-btn:hover {
   filter: brightness(1.1);
+}
+
+/* Dropdown Styles */
+.sidebar-create-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-width: 240px;
+  z-index: 1000;
+  padding: 4px 0;
+  margin-top: 4px;
+}
+
+.sidebar-closed .sidebar-create-dropdown {
+  left: calc(100% + 8px);
+  top: 0;
+  transform: none;
+}
+
+.sidebar-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  color: #323130;
+}
+
+.sidebar-dropdown-item:hover {
+  background-color: #f3f2f1;
+}
+
+.sidebar-dropdown-item:active {
+  background-color: #edebe9;
+}
+
+.sidebar-dropdown-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.sidebar-dropdown-icon svg {
+  width: 20px;
+  height: 20px;
+  color: inherit;
+}
+
+.sidebar-dropdown-icon svg:first-child {
+  width: 18px;
+  height: 18px;
+}
+
+/* Folder icon - Yellow */
+.sidebar-dropdown-icon.folder-icon {
+  background-color: #ffb900;
+  color: #ffffff;
+}
+
+/* Document upload icon */
+.sidebar-dropdown-icon.document-upload-icon {
+  background-color: #e8e8e8;
+  color: #323130;
+  position: relative;
+}
+
+.sidebar-dropdown-icon.document-upload-icon svg:first-child {
+  color: #323130;
+}
+
+.sidebar-dropdown-icon.document-upload-icon .upload-overlay {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  background-color: #323130;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-dropdown-icon.document-upload-icon .upload-overlay svg {
+  width: 10px;
+  height: 10px;
+  color: #ffffff;
+}
+
+/* Folder upload icon */
+.sidebar-dropdown-icon.folder-upload-icon {
+  background-color: #ffb900;
+  color: #ffffff;
+  position: relative;
+}
+
+.sidebar-dropdown-icon.folder-upload-icon .upload-overlay {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  background-color: #323130;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-dropdown-icon.folder-upload-icon .upload-overlay svg {
+  width: 10px;
+  height: 10px;
+  color: #ffffff;
+}
+
+/* Word icon - Blue */
+.sidebar-dropdown-icon.word-icon {
+  background-color: #2B579A;
+  color: #ffffff;
+}
+
+.sidebar-dropdown-icon.word-icon svg {
+  width: 20px;
+  height: 20px;
+  color: #ffffff;
+}
+
+/* Excel icon - Green */
+.sidebar-dropdown-icon.excel-icon {
+  background-color: #217346;
+  color: #ffffff;
+}
+
+.sidebar-dropdown-icon.excel-icon svg {
+  width: 20px;
+  height: 20px;
+  color: #ffffff;
+}
+
+/* PowerPoint icon - Red */
+.sidebar-dropdown-icon.powerpoint-icon {
+  background-color: #D04423;
+  color: #ffffff;
+}
+
+.sidebar-dropdown-icon.powerpoint-icon svg {
+  width: 20px;
+  height: 20px;
+  color: #ffffff;
+}
+
+/* OneNote icon - Purple */
+.sidebar-dropdown-icon.onenote-icon {
+  background-color: #7719AA;
+  color: #ffffff;
+}
+
+.sidebar-dropdown-icon.onenote-icon svg {
+  width: 20px;
+  height: 20px;
+  color: #ffffff;
+}
+
+/* Text icon */
+.sidebar-dropdown-icon.text-icon {
+  background-color: #ffffff;
+  color: #323130;
+  border: 1px solid #edebe9;
+}
+
+.sidebar-dropdown-icon.text-icon svg {
+  width: 20px;
+  height: 20px;
+  color: #323130;
+}
+
+.sidebar-dropdown-separator {
+  height: 1px;
+  background-color: #edebe9;
+  margin: 4px 0;
 }
 
 .sidebar-menu {
