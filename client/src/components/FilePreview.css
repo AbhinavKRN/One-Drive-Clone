@@ -22,7 +22,7 @@
 }
 
 .file-preview-modal {
-  background: white;
+  background: var(--bg-secondary);
   border-radius: 8px;
   width: 90%;
   max-width: 900px;
@@ -30,6 +30,7 @@
   display: flex;
   flex-direction: column;
   animation: slideUp 0.3s ease-out;
+  transition: background-color var(--transition-base);
 }
 
 @keyframes slideUp {
@@ -48,19 +49,22 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid #edebe9;
+  border-bottom: 1px solid var(--border-color-light);
+  transition: border-color var(--transition-base);
 }
 
 .preview-title h2 {
   font-size: 18px;
   font-weight: 600;
-  color: #323130;
+  color: var(--text-primary);
   margin-bottom: 4px;
+  transition: color var(--transition-base);
 }
 
 .preview-title p {
   font-size: 13px;
-  color: #605e5c;
+  color: var(--text-secondary);
+  transition: color var(--transition-base);
 }
 
 .preview-actions {
@@ -75,13 +79,14 @@
   height: 40px;
   border-radius: 4px;
   cursor: pointer;
-  color: #323130;
+  color: var(--text-primary);
   font-size: 18px;
-  transition: background-color 0.2s;
+  transition: background-color var(--transition-fast),
+              color var(--transition-base);
 }
 
 .preview-actions button:hover {
-  background-color: #f3f2f1;
+  background-color: var(--bg-hover);
 }
 
 .preview-content {
@@ -118,9 +123,10 @@
   font-family: 'Courier New', monospace;
   font-size: 14px;
   line-height: 1.6;
-  color: #323130;
+  color: var(--text-primary);
   white-space: pre-wrap;
   word-wrap: break-word;
+  transition: color var(--transition-base);
 }
 
 .preview-placeholder {
@@ -128,25 +134,29 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #605e5c;
+  color: var(--text-secondary);
   text-align: center;
   padding: 60px 20px;
+  transition: color var(--transition-base);
 }
 
 .preview-placeholder i {
   font-size: 80px;
-  color: #d2d0ce;
+  color: var(--text-tertiary);
   margin-bottom: 20px;
+  transition: color var(--transition-base);
 }
 
 .preview-placeholder p {
   font-size: 18px;
   font-weight: 600;
-  color: #323130;
+  color: var(--text-primary);
   margin-bottom: 8px;
+  transition: color var(--transition-base);
 }
 
 .preview-placeholder small {
   font-size: 14px;
-  color: #605e5c;
+  color: var(--text-secondary);
+  transition: color var(--transition-base);
 }

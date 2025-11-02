@@ -172,6 +172,8 @@ const Dashboard = () => {
         onSearchChange={setSearchQuery}
         setActiveTab={setActiveTab}
         activeTab={activeTab}
+        storageUsed={storageUsed}
+        storageTotal={storageTotal}
       />
 
       {/* --- Conditionally Render Tabs --- */}

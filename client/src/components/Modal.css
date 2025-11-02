@@ -13,12 +13,13 @@
 }
 
 .modal {
-  background: white;
+  background: var(--bg-secondary);
   border-radius: 8px;
   width: 90%;
   max-width: 480px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-lg);
   animation: slideUp 0.3s ease-out;
+  transition: background-color var(--transition-base), box-shadow var(--transition-base);
 }
 
 .modal-header {
@@ -26,14 +27,16 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid #edebe9;
+  border-bottom: 1px solid var(--border-color-light);
+  transition: border-color var(--transition-base);
 }
 
 .modal-header h2 {
   font-size: 18px;
   font-weight: 600;
-  color: #323130;
+  color: var(--text-primary);
   margin: 0;
+  transition: color var(--transition-base);
 }
 
 .btn-close {
@@ -43,13 +46,14 @@
   height: 32px;
   border-radius: 4px;
   cursor: pointer;
-  color: #605e5c;
+  color: var(--text-secondary);
   font-size: 16px;
-  transition: background-color 0.2s;
+  transition: background-color var(--transition-fast),
+              color var(--transition-base);
 }
 
 .btn-close:hover {
-  background-color: #f3f2f1;
+  background-color: var(--bg-hover);
 }
 
 .modal-body {
@@ -61,22 +65,23 @@
   justify-content: flex-end;
   gap: 12px;
   padding: 16px 24px;
-  border-top: 1px solid #edebe9;
+  border-top: 1px solid var(--border-color-light);
+  transition: border-color var(--transition-base);
 }
 
 .btn-secondary {
   padding: 10px 20px;
-  background-color: white;
-  color: #323130;
-  border: 1px solid #8a8886;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color-hover);
   border-radius: 4px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
 }
 
 .btn-secondary:hover {
-  background-color: #f3f2f1;
-  border-color: #323130;
+  background-color: var(--bg-hover);
+  border-color: var(--text-primary);
 }

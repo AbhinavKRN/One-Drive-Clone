@@ -4,15 +4,16 @@
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
-  color: #605e5c;
+  color: var(--text-secondary);
   text-align: center;
   height: 100%;
-  background-color: #faf9f8;
+  background-color: var(--bg-primary);
   flex: 1;
+  transition: color var(--transition-base), background-color var(--transition-base);
 }
 
 .files-white-box .empty-state {
-  background-color: #ffffff;
+  background-color: var(--bg-secondary);
 }
 
 .empty-state-illustration {
@@ -31,15 +32,17 @@
 .empty-state h3 {
   font-size: 20px;
   margin-bottom: 0;
-  color: #605e5c;
+  color: var(--text-secondary);
   font-weight: 600;
   margin-top: 0;
+  transition: color var(--transition-base);
 }
 
 .empty-state p {
   font-size: 14px;
-  color: #605e5c;
+  color: var(--text-secondary);
   display: none;
+  transition: color var(--transition-base);
 }
 
 /* Grid View */
@@ -48,33 +51,34 @@
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 12px;
   padding: 20px;
-  background-color: #faf9f8;
+  background-color: var(--bg-primary);
   overflow-y: auto;
   flex: 1;
+  transition: background-color var(--transition-base);
 }
 
 .files-white-box .file-grid {
-  background-color: #ffffff;
+  background-color: var(--bg-secondary);
 }
 
 .file-card {
-  background: #ffffff;
-  border: 1px solid #edebe9;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color-light);
   border-radius: 4px;
   padding: 12px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
   position: relative;
 }
 
 .file-card:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-color: #d2d0ce;
+  box-shadow: var(--shadow-sm);
+  border-color: var(--border-color-medium);
 }
 
 .file-card.selected {
-  border-color: #0078d4;
-  background-color: #f3f9fd;
+  border-color: var(--accent-primary);
+  background-color: var(--bg-hover);
 }
 
 .file-card-checkbox {
@@ -127,33 +131,38 @@
 .file-name {
   font-size: 14px;
   font-weight: 500;
-  color: #323130;
+  color: var(--text-primary);
   margin-bottom: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: color var(--transition-base);
 }
 
 .file-meta {
   font-size: 12px;
-  color: #605e5c;
+  color: var(--text-secondary);
   display: flex;
   justify-content: center;
   gap: 8px;
+  transition: color var(--transition-base);
 }
 
 .file-card-download {
   position: absolute;
   top: 8px;
   right: 8px;
-  background: white;
-  border: 1px solid #d2d0ce;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color-medium);
   border-radius: 4px;
   padding: 6px 10px;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.2s;
-  color: #0078d4;
+  transition: opacity var(--transition-fast),
+              background-color var(--transition-base),
+              border-color var(--transition-base),
+              color var(--transition-base);
+  color: var(--accent-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -170,20 +179,21 @@
 }
 
 .file-card-download:hover {
-  background-color: #f3f2f1;
+  background-color: var(--bg-hover);
 }
 
 /* List View */
 .file-list {
-  background-color: #faf9f8;
+  background-color: var(--bg-primary);
   overflow-y: auto;
   flex: 1;
   display: flex;
   flex-direction: column;
+  transition: background-color var(--transition-base);
 }
 
 .files-white-box .file-list {
-  background-color: #ffffff;
+  background-color: var(--bg-secondary);
 }
 
 .file-list-header {
@@ -191,15 +201,18 @@
   grid-template-columns: 2fr 1fr 1fr 1fr;
   gap: 16px;
   padding: 8px 20px;
-  background-color: #fafafa;
-  border-bottom: 1px solid #edebe9;
+  background-color: var(--bg-hover);
+  border-bottom: 1px solid var(--border-color-light);
   font-weight: 600;
   font-size: 12px;
-  color: #605e5c;
+  color: var(--text-secondary);
   letter-spacing: 0.5px;
   position: sticky;
   top: 0;
   z-index: 1;
+  transition: background-color var(--transition-base),
+              border-color var(--transition-base),
+              color var(--transition-base);
 }
 
 .file-list-row {
@@ -207,20 +220,21 @@
   grid-template-columns: 2fr 1fr 1fr 1fr;
   gap: 16px;
   padding: 8px 20px;
-  background: #ffffff;
-  border-bottom: 1px solid #f3f2f1;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color-light);
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color var(--transition-fast),
+              border-color var(--transition-base);
   position: relative;
 }
 
 .file-list-row:hover {
-  background-color: #f3f2f1;
+  background-color: var(--bg-hover);
 }
 
 .file-list-row.selected {
-  background-color: #e3f2fd;
-  border-left: 3px solid #0078d4;
+  background-color: var(--bg-hover);
+  border-left: 3px solid var(--accent-primary);
 }
 
 /* Hide action icons by default */
@@ -240,7 +254,8 @@
   display: flex;
   align-items: center;
   font-size: 14px;
-  color: #323130;
+  color: var(--text-primary);
+  transition: color var(--transition-base);
 }
 
 .col-name {
@@ -264,7 +279,7 @@
 }
 
 .name-header-text:hover {
-  background-color: #e1dfdd;
+  background-color: var(--bg-active);
 }
 
 .name-dropdown-menu {
@@ -272,21 +287,25 @@
   top: 100%;
   left: 0;
   margin-top: 4px;
-  background: white;
-  border: 1px solid #d2d0ce;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color-medium);
   border-radius: 4px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-sm);
   min-width: 180px;
   z-index: 1000;
   overflow: hidden;
+  transition: background-color var(--transition-base),
+              border-color var(--transition-base),
+              box-shadow var(--transition-base);
 }
 
 .menu-item {
   padding: 8px 12px;
   cursor: pointer;
   font-size: 14px;
-  color: #323130;
-  transition: background-color 0.2s;
+  color: var(--text-primary);
+  transition: background-color var(--transition-fast),
+              color var(--transition-base);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -294,7 +313,7 @@
 }
 
 .menu-item:hover {
-  background-color: #f3f2f1;
+  background-color: var(--bg-hover);
 }
 
 .menu-item-with-arrow {
@@ -306,13 +325,16 @@
   left: 100%;
   top: 0;
   margin-left: 4px;
-  background: white;
-  border: 1px solid #d2d0ce;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color-medium);
   border-radius: 4px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-sm);
   min-width: 160px;
   z-index: 1001;
   overflow: hidden;
+  transition: background-color var(--transition-base),
+              border-color var(--transition-base),
+              box-shadow var(--transition-base);
 }
 
 .inline-actions {
@@ -344,19 +366,20 @@
 .btn-icon {
   background: none;
   border: none;
-  color: #605e5c;
+  color: var(--text-secondary);
   cursor: pointer;
   padding: 6px;
   border-radius: 4px;
-  transition: background-color 0.2s, color 0.2s;
+  transition: background-color var(--transition-fast), 
+              color var(--transition-base);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .btn-icon:hover {
-  background-color: #e1dfdd;
-  color: #323130;
+  background-color: var(--bg-active);
+  color: var(--text-primary);
 }
 
 .btn-icon svg {

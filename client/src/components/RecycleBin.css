@@ -1,11 +1,12 @@
 .recycle-bin-container {
   padding: 0;
-  background-color: #f8f8f8;
+  background-color: var(--bg-primary);
   min-height: calc(100vh - 80px);
   width: 100%;
   display: flex;
   flex-direction: column;
   font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  transition: background-color var(--transition-base);
 }
 
 /* Top Bar */
@@ -14,8 +15,9 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 32px 12px 32px;
-  background-color: #f8f8f8;
+  background-color: var(--bg-primary);
   border-bottom: none;
+  transition: background-color var(--transition-base);
 }
 
 .personal-vault-toggle {
@@ -25,28 +27,31 @@
   cursor: pointer;
   user-select: none;
   font-size: 14px;
-  color: #323130;
+  color: var(--text-primary);
   padding: 4px 6px;
   border-radius: 4px;
-  transition: background-color 0.2s;
+  transition: background-color var(--transition-fast),
+              color var(--transition-base);
 }
 
 .personal-vault-toggle:hover {
-  background-color: #f3f2f1;
+  background-color: var(--bg-hover);
 }
 
 .vault-icon {
   width: 16px;
   height: 16px;
-  color: #605e5c;
+  color: var(--text-secondary);
   flex-shrink: 0;
+  transition: color var(--transition-base);
 }
 
 .ellipsis-icon {
   width: 16px;
   height: 16px;
-  color: #605e5c;
+  color: var(--text-secondary);
   flex-shrink: 0;
+  transition: color var(--transition-base);
 }
 
 .top-bar-controls {
@@ -65,9 +70,10 @@
   background-color: transparent;
   border: none;
   font-size: 14px;
-  color: #323130;
+  color: var(--text-primary);
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color var(--transition-fast),
+              color var(--transition-base);
   border-radius: 4px;
   font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
 }
@@ -75,7 +81,7 @@
 .sort-btn-top:hover,
 .view-btn:hover,
 .details-btn-top:hover {
-  background-color: #f3f2f1;
+  background-color: var(--bg-hover);
 }
 
 .sort-icon-top,
@@ -83,49 +89,55 @@
 .details-icon-top {
   width: 16px;
   height: 16px;
-  color: #605e5c;
+  color: var(--text-secondary);
   flex-shrink: 0;
+  transition: color var(--transition-base);
 }
 
 .dropdown-icon {
   width: 14px;
   height: 14px;
-  color: #605e5c;
+  color: var(--text-secondary);
   flex-shrink: 0;
+  transition: color var(--transition-base);
 }
 
 /* Title */
 .recycle-bin-title {
   font-size: 28px;
   font-weight: 600;
-  color: #323130;
+  color: var(--text-primary);
   margin: 0;
   padding: 20px 32px 0 32px;
   line-height: 1.2;
   font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  transition: color var(--transition-base);
 }
 
 /* Table Header */
 .recycle-bin-table-header {
   padding: 0 32px;
   margin-top: 8px;
-  background-color: #f8f8f8;
+  background-color: var(--bg-primary);
+  transition: background-color var(--transition-base);
 }
 
 .recycle-bin-table-wrapper {
-  background-color: #ffffff;
+  background-color: var(--bg-secondary);
   border: none;
   max-height: calc(100vh - 250px);
   overflow-y: auto;
   overflow-x: auto;
+  transition: background-color var(--transition-base);
 }
 
 .recycle-bin-table {
   width: 100%;
   border-collapse: collapse;
-  background-color: #ffffff;
+  background-color: var(--bg-secondary);
   table-layout: auto;
   display: table;
+  transition: background-color var(--transition-base);
 }
 
 .recycle-bin-table thead {
@@ -137,7 +149,8 @@
 
 .recycle-bin-table tbody {
   display: table-row-group;
-  background-color: #ffffff;
+  background-color: var(--bg-secondary);
+  transition: background-color var(--transition-base);
 }
 
 .recycle-bin-table tr {
@@ -150,10 +163,12 @@
 }
 
 .table-header-row {
-  background-color: #f3f2f1;
-  border-bottom: 1px solid #edebe9;
+  background-color: var(--bg-hover);
+  border-bottom: 1px solid var(--border-color-light);
   height: 40px;
   margin: 0;
+  transition: background-color var(--transition-base),
+              border-color var(--transition-base);
 }
 
 .table-header-cell {
@@ -161,11 +176,12 @@
   text-align: left;
   font-size: 13px;
   font-weight: 600;
-  color: #323130;
+  color: var(--text-primary);
   border-bottom: none;
   white-space: nowrap;
   font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
   vertical-align: middle;
+  transition: color var(--transition-base);
 }
 
 .table-header-cell.sortable {
@@ -174,43 +190,47 @@
 }
 
 .table-header-cell.sortable:hover {
-  background-color: #e1dfdd;
+  background-color: var(--bg-active);
 }
 
 .header-icon {
   width: 16px;
   height: 16px;
-  color: #323130;
+  color: var(--text-primary);
   vertical-align: middle;
   margin-right: 6px;
   display: inline-block;
+  transition: color var(--transition-base);
 }
 
 .sort-icon {
   width: 14px;
   height: 14px;
-  color: #323130;
+  color: var(--text-primary);
   margin-left: 6px;
   vertical-align: middle;
   display: inline-block;
+  transition: color var(--transition-base);
 }
 
 .table-row {
-  border-bottom: 1px solid #f3f2f1;
-  transition: background-color 0.15s;
-  background-color: #ffffff;
+  border-bottom: 1px solid var(--border-color-light);
+  transition: background-color var(--transition-fast),
+              border-color var(--transition-base);
+  background-color: var(--bg-secondary);
 }
 
 .table-row:hover {
-  background-color: #faf9f8;
+  background-color: var(--bg-hover);
 }
 
 .table-cell {
   padding: 12px 16px;
   font-size: 14px;
-  color: #323130;
+  color: var(--text-primary);
   vertical-align: middle;
   font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  transition: color var(--transition-base);
 }
 
 /* Empty State */
@@ -222,7 +242,8 @@
   padding: 80px 20px;
   min-height: calc(100vh - 300px);
   flex: 1;
-  background-color: #f8f8f8;
+  background-color: var(--bg-primary);
+  transition: background-color var(--transition-base);
 }
 
 .empty-state-icon {
@@ -242,10 +263,11 @@
 
 .empty-state-text {
   font-size: 16px;
-  color: #605e5c;
+  color: var(--text-secondary);
   margin: 0;
   font-weight: 400;
   font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  transition: color var(--transition-base);
 }
 
 /* Sort Menu */
@@ -257,13 +279,16 @@
   position: absolute;
   top: calc(100% + 4px);
   right: 0;
-  background-color: #ffffff;
-  border: 1px solid #d2d0ce;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color-medium);
   border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-sm);
   min-width: 160px;
   z-index: 100;
   overflow: hidden;
+  transition: background-color var(--transition-base),
+              border-color var(--transition-base),
+              box-shadow var(--transition-base);
 }
 
 .sort-menu button {
@@ -274,14 +299,15 @@
   background: none;
   border: none;
   font-size: 14px;
-  color: #323130;
+  color: var(--text-primary);
   cursor: pointer;
-  transition: background-color 0.15s;
+  transition: background-color var(--transition-fast),
+              color var(--transition-base);
   font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica', 'Arial', sans-serif;
 }
 
 .sort-menu button:hover {
-  background-color: #f3f2f1;
+  background-color: var(--bg-hover);
 }
 
 .recycle-bin-table-wrapper::-webkit-scrollbar {
@@ -290,16 +316,18 @@
 }
 
 .recycle-bin-table-wrapper::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--scrollbar-track);
+  transition: background var(--transition-base);
 }
 
 .recycle-bin-table-wrapper::-webkit-scrollbar-thumb {
-  background: #888;
+  background: var(--scrollbar-thumb);
   border-radius: 6px;
+  transition: background var(--transition-base);
 }
 
 .recycle-bin-table-wrapper::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* Responsive */
