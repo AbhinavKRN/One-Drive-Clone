@@ -11,86 +11,6 @@ export const useFileManager = () => {
   const storageTotal = 5 * 1024 * 1024 * 1024 // 5GB in bytes
   const [storageUsed, setStorageUsed] = useState(0)
   const [loading, setLoading] = useState(false)
-  const [defaultFoldersInitialized, setDefaultFoldersInitialized] = useState(() => {
-    return localStorage.getItem('defaultContentInitialized') === 'true'
-  })
-
-  // Create default folders for new users
-  const createDefaultFolders = async (existingFolders) => {
-    const defaultFolderNames = ['Documents', 'Personal Vault', 'Pictures']
-    const token = getToken()
-    if (!token) return
-
-    // Check which default folders are missing
-    const missingFolders = defaultFolderNames.filter(
-      folderName => !existingFolders.some(
-        folder => folder.name === folderName && !folder.parentId
-      )
-    )
-
-    // Create missing default folders
-    if (missingFolders.length > 0) {
-      try {
-        const createPromises = missingFolders.map(folderName =>
-          fetch(`${API_BASE_URL}/folders`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              name: folderName,
-              parent_id: null
-            })
-          })
-        )
-
-        await Promise.all(createPromises)
-        console.log('Default folders created:', missingFolders)
-      } catch (error) {
-        console.error('Error creating default folders:', error)
-      }
-    }
-  }
-
-  // Create default file (Getting started with OneDrive.pdf)
-  const createDefaultFile = async (existingFiles) => {
-    const defaultFileName = 'Getting started with OneDrive.pdf'
-    const token = getToken()
-    if (!token) return
-
-    // Check if the default file already exists
-    const fileExists = existingFiles.some(
-      file => file.name === defaultFileName && !file.folder_id
-    )
-
-    if (!fileExists) {
-      try {
-        // Fetch the PDF file from public directory
-        const response = await fetch('/images/Getting started with OneDrive.pdf')
-        const blob = await response.blob()
-
-        // Create a File object from the blob
-        const file = new File([blob], defaultFileName, { type: 'application/pdf' })
-
-        // Upload the file
-        const formData = new FormData()
-        formData.append('file', file)
-
-        await fetch(`${API_BASE_URL}/files/upload`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
-          body: formData
-        })
-
-        console.log('Default file created:', defaultFileName)
-      } catch (error) {
-        console.error('Error creating default file:', error)
-      }
-    }
-  }
 
   // Load files and folders
   const loadData = async () => {
@@ -119,48 +39,14 @@ export const useFileManager = () => {
         const allFiles = filesData.data.files || []
         const allFolders = foldersData.data.folders || []
 
-        // Create default folders and files if not initialized and in root folder
-        if (!defaultFoldersInitialized && currentFolderId === null) {
-          await createDefaultFolders(allFolders)
-          await createDefaultFile(allFiles)
-
-          // Mark as initialized in both state and localStorage
-          setDefaultFoldersInitialized(true)
-          localStorage.setItem('defaultContentInitialized', 'true')
-
-          // Reload folders and files after creating defaults
-          const updatedFoldersResponse = await fetch(`${API_BASE_URL}/folders`, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          })
-          const updatedFoldersData = await updatedFoldersResponse.json()
-          if (updatedFoldersData.status === 'success') {
-            allFolders.length = 0
-            allFolders.push(...(updatedFoldersData.data.folders || []))
-          }
-
-          // Reload files as well
-          const updatedFilesResponse = await fetch(`${API_BASE_URL}/files`, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          })
-          const updatedFilesData = await updatedFilesResponse.json()
-          if (updatedFilesData.status === 'success') {
-            allFiles.length = 0
-            allFiles.push(...(updatedFilesData.data.files || []))
-          }
-        }
-
         // Filter files and folders by current folder
-        const currentFiles = allFiles.filter(file =>
-          (currentFolderId === null && !file.folder_id) ||
+        const currentFiles = allFiles.filter(file => 
+          (currentFolderId === null && !file.folder_id) || 
           file.folder_id === currentFolderId
         )
-        const currentFoldersList = allFolders.filter(folder =>
-          (currentFolderId === null && !folder.parentId) ||
-          folder.parentId === currentFolderId
+        const currentFoldersList = allFolders.filter(folder => 
+          (currentFolderId === null && !folder.parent_id) || 
+          folder.parent_id === currentFolderId
         )
 
         // Combine and sort
