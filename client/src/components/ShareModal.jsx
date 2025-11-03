@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { DismissRegular, CopyRegular, SendRegular, ChevronDownRegular, PersonRegular } from '@fluentui/react-icons'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
 import API_BASE_URL from '../config/api'
 import Toast from './Toast'
 import './Modal.css'
@@ -9,6 +10,7 @@ import './ShareModal.css'
 
 const ShareModal = ({ file, onClose, onShareSuccess }) => {
   const { getToken } = useAuth()
+  const toastContext = useToast()
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
   const [permission, setPermission] = useState('edit') // 'view' or 'edit'
@@ -451,21 +453,16 @@ const ShareModal = ({ file, onClose, onShareSuccess }) => {
                 type="button"
                 className="btn-send"
                 onClick={() => {
-                  if (email.trim()) {
-                    setToast({
-                      message: `"${file.name}" sent to ${email}`,
-                      type: 'success'
-                    })
-                    // Close modal after a short delay to show the toast
-                    setTimeout(() => {
-                      onClose()
-                    }, 500)
-                  } else {
-                    setToast({
-                      message: `Please enter an email address to send "${file.name}"`,
-                      type: 'error'
-                    })
+                  if (!email.trim()) {
+                    toastContext.error(`Please enter an email address to send "${file.name}"`, 3000)
+                    return
                   }
+
+                  // Show dummy success toast using ToastContext (persists after modal closes)
+                  toastContext.success(`"${file.name}" sent to ${email}`, 3000)
+                  
+                  // Close modal instantly
+                  onClose()
                 }}
                 disabled={loading}
               >

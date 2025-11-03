@@ -370,17 +370,80 @@ const Dashboard = () => {
     });
   };
 
-  const handleShare = () => {
-    if (selectedItems.length === 1) {
-      const item = files.find((f) => f.id === selectedItems[0]);
-      if (item && item.type !== "folder") {
-        setShareItem(item);
-      }
+  const handleShare = (fileParam = null) => {
+    // Support calling with a file directly (from context menu) or from selected items
+    let item = fileParam;
+    
+    if (!item && selectedItems.length === 1) {
+      item = files.find((f) => f.id === selectedItems[0]);
     }
+    
+    if (!item) {
+      toast.info("Please select a file to share");
+      return;
+    }
+    
+    if (item.type === "folder") {
+      toast.info("Please select a file (not a folder) to share");
+      return;
+    }
+    
+    setShareItem(item);
   };
 
-  const handleCopyLink = () => {
-    toast.info("Copy link feature will be implemented");
+  const handleCopyLink = async (fileParam = null) => {
+    // Support calling with a file directly (from context menu) or from selected items
+    let item = fileParam;
+    
+    if (!item && selectedItems.length === 1) {
+      item = files.find((f) => f.id === selectedItems[0]);
+    }
+    
+    if (!item) {
+      toast.info("Please select a file to copy its link");
+      return;
+    }
+    
+    if (item.type === "folder") {
+      toast.info("Please select a file (not a folder) to copy its link");
+      return;
+    }
+    
+    try {
+      const token = getToken();
+      if (!token) {
+        toast.error("Authentication required");
+        return;
+      }
+
+      // Create or get share link
+      const response = await fetch(`${API_BASE_URL}/files/${item.id}/share-link`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          permission: 'view',
+          allow_download: true
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.status === 'success') {
+        const fullUrl = `${window.location.origin}/shared/${data.data.share_token}`;
+        
+        // Copy to clipboard
+        await navigator.clipboard.writeText(fullUrl);
+        toast.success(`Share link for "${item.name}" copied to clipboard!`);
+      } else {
+        toast.error(data.error || 'Failed to create share link');
+      }
+    } catch (error) {
+      console.error('Copy link error:', error);
+      toast.error('Failed to copy link. Please try again.');
+    }
   };
 
   const handleMoveTo = () => {
@@ -746,7 +809,6 @@ const Dashboard = () => {
                     onFilesUpload={handleFilesUpload}
                     onFolderUpload={handleFolderUpload}
                     onMoveFileToFolder={moveFileToFolder}
-                    onShare={handleShare}
                     onCopyLink={handleCopyLink}
                     onMoveTo={handleMoveTo}
                     onCopyTo={handleCopyTo}

@@ -1279,10 +1279,18 @@ const FileGrid = ({
           file={contextMenu.file}
           position={contextMenu.position}
           onShare={() => {
-            if (onShare) onShare();
+            if (onShare && contextMenu.file) {
+              onShare(contextMenu.file);
+            }
           }}
-          onCopyLink={() => {
-            if (onCopyLink) onCopyLink();
+          onCopyLink={async () => {
+            if (onCopyLink && contextMenu.file) {
+              // Use the file from context menu for copy link
+              if (contextMenu.file.type === 'folder') {
+                return;
+              }
+              await onCopyLink(contextMenu.file);
+            }
           }}
           onDelete={() => {
             if (onDelete) onDelete([contextMenu.file.id]);
