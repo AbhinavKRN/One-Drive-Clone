@@ -21,7 +21,7 @@ const {
   createShareLink,
   getShareLink,
   disableShareLink,
-  accessSharedFile
+  accessSharedFile,
   createEmptyFile,
   shareFile,
   getFileShares,
