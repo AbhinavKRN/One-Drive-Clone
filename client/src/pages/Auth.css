@@ -259,6 +259,18 @@
   background: rgba(28, 30, 33, 0.95) !important;
 }
 
+.signup-box .auth-header {
+  justify-content: center !important;
+  align-items: center !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  margin-bottom: 32px !important;
+}
+
+.signup-box .microsoft-text {
+  color: #ffffff !important;
+}
+
 .signup-subtitle {
   text-align: center;
 }
@@ -290,11 +302,51 @@
   justify-content: flex-start !important;
   margin-bottom: 8px !important;
   align-items: flex-start !important;
-  margin-left: -8px !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
 }
 
-.login-box .ms-logo {
-  height: 70px !important;
+/* Microsoft Logo CSS Implementation */
+.microsoft-logo-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.microsoft-logo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px;
+  width: 20px;
+  height: 20px;
+}
+
+.microsoft-square {
+  width: 8px;
+  height: 8px;
+}
+
+.microsoft-red {
+  background: #f25022;
+}
+
+.microsoft-green {
+  background: #7fba00;
+}
+
+.microsoft-blue {
+  background: #00a4ef;
+}
+
+.microsoft-yellow {
+  background: #ffb900;
+}
+
+.microsoft-text {
+  font-size: 16px;
+  font-weight: 400;
+  color: #1b1b1b;
+  line-height: 1;
 }
 
 .login-title {
