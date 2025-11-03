@@ -443,11 +443,322 @@ const renameFolder = async (req, res) => {
   }
 }
 
+const moveFolder = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { parent_id } = req.body
+    const userId = req.user.id
+
+    const { data: folder } = await supabase
+      .from('folders')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single()
+
+    if (!folder) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'move_folder',
+        error: 'Folder not found',
+        code: 404
+      })
+    }
+
+    // If parent_id is provided, validate it exists and belongs to user
+    if (parent_id !== null && parent_id !== undefined) {
+      const { data: parentFolder } = await supabase
+        .from('folders')
+        .select('*')
+        .eq('id', parent_id)
+        .eq('user_id', userId)
+        .is('deleted_at', null)
+        .single()
+
+      if (!parentFolder) {
+        return res.status(404).json({
+          status: 'error',
+          action: 'move_folder',
+          error: 'Parent folder not found',
+          code: 404
+        })
+      }
+
+      // Check if moving folder into itself or its children (circular reference)
+      const isChildOf = async (targetId, potentialParentId) => {
+        if (targetId === potentialParentId) return true
+        
+        const { data: targetFolder } = await supabase
+          .from('folders')
+          .select('parent_id')
+          .eq('id', targetId)
+          .single()
+
+        if (!targetFolder || !targetFolder.parent_id) return false
+        
+        return isChildOf(targetFolder.parent_id, potentialParentId)
+      }
+
+      const wouldCreateCircular = await isChildOf(parent_id, id)
+      if (wouldCreateCircular) {
+        return res.status(400).json({
+          status: 'error',
+          action: 'move_folder',
+          error: 'Cannot move folder into itself or its children',
+          code: 400
+        })
+      }
+    }
+
+    // Check if folder with same name exists in target location
+    const query = supabase
+      .from('folders')
+      .select('*')
+      .eq('name', folder.name)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .neq('id', id)
+
+    if (parent_id === null || parent_id === undefined) {
+      query.is('parent_id', null)
+    } else {
+      query.eq('parent_id', parent_id)
+    }
+
+    const { data: existingFolder } = await query.single()
+
+    if (existingFolder) {
+      return res.status(409).json({
+        status: 'error',
+        action: 'move_folder',
+        error: 'Folder with this name already exists in the target location',
+        code: 409
+      })
+    }
+
+    const { data: updatedFolder } = await supabase
+      .from('folders')
+      .update({
+        parent_id: parent_id || null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single()
+
+    return res.json({
+      status: 'success',
+      action: 'move_folder',
+      data: { folder: updatedFolder },
+      message: 'Folder moved successfully'
+    })
+  } catch (error) {
+    console.error('Move folder error:', error)
+    return res.status(500).json({
+      status: 'error',
+      action: 'move_folder',
+      error: error.message,
+      code: 500
+    })
+  }
+}
+
+const copyFolder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { parent_id } = req.body;
+    const userId = req.user.id;
+
+    const { data: folder } = await supabase
+      .from('folders')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .single();
+
+    if (!folder) {
+      return res.status(404).json({
+        status: 'error',
+        action: 'copy_folder',
+        error: 'Folder not found',
+        code: 404
+      });
+    }
+
+    // If parent_id is provided, validate it exists and belongs to user
+    if (parent_id !== null && parent_id !== undefined) {
+      const { data: parentFolder } = await supabase
+        .from('folders')
+        .select('*')
+        .eq('id', parent_id)
+        .eq('user_id', userId)
+        .is('deleted_at', null)
+        .single();
+
+      if (!parentFolder) {
+        return res.status(404).json({
+          status: 'error',
+          action: 'copy_folder',
+          error: 'Parent folder not found',
+          code: 404
+        });
+      }
+
+      // Check if copying folder into itself or its children (circular reference)
+      const isChildOf = async (targetId, potentialParentId) => {
+        if (targetId === potentialParentId) return true;
+        
+        const { data: targetFolder } = await supabase
+          .from('folders')
+          .select('parent_id')
+          .eq('id', targetId)
+          .single();
+
+        if (!targetFolder || !targetFolder.parent_id) return false;
+        
+        return isChildOf(targetFolder.parent_id, potentialParentId);
+      };
+
+      const wouldCreateCircular = await isChildOf(parent_id, id);
+      if (wouldCreateCircular) {
+        return res.status(400).json({
+          status: 'error',
+          action: 'copy_folder',
+          error: 'Cannot copy folder into itself or its children',
+          code: 400
+        });
+      }
+    }
+
+    // Generate unique name if folder with same name exists in target location
+    let newName = folder.name;
+    let copyNumber = 1;
+    
+    while (true) {
+      const query = supabase
+        .from('folders')
+        .select('*')
+        .eq('name', newName)
+        .eq('user_id', userId)
+        .is('deleted_at', null);
+
+      if (parent_id === null || parent_id === undefined) {
+        query.is('parent_id', null);
+      } else {
+        query.eq('parent_id', parent_id);
+      }
+
+      const { data: existingFolder } = await query.single();
+
+      if (!existingFolder) break;
+      
+      // Add " - Copy (n)" to folder name
+      newName = `${folder.name} - Copy${copyNumber > 1 ? ` (${copyNumber})` : ''}`;
+      copyNumber++;
+    }
+
+    // Recursive function to copy folder and its contents
+    const copyFolderRecursive = async (sourceFolderId, targetParentId, newFolderName = null) => {
+      // Get source folder
+      const { data: sourceFolder } = await supabase
+        .from('folders')
+        .select('*')
+        .eq('id', sourceFolderId)
+        .single();
+
+      // Create new folder
+      const { data: newFolder, error: folderError } = await supabase
+        .from('folders')
+        .insert([{
+          name: newFolderName || sourceFolder.name,
+          user_id: userId,
+          parent_id: targetParentId || null
+        }])
+        .select()
+        .single();
+
+      if (folderError) throw folderError;
+
+      // Copy all files in this folder
+      const { data: files } = await supabase
+        .from('files')
+        .select('*')
+        .eq('folder_id', sourceFolderId)
+        .eq('user_id', userId)
+        .is('deleted_at', null);
+
+      const fs = require('fs').promises;
+      const path = require('path');
+
+      for (const file of files || []) {
+        // Copy physical file
+        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+        const newPath = path.join(path.dirname(file.path), `${uniqueSuffix}-${file.name}`);
+        
+        try {
+          await fs.copyFile(file.path, newPath);
+          const stats = await fs.stat(newPath);
+
+          // Create new file record
+          await supabase
+            .from('files')
+            .insert([{
+              name: file.name,
+              type: file.type,
+              size: stats.size,
+              path: newPath,
+              user_id: userId,
+              folder_id: newFolder.id
+            }]);
+        } catch (fsError) {
+          console.error('File copy error:', fsError);
+          // Continue with other files even if one fails
+        }
+      }
+
+      // Copy all subfolders recursively
+      const { data: subfolders } = await supabase
+        .from('folders')
+        .select('*')
+        .eq('parent_id', sourceFolderId)
+        .eq('user_id', userId)
+        .is('deleted_at', null);
+
+      for (const subfolder of subfolders || []) {
+        await copyFolderRecursive(subfolder.id, newFolder.id);
+      }
+
+      return newFolder;
+    };
+
+    const copiedFolder = await copyFolderRecursive(id, parent_id, newName);
+
+    return res.json({
+      status: 'success',
+      action: 'copy_folder',
+      data: { folder: copiedFolder },
+      message: 'Folder copied successfully'
+    });
+  } catch (error) {
+    console.error('Copy folder error:', error);
+    return res.status(500).json({
+      status: 'error',
+      action: 'copy_folder',
+      error: error.message,
+      code: 500
+    });
+  }
+};
+
 module.exports = {
   createFolder,
   getAllFolders,
   getFolderHierarchy,
   getFolderFiles,
   deleteFolder,
-  renameFolder
+  renameFolder,
+  moveFolder,
+  copyFolder
 }

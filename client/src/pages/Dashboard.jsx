@@ -11,6 +11,8 @@ import RecycleBin from "../components/RecycleBin";
 import CreateFolderModal from "../components/CreateFolderModal";
 import RenameModal from "../components/RenameModal";
 import ShareModal from "../components/ShareModal";
+import MoveToModal from "../components/MoveToModal";
+import CopyToModal from "../components/CopyToModal";
 import CommandBar from "../components/CommandBar";
 import FilterBar from "../components/FilterBar";
 import { useFileManager } from "../hooks/useFileManager";
@@ -37,6 +39,8 @@ const Dashboard = () => {
   const [showCreateFolder, setShowCreateFolder] = useState(false);
   const [renameItem, setRenameItem] = useState(null);
   const [shareItem, setShareItem] = useState(null);
+  const [showMoveToModal, setShowMoveToModal] = useState(false);
+  const [showCopyToModal, setShowCopyToModal] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const [activeTab, setActiveTab] = useState("Files");
   const [sharedFiles, setSharedFiles] = useState([]);
@@ -77,6 +81,7 @@ const Dashboard = () => {
     downloadFile,
     createEmptyFile,
     moveFileToFolder,
+    refreshFiles,
   } = useFileManager(toast);
 
   // Store navigateToFolderBySlug in ref for stable reference
@@ -447,11 +452,153 @@ const Dashboard = () => {
   };
 
   const handleMoveTo = () => {
-    toast.info("Move to feature will be implemented");
+    if (selectedItems.length === 0) {
+      toast.error("Please select items to move");
+      return;
+    }
+    setShowMoveToModal(true);
+  };
+
+  const handleMoveItems = async (itemIds, destinationFolderId) => {
+    try {
+      const token = getToken();
+      if (!token) {
+        toast.error("Authentication required");
+        return;
+      }
+
+      // Get destination name before moving (for toast message)
+      const destinationName = destinationFolderId === null 
+        ? "My Files" 
+        : folders.find(f => f.id === destinationFolderId)?.name || "selected folder";
+
+      // Get all items (files and folders)
+      const allItems = [...files, ...folders];
+      
+      // Move each item
+      const movePromises = itemIds.map(async (itemId) => {
+        const item = allItems.find(i => i.id === itemId);
+        if (!item) {
+          console.error("Item not found:", itemId);
+          return { status: "error", error: "Item not found" };
+        }
+
+        const endpoint = item.type === "folder"
+          ? `${API_BASE_URL}/folders/${itemId}/move`
+          : `${API_BASE_URL}/files/${itemId}/move`;
+
+        const response = await fetch(endpoint, {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            folder_id: destinationFolderId,
+            parent_id: destinationFolderId, // For folders
+          }),
+        });
+
+        const data = await response.json();
+        return data;
+      });
+
+      const results = await Promise.all(movePromises);
+      const hasError = results.some((r) => r.status !== "success");
+
+      if (hasError) {
+        toast.error("Some items could not be moved");
+      } else {
+        // Close modal and clear selection immediately
+        setShowMoveToModal(false);
+        setSelectedItems([]);
+        
+        // Show success toast immediately
+        const itemCount = itemIds.length;
+        toast.success(`${itemCount} item(s) moved to ${destinationName}`);
+        
+        // Refresh the file list to reflect changes
+        refreshFiles();
+      }
+    } catch (error) {
+      console.error("Move error:", error);
+      toast.error("Failed to move items");
+    }
   };
 
   const handleCopyTo = () => {
-    toast.info("Copy to feature will be implemented");
+    if (selectedItems.length === 0) {
+      toast.error("Please select items to copy");
+      return;
+    }
+    setShowCopyToModal(true);
+  };
+
+  const handleCopyItems = async (itemIds, destinationFolderId) => {
+    try {
+      const token = getToken();
+      if (!token) {
+        toast.error("Authentication required");
+        return;
+      }
+
+      // Get destination name before copying (for toast message)
+      const destinationName = destinationFolderId === null 
+        ? "My Files" 
+        : folders.find(f => f.id === destinationFolderId)?.name || "selected folder";
+
+      // Get all items (files and folders)
+      const allItems = [...files, ...folders];
+      
+      // Copy each item
+      const copyPromises = itemIds.map(async (itemId) => {
+        const item = allItems.find(i => i.id === itemId);
+        if (!item) {
+          console.error("Item not found:", itemId);
+          return { status: "error", error: "Item not found" };
+        }
+
+        const endpoint = item.type === "folder"
+          ? `${API_BASE_URL}/folders/${itemId}/copy`
+          : `${API_BASE_URL}/files/${itemId}/copy`;
+
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            folder_id: destinationFolderId,
+            parent_id: destinationFolderId, // For folders
+          }),
+        });
+
+        const data = await response.json();
+        return data;
+      });
+
+      const results = await Promise.all(copyPromises);
+      const hasError = results.some((r) => r.status !== "success");
+
+      if (hasError) {
+        toast.error("Some items could not be copied");
+      } else {
+        // Close modal and clear selection immediately
+        setShowCopyToModal(false);
+        setSelectedItems([]);
+        
+        // Show success toast immediately
+        const itemCount = itemIds.length;
+        toast.success(`${itemCount} item(s) copied to ${destinationName}`);
+        
+        // Refresh the file list to reflect changes
+        refreshFiles();
+      }
+    } catch (error) {
+      console.error("Copy error:", error);
+      toast.error("Failed to copy items");
+    }
   };
 
   const handleCommandBarRename = () => {
@@ -891,6 +1038,26 @@ const Dashboard = () => {
             }
             setShareItem(null);
           }}
+        />
+      )}
+
+      {showMoveToModal && (
+        <MoveToModal
+          onClose={() => setShowMoveToModal(false)}
+          onMove={handleMoveItems}
+          folders={folders}
+          selectedItems={selectedItems}
+          currentFolderId={currentPath}
+        />
+      )}
+
+      {showCopyToModal && (
+        <CopyToModal
+          onClose={() => setShowCopyToModal(false)}
+          onCopy={handleCopyItems}
+          folders={folders}
+          selectedItems={selectedItems}
+          currentFolderId={currentPath}
         />
       )}
     </div>

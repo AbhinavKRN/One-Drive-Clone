@@ -69,9 +69,11 @@ const FileContextMenu = ({
 
   if (!file || !position) return null;
 
-  const handleAction = (action) => {
+  const handleAction = (action, keepOpen = false) => {
     action();
-    onClose();
+    if (!keepOpen) {
+      onClose();
+    }
   };
 
   return (
@@ -115,12 +117,12 @@ const FileContextMenu = ({
 
         <div className="context-menu-separator" />
 
-        <div className="context-menu-item" onClick={() => handleAction(onMoveTo)}>
+        <div className="context-menu-item" onClick={() => handleAction(onMoveTo, true)}>
           <FolderArrowUpRegular className="context-menu-icon" />
           <span>Move to</span>
         </div>
 
-        <div className="context-menu-item" onClick={() => handleAction(onCopyTo)}>
+        <div className="context-menu-item" onClick={() => handleAction(onCopyTo, true)}>
           <CopyRegular className="context-menu-icon" />
           <span>Copy to</span>
         </div>

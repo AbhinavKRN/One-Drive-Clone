@@ -11,6 +11,7 @@ const {
   deleteFile,
   renameFile,
   moveFile,
+  copyFile,
   getRecycleBinItems,
   restoreItem,
   createEmptyFile,
@@ -90,5 +91,17 @@ router.patch('/:id/rename', authenticate, renameFile)
 // Generic routes (must come last)
 router.get('/:id', authenticate, getFile)
 router.delete('/:id', authenticate, deleteFile)
+router.get("/", authenticate, getAllFiles);
+router.get("/recycle-bin", authenticate, getRecycleBinItems);
+router.post("/restore/:id", authenticate, restoreItem);
+router.post("/create", authenticate, createEmptyFile);
+router.get("/:id/preview", authenticate, previewFile);
+router.get("/:id/download", authenticate, downloadFile);
+router.get("/:id", authenticate, getFile);
+router.post("/upload", authenticate, upload.single("file"), uploadFile);
+router.delete("/:id", authenticate, deleteFile);
+router.patch("/:id/rename", authenticate, renameFile);
+router.patch("/:id/move", authenticate, moveFile);
+router.post("/:id/copy", authenticate, copyFile);
 
 module.exports = router;

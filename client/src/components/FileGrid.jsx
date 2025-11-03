@@ -1301,10 +1301,28 @@ const FileGrid = ({
             }
           }}
           onMoveTo={() => {
-            if (onMoveTo) onMoveTo();
+            if (onMoveTo) {
+              // Select the item if not already selected
+              if (!selectedItems.includes(contextMenu.file.id)) {
+                onSelectionChange([contextMenu.file.id]);
+              }
+              // Close context menu before opening modal
+              setContextMenu(null);
+              // Small delay to ensure selection is updated
+              setTimeout(() => onMoveTo(), 50);
+            }
           }}
           onCopyTo={() => {
-            if (onCopyTo) onCopyTo();
+            if (onCopyTo) {
+              // Select the item if not already selected
+              if (!selectedItems.includes(contextMenu.file.id)) {
+                onSelectionChange([contextMenu.file.id]);
+              }
+              // Close context menu before opening modal
+              setContextMenu(null);
+              // Small delay to ensure selection is updated
+              setTimeout(() => onCopyTo(), 50);
+            }
           }}
           onRename={() => {
             if (onRename) onRename(contextMenu.file);
