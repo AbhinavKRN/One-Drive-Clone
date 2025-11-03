@@ -64,9 +64,29 @@ This application is containerized with Docker for easy deployment:
 - **Auto-restart**: Containers automatically restart on failure
 - **Health Checks**: Built-in health monitoring
 
+#### Docker Hub Images (Pre-built)
+
+For quick deployment without building, use our pre-built Docker Hub images:
+
+**Docker Hub Repository:** [`nara13134`](https://hub.docker.com/u/nara13134)
+
+**Available Images:**
+- **Client**: `nara13134/onedrive-client:latest` (86.2 MB)
+- **Server**: `nara13134/onedrive-server:latest` (232 MB)
+
+**Using Docker Hub Images:**
+
+```bash
+# Use docker-compose.hub.yml to pull pre-built images
+docker-compose -f docker-compose.hub.yml up -d
+```
+
+This will automatically pull the latest images from Docker Hub and start the application.
+
 **For detailed deployment instructions, see:**
 - [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md) - Complete deployment guide
 - [HACKATHON_DEPLOYMENT.md](HACKATHON_DEPLOYMENT.md) - Quick start for teams
+- [DOCKER_IMAGES_SUBMISSION.md](DOCKER_IMAGES_SUBMISSION.md) - Docker Hub images submission guide
 
 ---
 

@@ -40,16 +40,58 @@ Password: test123
    JWT_SECRET=<provided-by-team>
    ```
 
-4. **Start the application**
+4. **Start the application** (Choose one method)
+
+   **Option A: Using Pre-built Docker Hub Images (Recommended - Fastest)**
+   ```bash
+   docker-compose -f docker-compose.hub.yml up -d
+   ```
+   This pulls pre-built images from Docker Hub - no build time required!
+
+   **Option B: Build from Source**
    ```bash
    docker-compose up -d
    ```
+   This builds images locally from source code.
 
 5. **Access the application**
    - Open browser: **http://localhost**
    - Login with demo credentials above
 
 **That's it!** 🎉
+
+---
+
+## 🐳 Docker Hub Images
+
+### Pre-built Images Available
+
+**Docker Hub Repository:** [`nara13134`](https://hub.docker.com/u/nara13134)
+
+**Images:**
+- **Client**: `nara13134/onedrive-client:latest` (86.2 MB)
+  - React frontend built with Vite
+  - Served with Nginx Alpine
+  - Multi-stage build for optimization
+  
+- **Server**: `nara13134/onedrive-server:latest` (232 MB)
+  - Node.js 18 Alpine runtime
+  - Express.js backend
+  - Built-in health checks
+
+### Benefits of Using Docker Hub Images
+
+✅ **Fast Setup** - No build time, images pull in seconds  
+✅ **Consistent** - Same images tested and verified  
+✅ **Reliable** - Pre-built and optimized  
+✅ **Professional** - Production-ready images  
+
+### Image Verification
+
+All Docker Hub images are verified to match the source code:
+- Image IDs verified against local builds
+- Images tested and working correctly
+- Size optimized with multi-stage builds
 
 ---
 
