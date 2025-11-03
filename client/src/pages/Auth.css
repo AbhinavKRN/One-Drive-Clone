@@ -102,11 +102,28 @@
   border: 1px solid #5a5a5a;
   border-bottom: 2px solid #5a5a5a;
   background-color: #3a3a3a;
-  color: #ffffff;
+  color: #ffffff !important;
   border-radius: 2px;
   font-size: 15px;
   transition: all 0.2s;
   box-sizing: border-box;
+}
+
+/* Signup page inputs - white text */
+.signup-page .ms-input:not(.login-input),
+.signup-page .form-group input:not(.login-input) {
+  color: #ffffff !important;
+}
+
+.signup-page .ms-input:not(.login-input):not(:placeholder-shown),
+.signup-page .form-group input:not(.login-input):not(:placeholder-shown) {
+  color: #ffffff !important;
+}
+
+.signup-page .ms-input:not(.login-input):-webkit-autofill,
+.signup-page .form-group input:not(.login-input):-webkit-autofill {
+  -webkit-text-fill-color: #ffffff !important;
+  -webkit-box-shadow: 0 0 0px 1000px #3a3a3a inset !important;
 }
 
 .form-group input::placeholder,
@@ -298,6 +315,15 @@
   border-radius: 0 !important;
 }
 
+.login-input:not(:placeholder-shown) {
+  color: #1b1b1b !important;
+}
+
+.login-input:-webkit-autofill {
+  -webkit-text-fill-color: #1b1b1b !important;
+  -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+}
+
 .login-input::placeholder {
   color: #616161 !important;
 }
@@ -309,6 +335,7 @@
 .login-input:focus {
   border-bottom: 2px solid #0067b8 !important;
   background-color: transparent !important;
+  color: #1b1b1b !important;
 }
 
 .login-no-account {
