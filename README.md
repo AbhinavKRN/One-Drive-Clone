@@ -6,16 +6,81 @@
 ![Node.js](https://img.shields.io/badge/Node.js-Express-339933?style=for-the-badge&logo=node.js)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-4169E1?style=for-the-badge&logo=postgresql)
 ![Tailwind](https://img.shields.io/badge/Tailwind-CSS-06B6D4?style=for-the-badge&logo=tailwindcss)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker)
+
+---
+
+## 🚀 Quick Start - Docker Deployment (Recommended)
+
+**Deploy the entire application with a single command using Docker!**
+
+### Prerequisites
+- Docker Desktop installed ([Download](https://www.docker.com/products/docker-desktop))
+- Docker Compose (included with Docker Desktop)
+
+### Steps
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd "New folder"
+   ```
+
+2. **Configure environment**
+   ```bash
+   cp .env.docker.example .env
+   # Edit .env with your Supabase credentials
+   ```
+
+3. **Start the application**
+   ```bash
+   docker-compose up -d
+   ```
+
+4. **Access the application**
+   - **Frontend**: http://localhost
+   - **Backend API**: http://localhost:5001/api/health
+
+**That's it!** The application will run persistently in the background with auto-restart on failures.
+
+### 🎯 Demo Credentials
+
+Use these credentials to test the application:
+
+```
+Email: test@gmail.com
+Password: test123
+```
+
+**Note**: Create this test account after first deployment, or use the signup page to create a new account.
+
+### Docker Images
+
+This application is containerized with Docker for easy deployment:
+
+- **Client Image**: React frontend served with Nginx
+- **Server Image**: Node.js/Express backend
+- **Persistent Storage**: Docker volumes for uploaded files
+- **Auto-restart**: Containers automatically restart on failure
+- **Health Checks**: Built-in health monitoring
+
+**For detailed deployment instructions, see:**
+- [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md) - Complete deployment guide
+- [HACKATHON_DEPLOYMENT.md](HACKATHON_DEPLOYMENT.md) - Quick start for teams
 
 ---
 
 ## Table of Contents
 
+- [🚀 Quick Start - Docker Deployment](#-quick-start---docker-deployment-recommended)
+- [🎯 Demo Credentials](#-demo-credentials)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Architecture Overview](#architecture-overview)
 - [Data Models](#data-models)
 - [Setup Instructions](#setup-instructions)
+  - [Docker Deployment](#docker-deployment-recommended-for-production)
+  - [Local Development Setup](#local-development-setup)
 - [Environment Variables](#environment-variables)
 - [UI Architecture & State Management](#ui-architecture--state-management)
 - [File Versioning & Synchronization](#file-versioning--synchronization)
@@ -543,9 +608,88 @@ npm run build
 
 ---
 
-### Docker Setup (Optional)
+### Docker Deployment (Recommended for Production)
 
-**Coming soon** - Docker Compose configuration for easy deployment
+**Quick deployment with Docker Compose - perfect for hackathons and production!**
+
+#### Prerequisites
+
+- Docker Desktop installed ([Download](https://www.docker.com/products/docker-desktop))
+- Docker Compose (included with Docker Desktop)
+
+#### Quick Start
+
+1. **Configure Environment**
+
+```bash
+# Copy environment template
+cp .env.docker.example .env
+
+# Edit with your Supabase credentials
+# Required: SUPABASE_URL, SUPABASE_ANON_KEY, JWT_SECRET
+```
+
+2. **Start Application (Persistent Mode)**
+
+```bash
+# Build and start in background
+docker-compose up -d --build
+
+# Check status
+docker-compose ps
+
+# View logs
+docker-compose logs -f
+```
+
+3. **Access Application**
+
+- **Frontend**: http://localhost
+- **Backend API**: http://localhost:5001/api/health
+
+**That's it!** The application will:
+- ✅ Run in the background (close terminal anytime)
+- ✅ Auto-restart on crashes
+- ✅ Auto-start when Docker Desktop opens
+- ✅ Persist uploaded files in Docker volumes
+
+#### Common Docker Commands
+
+```bash
+# View logs
+docker-compose logs -f
+
+# Stop application
+docker-compose down
+
+# Restart application
+docker-compose restart
+
+# Rebuild after code changes
+docker-compose up -d --build
+
+# Check container health
+curl http://localhost:5001/api/health
+```
+
+#### Architecture
+
+```
+┌─────────────┐       ┌──────────────┐
+│   Client    │◄─────►│   Server     │
+│  (Port 80)  │       │  (Port 5001) │
+│   Nginx     │       │   Node.js    │
+└─────────────┘       └──────────────┘
+                             │
+                      ┌──────▼───────┐
+                      │   Supabase   │
+                      │  PostgreSQL  │
+                      └──────────────┘
+```
+
+**For detailed deployment guide, troubleshooting, and production setup:**
+- See [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md) - Complete deployment guide
+- See [HACKATHON_DEPLOYMENT.md](HACKATHON_DEPLOYMENT.md) - Quick start for teams
 
 ---
 
