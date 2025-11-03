@@ -11,6 +11,7 @@ const {
   deleteFile,
   renameFile,
   moveFile,
+  copyFile,
   getRecycleBinItems,
   restoreItem,
   createEmptyFile,
@@ -58,5 +59,6 @@ router.post("/upload", authenticate, upload.single("file"), uploadFile);
 router.delete("/:id", authenticate, deleteFile);
 router.patch("/:id/rename", authenticate, renameFile);
 router.patch("/:id/move", authenticate, moveFile);
+router.post("/:id/copy", authenticate, copyFile);
 
 module.exports = router;

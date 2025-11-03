@@ -5,7 +5,9 @@ const {
   getFolderHierarchy,
   getFolderFiles,
   deleteFolder,
-  renameFolder
+  renameFolder,
+  moveFolder,
+  copyFolder
 } = require('../controllers/folder.controller')
 const { authenticate } = require('../middlewares/auth.middleware')
 
@@ -17,6 +19,8 @@ router.get('/hierarchy', authenticate, getFolderHierarchy)
 router.get('/:id/files', authenticate, getFolderFiles)
 router.delete('/:id', authenticate, deleteFolder)
 router.patch('/:id/rename', authenticate, renameFolder)
+router.patch('/:id/move', authenticate, moveFolder)
+router.post('/:id/copy', authenticate, copyFolder)
 
 module.exports = router
 

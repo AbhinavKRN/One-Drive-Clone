@@ -1,0 +1,408 @@
+/* Copy To Modal uses same styles as Move To Modal */
+.copy-to-modal {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 540px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.copy-to-modal .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e1e1e1;
+}
+
+.copy-to-modal .modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #323130;
+}
+
+.copy-to-modal .close-btn {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  color: #605e5c;
+  transition: all 0.2s;
+}
+
+.copy-to-modal .close-btn:hover {
+  background: #f3f2f1;
+  color: #323130;
+}
+
+.copy-to-modal .modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  min-height: 300px;
+  max-height: 500px;
+}
+
+.copy-to-modal .destination-info {
+  margin-bottom: 16px;
+}
+
+.copy-to-modal .info-text {
+  margin: 0;
+  font-size: 14px;
+  color: #605e5c;
+  line-height: 1.5;
+}
+
+.copy-to-modal .folder-tree-container {
+  border: 1px solid #e1e1e1;
+  border-radius: 4px;
+  background: #fafafa;
+  overflow: hidden;
+}
+
+.copy-to-modal .folder-tree-item {
+  position: relative;
+}
+
+.copy-to-modal .folder-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+  user-select: none;
+  position: relative;
+  background: white;
+  border-bottom: 1px solid #f3f2f1;
+}
+
+.copy-to-modal .folder-row:hover:not(.disabled) {
+  background: #f3f2f1;
+}
+
+.copy-to-modal .folder-row.selected {
+  background: #e3f2fd;
+  border-left: 3px solid #0078d4;
+}
+
+.copy-to-modal .folder-row.selected:hover {
+  background: #d1e9f6;
+}
+
+.copy-to-modal .folder-row.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #fafafa;
+}
+
+.copy-to-modal .folder-row.root-folder {
+  font-weight: 500;
+  border-bottom: 2px solid #e1e1e1;
+}
+
+.copy-to-modal .expand-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #605e5c;
+  margin-right: 4px;
+  border-radius: 2px;
+  transition: all 0.15s;
+}
+
+.copy-to-modal .expand-btn:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.05);
+  color: #323130;
+}
+
+.copy-to-modal .expand-btn:disabled {
+  cursor: not-allowed;
+}
+
+.copy-to-modal .expand-placeholder {
+  width: 20px;
+  height: 20px;
+  margin-right: 4px;
+  display: inline-block;
+}
+
+.copy-to-modal .folder-icon {
+  font-size: 20px;
+  color: #ffb900;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.copy-to-modal .folder-row.root-folder .folder-icon {
+  color: #0078d4;
+}
+
+.copy-to-modal .folder-name {
+  flex: 1;
+  font-size: 14px;
+  color: #323130;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.copy-to-modal .checkmark-icon {
+  font-size: 16px;
+  color: #0078d4;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.copy-to-modal .folder-children {
+  background: white;
+}
+
+.copy-to-modal .empty-folders {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.copy-to-modal .empty-folders p {
+  margin: 0;
+  color: #a19f9d;
+  font-size: 14px;
+}
+
+.copy-to-modal .modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #e1e1e1;
+  background: #fafafa;
+}
+
+.copy-to-modal .btn-primary,
+.copy-to-modal .btn-secondary {
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 80px;
+}
+
+.copy-to-modal .btn-primary {
+  background: #0078d4;
+  color: white;
+}
+
+.copy-to-modal .btn-primary:hover:not(:disabled) {
+  background: #106ebe;
+}
+
+.copy-to-modal .btn-primary:disabled {
+  background: #c8c6c4;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.copy-to-modal .btn-secondary {
+  background: white;
+  color: #323130;
+  border: 1px solid #8a8886;
+}
+
+.copy-to-modal .btn-secondary:hover:not(:disabled) {
+  background: #f3f2f1;
+  border-color: #323130;
+}
+
+.copy-to-modal .btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Scrollbar styling */
+.copy-to-modal .modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.copy-to-modal .modal-body::-webkit-scrollbar-track {
+  background: #f3f2f1;
+}
+
+.copy-to-modal .modal-body::-webkit-scrollbar-thumb {
+  background: #c8c6c4;
+  border-radius: 4px;
+}
+
+.copy-to-modal .modal-body::-webkit-scrollbar-thumb:hover {
+  background: #a19f9d;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .copy-to-modal {
+    background: #292929;
+  }
+
+  .copy-to-modal .modal-header {
+    border-bottom-color: #3b3b3b;
+  }
+
+  .copy-to-modal .modal-header h2 {
+    color: #ffffff;
+  }
+
+  .copy-to-modal .close-btn {
+    color: #c8c6c4;
+  }
+
+  .copy-to-modal .close-btn:hover {
+    background: #3b3b3b;
+    color: #ffffff;
+  }
+
+  .copy-to-modal .info-text {
+    color: #c8c6c4;
+  }
+
+  .copy-to-modal .folder-tree-container {
+    border-color: #3b3b3b;
+    background: #1f1f1f;
+  }
+
+  .copy-to-modal .folder-row {
+    background: #292929;
+    border-bottom-color: #3b3b3b;
+  }
+
+  .copy-to-modal .folder-row:hover:not(.disabled) {
+    background: #3b3b3b;
+  }
+
+  .copy-to-modal .folder-row.selected {
+    background: #1a3a52;
+    border-left-color: #0078d4;
+  }
+
+  .copy-to-modal .folder-row.selected:hover {
+    background: #1e4567;
+  }
+
+  .copy-to-modal .folder-row.disabled {
+    background: #1f1f1f;
+  }
+
+  .copy-to-modal .folder-row.root-folder {
+    border-bottom-color: #3b3b3b;
+  }
+
+  .copy-to-modal .folder-name {
+    color: #ffffff;
+  }
+
+  .copy-to-modal .expand-btn {
+    color: #c8c6c4;
+  }
+
+  .copy-to-modal .expand-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+  }
+
+  .copy-to-modal .folder-children {
+    background: #292929;
+  }
+
+  .copy-to-modal .empty-folders p {
+    color: #8a8886;
+  }
+
+  .copy-to-modal .modal-footer {
+    border-top-color: #3b3b3b;
+    background: #1f1f1f;
+  }
+
+  .copy-to-modal .btn-secondary {
+    background: #292929;
+    color: #ffffff;
+    border-color: #8a8886;
+  }
+
+  .copy-to-modal .btn-secondary:hover:not(:disabled) {
+    background: #3b3b3b;
+    border-color: #c8c6c4;
+  }
+
+  .copy-to-modal .modal-body::-webkit-scrollbar-track {
+    background: #1f1f1f;
+  }
+
+  .copy-to-modal .modal-body::-webkit-scrollbar-thumb {
+    background: #3b3b3b;
+  }
+
+  .copy-to-modal .modal-body::-webkit-scrollbar-thumb:hover {
+    background: #605e5c;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .copy-to-modal {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .copy-to-modal .modal-header {
+    padding: 16px 20px;
+  }
+
+  .copy-to-modal .modal-header h2 {
+    font-size: 18px;
+  }
+
+  .copy-to-modal .modal-body {
+    padding: 16px 20px;
+  }
+
+  .copy-to-modal .modal-footer {
+    padding: 12px 20px;
+  }
+
+  .copy-to-modal .folder-row {
+    padding: 12px 10px;
+  }
+
+  .copy-to-modal .btn-primary,
+  .copy-to-modal .btn-secondary {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+}
+

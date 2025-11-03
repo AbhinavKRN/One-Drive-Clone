@@ -967,6 +967,128 @@ const createEmptyFile = async (req, res) => {
   }
 };
 
+const copyFile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { folder_id } = req.body;
+    const userId = req.user.id;
+
+    const { data: file } = await supabase
+      .from("files")
+      .select("*")
+      .eq("id", id)
+      .eq("user_id", userId)
+      .is("deleted_at", null)
+      .single();
+
+    if (!file) {
+      return res.status(404).json({
+        status: "error",
+        action: "copy_file",
+        error: "File not found",
+        code: 404,
+      });
+    }
+
+    // If folder_id is provided, validate it exists and belongs to user
+    if (folder_id !== null && folder_id !== undefined) {
+      const { data: folder } = await supabase
+        .from("folders")
+        .select("*")
+        .eq("id", folder_id)
+        .eq("user_id", userId)
+        .is("deleted_at", null)
+        .single();
+
+      if (!folder) {
+        return res.status(404).json({
+          status: "error",
+          action: "copy_file",
+          error: "Folder not found",
+          code: 404,
+        });
+      }
+    }
+
+    // Generate unique name if file with same name exists in target folder
+    let newName = file.name;
+    let copyNumber = 1;
+    
+    while (true) {
+      const { data: existingFile } = await supabase
+        .from("files")
+        .select("*")
+        .eq("name", newName)
+        .eq("user_id", userId)
+        .eq("folder_id", folder_id || null)
+        .is("deleted_at", null)
+        .single();
+
+      if (!existingFile) break;
+      
+      // Add " - Copy (n)" to filename
+      const nameParts = file.name.split(".");
+      const extension = nameParts.length > 1 ? "." + nameParts.pop() : "";
+      const baseName = nameParts.join(".");
+      newName = `${baseName} - Copy${copyNumber > 1 ? ` (${copyNumber})` : ""}${extension}`;
+      copyNumber++;
+    }
+
+    // Copy the physical file
+    const fs = require("fs").promises;
+    const path = require("path");
+    const oldPath = file.path;
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    const newPath = path.join(path.dirname(oldPath), `${uniqueSuffix}-${newName}`);
+
+    try {
+      await fs.copyFile(oldPath, newPath);
+    } catch (fsError) {
+      console.error("File copy error (disk):", fsError);
+      return res.status(500).json({
+        status: "error",
+        action: "copy_file",
+        error: "Failed to copy file on disk",
+        code: 500,
+      });
+    }
+
+    // Get file stats
+    const stats = await fs.stat(newPath);
+
+    // Create new file record in database
+    const { data: copiedFile } = await supabase
+      .from("files")
+      .insert([
+        {
+          name: newName,
+          type: file.type,
+          size: stats.size,
+          path: newPath,
+          user_id: userId,
+          folder_id: folder_id || null,
+        },
+      ])
+      .select()
+      .single();
+
+    return res.json({
+      status: "success",
+      action: "copy_file",
+      data: { file: copiedFile },
+      message: "File copied successfully",
+    });
+  } catch (error) {
+    console.error("Copy file error:", error);
+    return res.status(500).json({
+      status: "error",
+      action: "copy_file",
+      error: error.message,
+      code: 500,
+    });
+  }
+};
+
 module.exports = {
   uploadFile,
   getAllFiles,
@@ -976,6 +1098,7 @@ module.exports = {
   deleteFile,
   renameFile,
   moveFile,
+  copyFile,
   getRecycleBinItems,
   restoreItem,
   createEmptyFile,
