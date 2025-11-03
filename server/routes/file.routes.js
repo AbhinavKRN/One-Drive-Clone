@@ -78,10 +78,10 @@ router.delete('/:id/share', authenticate, unshareFile)
 router.get('/:id/preview', authenticate, previewFile)
 router.get('/:id/download', authenticate, downloadFile)
 router.patch('/:id/rename', authenticate, renameFile)
-
-// Generic routes (must come last)
 router.patch("/:id/move", authenticate, moveFile);
 router.post("/:id/copy", authenticate, copyFile);
+
+// Generic routes (must come last)
 router.get("/:id", authenticate, getFile);
 router.delete("/:id", authenticate, deleteFile);
 

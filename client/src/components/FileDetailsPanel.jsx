@@ -63,7 +63,7 @@ const FileDetailsPanel = ({ file, onClose }) => {
           <div className="detail-item">
             <span className="detail-label">Path</span>
             <span className="detail-value path-value">
-              {file.original_location || file.folder_path || "My files"} › {file.name}
+              {file.original_location || file.folder_path || file.path || "My files"} › {file.name}
             </span>
           </div>
 

@@ -15,6 +15,7 @@ import MoveToModal from "../components/MoveToModal";
 import CopyToModal from "../components/CopyToModal";
 import CommandBar from "../components/CommandBar";
 import FilterBar from "../components/FilterBar";
+import FileDetailsPanel from "../components/FileDetailsPanel";
 import { useFileManager } from "../hooks/useFileManager";
 import { nameToSlug } from "../hooks/useFileManager";
 import API_BASE_URL from "../config/api";
@@ -51,6 +52,8 @@ const Dashboard = () => {
   const [photoTab, setPhotoTab] = useState("Moments");
   const [documentFilter, setDocumentFilter] = useState("all");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showDetailsPanel, setShowDetailsPanel] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   // Set filter type based on URL path
   useEffect(() => {
@@ -612,9 +615,19 @@ const Dashboard = () => {
     setSelectedItems([]);
   };
 
-  const handleDetails = () => {
-    console.log("Open details pane");
-    toast.info("Details pane feature will be implemented");
+  const handleDetails = (file = null) => {
+
+    const fileToShow = file || (selectedItems.length > 0 ? filteredFiles.find(f => f.id === selectedItems[0]) : null);
+    if (fileToShow) {
+      setSelectedFile(fileToShow);
+      setShowDetailsPanel(true);
+    }
+  };
+
+  // Handle closing details panel
+  const handleCloseDetails = () => {
+    setShowDetailsPanel(false);
+    setSelectedFile(null);
   };
 
   // Prevent body scroll when sidebar is open on mobile
@@ -1059,6 +1072,11 @@ const Dashboard = () => {
           selectedItems={selectedItems}
           currentFolderId={currentPath}
         />
+      )}
+
+      {/* Details Panel */}
+      {showDetailsPanel && selectedFile && (
+        <FileDetailsPanel file={selectedFile} onClose={handleCloseDetails} />
       )}
     </div>
   );

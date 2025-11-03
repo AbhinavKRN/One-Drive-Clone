@@ -29,6 +29,11 @@ const FileGrid = ({
   onFilesUpload,
   onFolderUpload,
   onMoveFileToFolder,
+  onMoveTo,
+  onCopyTo,
+  onDetails,
+  onRename,
+  onCopyLink,
 }) => {
   const [showNameMenu, setShowNameMenu] = useState(false);
   const [showModifiedMenu, setShowModifiedMenu] = useState(false);
@@ -1328,7 +1333,7 @@ const FileGrid = ({
             if (onRename) onRename(contextMenu.file);
           }}
           onDetails={() => {
-            if (onDetails) onDetails();
+            if (onDetails) onDetails(contextMenu.file);
           }}
           onClose={() => setContextMenu(null)}
         />

@@ -5,7 +5,6 @@ import {
   DeleteRegular,
   ArrowDownloadRegular,
   FolderArrowUpRegular,
-  CopyRegular,
   RenameRegular,
   PanelRightRegular,
 } from '@fluentui/react-icons';
@@ -120,11 +119,6 @@ const FileContextMenu = ({
         <div className="context-menu-item" onClick={() => handleAction(onMoveTo, true)}>
           <FolderArrowUpRegular className="context-menu-icon" />
           <span>Move to</span>
-        </div>
-
-        <div className="context-menu-item" onClick={() => handleAction(onCopyTo, true)}>
-          <CopyRegular className="context-menu-icon" />
-          <span>Copy to</span>
         </div>
 
         <div className="context-menu-item" onClick={() => handleAction(onRename)}>
