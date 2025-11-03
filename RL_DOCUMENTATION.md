@@ -1871,24 +1871,6 @@ UPDATE folders SET deleted_at = NOW() WHERE user_id = 'user_id';
 
 ---
 
-## 15. Contact & Support
-
-For questions or issues with this RL documentation:
-
-- **Project Repository**: [GitHub URL]
-- **Hackathon Team**: [Team Name]
-- **Technical Contact**: [Your Email]
-
----
-
-## Document Changelog
-
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.0 | 2025-11-03 | Initial RL documentation created |
-
----
-
 **End of Documentation**
 
 This document provides a complete specification for training Reinforcement Learning agents on the OneDrive Clone platform. All features documented here are **fully functional and tested**. The system is ready for RL experimentation, training, and evaluation.
