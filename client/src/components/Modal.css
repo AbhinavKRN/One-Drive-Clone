@@ -259,15 +259,21 @@
   background-color: #ffffff;
   border: 2px solid #0078d4;
   border-radius: 2px;
-  color: #000000;
+  color: #000000 !important;
   padding: 12px 16px;
   font-size: 15px;
+}
+
+.create-folder-modal .form-group input::placeholder {
+  color: #000000;
+  opacity: 0.6;
 }
 
 .create-folder-modal .form-group input:focus {
   border-color: #0078d4;
   border-width: 2px;
   padding: 12px 16px;
+  color: #000000 !important;
 }
 
 .create-folder-modal .modal-footer {
