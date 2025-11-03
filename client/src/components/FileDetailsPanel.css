@@ -1,0 +1,142 @@
+.file-details-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 320px;
+  height: 100vh;
+  background-color: #ffffff;
+  border-left: 1px solid #e1e1e1;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  animation: slideInFromRight 0.2s ease-out;
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.details-panel-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #edebe9;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.details-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #605e5c;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.details-close-btn:hover {
+  background-color: #f3f2f1;
+}
+
+.details-close-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.details-panel-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #323130;
+  margin: 0;
+}
+
+.details-panel-content {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.details-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #605e5c;
+  text-transform: capitalize;
+}
+
+.detail-value {
+  font-size: 14px;
+  color: #323130;
+  word-wrap: break-word;
+}
+
+.file-type-value {
+  font-weight: 600;
+  font-size: 16px;
+  color: #201f1e;
+}
+
+.path-value {
+  color: #0078d4;
+  cursor: pointer;
+}
+
+.path-value:hover {
+  text-decoration: underline;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .file-details-panel {
+    background-color: #1e1e1e;
+    border-left-color: #3b3b3b;
+  }
+
+  .details-panel-header {
+    border-bottom-color: #3b3b3b;
+  }
+
+  .details-close-btn {
+    color: #ffffff;
+  }
+
+  .details-close-btn:hover {
+    background-color: #2d2d2d;
+  }
+
+  .details-panel-title {
+    color: #ffffff;
+  }
+
+  .detail-label {
+    color: #b3b3b3;
+  }
+
+  .detail-value {
+    color: #ffffff;
+  }
+
+  .file-type-value {
+    color: #ffffff;
+  }
+}

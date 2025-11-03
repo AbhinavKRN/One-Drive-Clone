@@ -10,10 +10,12 @@ import FilePreview from "../components/FilePreview";
 import RecycleBin from "../components/RecycleBin";
 import CreateFolderModal from "../components/CreateFolderModal";
 import RenameModal from "../components/RenameModal";
+import ShareModal from "../components/ShareModal";
 import CommandBar from "../components/CommandBar";
 import FilterBar from "../components/FilterBar";
 import { useFileManager } from "../hooks/useFileManager";
 import { nameToSlug } from "../hooks/useFileManager";
+import API_BASE_URL from "../config/api";
 import PhotosPage from "./PhotosPage"; // 👈 new Photos page component
 import { ChevronDownRegular } from "@fluentui/react-icons";
 import "./Dashboard.css";
@@ -34,8 +36,10 @@ const Dashboard = () => {
   const [previewFile, setPreviewFile] = useState(null);
   const [showCreateFolder, setShowCreateFolder] = useState(false);
   const [renameItem, setRenameItem] = useState(null);
+  const [shareItem, setShareItem] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
   const [activeTab, setActiveTab] = useState("Files");
+  const [sharedFiles, setSharedFiles] = useState([]);
   const [sortBy, setSortBy] = useState("name");
   const [showSortMenu, setShowSortMenu] = useState(false);
   const sortMenuRef = useRef(null);
@@ -127,6 +131,39 @@ const Dashboard = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showSortMenu]);
+
+  // Load shared files when on shared tab
+  useEffect(() => {
+    const loadSharedFiles = async () => {
+      if (filterType !== "shared") return;
+
+      try {
+        const token = getToken();
+        if (!token) return;
+
+        const response = await fetch(`${API_BASE_URL}/files/shared`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+        if (data.status === 'success') {
+          // Combine shared with me and shared by me
+          const allShared = [
+            ...(data.data.sharedWithMe || []).map(f => ({ ...f, sharedWithMe: true, sharedByMe: false })),
+            ...(data.data.sharedByMe || []).map(f => ({ ...f, sharedWithMe: false, sharedByMe: true }))
+          ];
+          setSharedFiles(allShared);
+        }
+      } catch (error) {
+        console.error('Error loading shared files:', error);
+        setSharedFiles([]);
+      }
+    };
+
+    loadSharedFiles();
+  }, [filterType, getToken]);
 
   const handleSort = (sortType) => {
     setSortBy(sortType);
@@ -333,12 +370,80 @@ const Dashboard = () => {
     });
   };
 
-  const handleShare = () => {
-    toast.info("Share feature will be implemented");
+  const handleShare = (fileParam = null) => {
+    // Support calling with a file directly (from context menu) or from selected items
+    let item = fileParam;
+    
+    if (!item && selectedItems.length === 1) {
+      item = files.find((f) => f.id === selectedItems[0]);
+    }
+    
+    if (!item) {
+      toast.info("Please select a file to share");
+      return;
+    }
+    
+    if (item.type === "folder") {
+      toast.info("Please select a file (not a folder) to share");
+      return;
+    }
+    
+    setShareItem(item);
   };
 
-  const handleCopyLink = () => {
-    toast.info("Copy link feature will be implemented");
+  const handleCopyLink = async (fileParam = null) => {
+    // Support calling with a file directly (from context menu) or from selected items
+    let item = fileParam;
+    
+    if (!item && selectedItems.length === 1) {
+      item = files.find((f) => f.id === selectedItems[0]);
+    }
+    
+    if (!item) {
+      toast.info("Please select a file to copy its link");
+      return;
+    }
+    
+    if (item.type === "folder") {
+      toast.info("Please select a file (not a folder) to copy its link");
+      return;
+    }
+    
+    try {
+      const token = getToken();
+      if (!token) {
+        toast.error("Authentication required");
+        return;
+      }
+
+      // Create or get share link
+      const response = await fetch(`${API_BASE_URL}/files/${item.id}/share-link`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          permission: 'view',
+          allow_download: true
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.status === 'success') {
+        const fullUrl = `${window.location.origin}/shared/${data.data.share_token}`;
+        
+        // Copy to clipboard
+        await navigator.clipboard.writeText(fullUrl);
+        toast.success(`Share link for "${item.name}" copied to clipboard!`);
+      } else {
+        toast.error(data.error || 'Failed to create share link');
+      }
+    } catch (error) {
+      console.error('Copy link error:', error);
+      toast.error('Failed to copy link. Please try again.');
+    }
   };
 
   const handleMoveTo = () => {
@@ -440,12 +545,13 @@ const Dashboard = () => {
               <RecycleBin />
             ) : filterType === "shared" ? (
               <SharedView
-                files={files}
+                files={sharedFiles}
                 viewMode={viewMode}
                 selectedItems={selectedItems}
                 onSelectionChange={setSelectedItems}
                 onItemClick={handleItemClick}
                 onDownload={handleDownload}
+                onShare={(file) => setShareItem(file)}
                 onFilesUpload={handleFilesUpload}
                 onFolderUpload={handleFolderUpload}
                 onMoveFileToFolder={moveFileToFolder}
@@ -694,6 +800,7 @@ const Dashboard = () => {
                     onItemClick={handleItemClick}
                     onDownload={handleDownload}
                     onDelete={handleDelete}
+                    onShare={(file) => setShareItem(file)}
                     sortBy={sortBy}
                     filterType={filterType}
                     currentPath={currentPath}
@@ -702,7 +809,6 @@ const Dashboard = () => {
                     onFilesUpload={handleFilesUpload}
                     onFolderUpload={handleFolderUpload}
                     onMoveFileToFolder={moveFileToFolder}
-                    onShare={handleShare}
                     onCopyLink={handleCopyLink}
                     onMoveTo={handleMoveTo}
                     onCopyTo={handleCopyTo}
@@ -748,6 +854,43 @@ const Dashboard = () => {
           item={renameItem}
           onClose={() => setRenameItem(null)}
           onRename={handleRename}
+        />
+      )}
+
+      {shareItem && (
+        <ShareModal
+          file={shareItem}
+          onClose={() => setShareItem(null)}
+          onShareSuccess={() => {
+            // Refresh shared files if on shared tab
+            if (filterType === "shared") {
+              const loadSharedFiles = async () => {
+                try {
+                  const token = getToken();
+                  if (!token) return;
+
+                  const response = await fetch(`${API_BASE_URL}/files/shared`, {
+                    headers: {
+                      'Authorization': `Bearer ${token}`
+                    }
+                  });
+
+                  const data = await response.json();
+                  if (data.status === 'success') {
+                    const allShared = [
+                      ...(data.data.sharedWithMe || []).map(f => ({ ...f, sharedWithMe: true, sharedByMe: false })),
+                      ...(data.data.sharedByMe || []).map(f => ({ ...f, sharedWithMe: false, sharedByMe: true }))
+                    ];
+                    setSharedFiles(allShared);
+                  }
+                } catch (error) {
+                  console.error('Error loading shared files:', error);
+                }
+              };
+              loadSharedFiles();
+            }
+            setShareItem(null);
+          }}
         />
       )}
     </div>

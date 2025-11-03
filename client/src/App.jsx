@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
+import SharedFilePage from './pages/SharedFilePage'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { ToastProvider } from './context/ToastContext'
@@ -52,7 +53,27 @@ function App() {
                   </PrivateRoute>
                 }
               />
-            </Routes>
+              <Route
+              path="/shared/:token"
+              element={<SharedFilePage />}
+            />
+            <Route
+              path="/shared/:token"
+              element={<SharedFilePage />}
+            />
+            <Route
+              path="/shared/:token"
+              element={<SharedFilePage />}
+            />
+            <Route
+              path="/shared/:token"
+              element={<SharedFilePage />}
+            />
+            <Route
+              path="/shared/:token"
+              element={<SharedFilePage />}
+            />
+          </Routes>
             <ToastContainer />
           </Router>
         </ToastProvider>
