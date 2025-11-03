@@ -1,50 +1,58 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
-import './Auth.css'
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import "./Auth.css";
 
 const Login = () => {
-  const [step, setStep] = useState(1) // Multi-step form
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const { login } = useAuth()
-  const navigate = useNavigate()
+  const [step, setStep] = useState(1); // Multi-step form
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleEmailSubmit = (e) => {
-    e.preventDefault()
-    setError('')
+    e.preventDefault();
+    setError("");
 
     if (!email) {
-      setError('Please enter an email address')
-      return
+      setError("Please enter an email address");
+      return;
     }
 
-    setStep(2)
-  }
+    setStep(2);
+  };
 
   const handlePasswordSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
+    e.preventDefault();
+    setError("");
 
     if (!password) {
-      setError('Please enter your password')
-      return
+      setError("Please enter your password");
+      return;
     }
 
-    const result = await login(email, password)
+    const result = await login(email, password);
     if (result.success) {
-      navigate('/dashboard/home')
+      navigate("/dashboard/home");
     } else {
-      setError(result.message)
+      setError(result.message);
     }
-  }
+  };
 
   return (
     <div className="auth-container login-page">
       <div className="auth-box login-box">
         <div className="auth-header">
-          <img src="/images/Microsoft.png" alt="Microsoft" className="ms-logo" />
+          <div className="microsoft-logo-wrapper">
+            <div className="microsoft-logo-grid">
+              <div className="microsoft-square microsoft-red"></div>
+              <div className="microsoft-square microsoft-green"></div>
+              <div className="microsoft-square microsoft-blue"></div>
+              <div className="microsoft-square microsoft-yellow"></div>
+            </div>
+            <span className="microsoft-text">Microsoft</span>
+          </div>
         </div>
 
         {step === 1 ? (
@@ -99,7 +107,11 @@ const Login = () => {
               </div>
 
               <div className="login-button-container">
-                <button type="button" className="btn-back login-back" onClick={() => setStep(1)}>
+                <button
+                  type="button"
+                  className="btn-back login-back"
+                  onClick={() => setStep(1)}
+                >
                   Back
                 </button>
                 <button type="submit" className="btn-primary login-btn">
@@ -112,13 +124,17 @@ const Login = () => {
       </div>
 
       <div className="login-footer">
-        <a href="https://www.microsoft.com/en-ca/privacy/privacystatement" target="_blank" rel="noopener noreferrer">
+        <a
+          href="https://www.microsoft.com/en-ca/privacy/privacystatement"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           Privacy statement
         </a>
         <span className="login-copyright">©2025 Microsoft</span>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
