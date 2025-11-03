@@ -69,6 +69,10 @@ function App() {
               path="/shared/:token"
               element={<SharedFilePage />}
             />
+            <Route
+              path="/shared/:token"
+              element={<SharedFilePage />}
+            />
           </Routes>
             <ToastContainer />
           </Router>
