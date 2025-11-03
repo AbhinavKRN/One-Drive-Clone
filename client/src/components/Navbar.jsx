@@ -5,7 +5,6 @@ import { useTheme } from "../context/ThemeContext";
 import {
   SearchRegular,
   SettingsRegular,
-  GlobeRegular,
   PersonAddRegular,
   StarRegular,
   ImageRegular,
@@ -13,9 +12,9 @@ import {
   ClockRegular,
   QuestionCircleRegular,
   PersonFeedbackRegular,
-  DiamondRegular,
   PanelLeftRegular,
 } from "@fluentui/react-icons";
+import BuyStorageModal from "./BuyStorageModal";
 import "./Navbar.css";
 
 const Navbar = ({
@@ -46,6 +45,7 @@ const Navbar = ({
   const settingsButtonRef = useRef(null);
   const avatarRef = useRef(null);
   const [darkThemeForPhotos, setDarkThemeForPhotos] = useState(false);
+  const [showBuyStorageModal, setShowBuyStorageModal] = useState(false);
 
   const allApps = [
     {
@@ -141,7 +141,6 @@ const Navbar = ({
   }, [location, setActiveTab]);
 
   const handleTabClick = (tab) => setActiveTab(tab);
-  const handleAvatarClick = () => setShowProfilePopup(!showProfilePopup);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -416,8 +415,18 @@ const Navbar = ({
 
             {/* Buy Storage Button */}
             <div className="apps-launcher-footer">
-              <button className="apps-buy-storage-btn">
-                <img src="/images/image copy 2.png" alt="Diamond" className="buy-storage-diamond-icon" />
+              <button
+                className="apps-buy-storage-btn"
+                onClick={() => {
+                  setShowBuyStorageModal(true);
+                  setShowAppsLauncher(false);
+                }}
+              >
+                <img
+                  src="/images/image copy 2.png"
+                  alt="Diamond"
+                  className="buy-storage-diamond-icon"
+                />
                 <span>Buy storage</span>
               </button>
             </div>
@@ -501,8 +510,15 @@ const Navbar = ({
 
       {/* Right side */}
       <div className="navbar-right">
-        <button className="navbar-storage-btn">
-          <img src="/images/image copy 2.png" alt="Diamond" className="navbar-storage-diamond-icon" />
+        <button
+          className="navbar-storage-btn"
+          onClick={() => setShowBuyStorageModal(true)}
+        >
+          <img
+            src="/images/image copy 2.png"
+            alt="Diamond"
+            className="navbar-storage-diamond-icon"
+          />
           <span>Get more storage</span>
         </button>
         <button
@@ -532,7 +548,15 @@ const Navbar = ({
               <div className="settings-storage-links">
                 <button className="settings-link">Manage</button>
                 <span className="settings-link-separator">|</span>
-                <button className="settings-link">Buy storage</button>
+                <button
+                  className="settings-link"
+                  onClick={() => {
+                    setShowBuyStorageModal(true);
+                    setShowSettingsDropdown(false);
+                  }}
+                >
+                  Buy storage
+                </button>
               </div>
             </div>
             <div className="settings-divider"></div>
@@ -616,8 +640,8 @@ const Navbar = ({
               <div className="profile-user-info">
                 <div className="profile-user-name">{getFormattedName()}</div>
                 <div className="profile-user-email">{user?.email || ""}</div>
-                <a 
-                  href="https://account.microsoft.com" 
+                <a
+                  href="https://account.microsoft.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="profile-view-account"
@@ -628,7 +652,7 @@ const Navbar = ({
               </div>
             </div>
 
-            <div 
+            <div
               className="profile-popup-footer"
               onClick={() => {
                 window.open("https://login.live.com", "_blank");
@@ -641,6 +665,11 @@ const Navbar = ({
           </div>
         )}
       </div>
+
+      {/* Buy Storage Modal */}
+      {showBuyStorageModal && (
+        <BuyStorageModal onClose={() => setShowBuyStorageModal(false)} />
+      )}
     </nav>
   );
 };
