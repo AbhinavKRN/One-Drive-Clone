@@ -246,10 +246,31 @@ docker-compose -f docker-compose.hub.yml up -d
    ```
 
 3. **Configure environment**
+
+   Create a `.env` file with the following demo credentials:
+
    ```bash
-   cp .env.docker.example .env
-   # Edit .env with provided Supabase credentials
+   # Create .env file
+   cat > .env << 'EOF'
+   # Demo Supabase Configuration (FOR HACKATHON EVALUATION ONLY)
+   SUPABASE_URL=https://ukbugknucpgntsqxxgcg.supabase.co
+   SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVrYnVna251Y3BnbnRzcXh4Z2NnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIwMjI4NzYsImV4cCI6MjA3NzU5ODg3Nn0.Unm4QuVgFJETOcnq8u_C4zLxOFw1Bez1KsZ7WAZCYYQ
+
+   # JWT Configuration
+   JWT_SECRET=hackathon-demo-secret-2024
+   JWT_EXPIRE=7d
+
+   # File Upload Configuration
+   MAX_FILE_SIZE=52428800
+   FRONTEND_URL=http://localhost
+   EOF
    ```
+
+   **⚠️ IMPORTANT NOTES:**
+   - These are **DEMO credentials** for hackathon evaluation only
+   - Database has Row Level Security (RLS) enabled for protection
+   - These credentials will be rotated after the hackathon
+   - For production use, create your own Supabase project
 
 4. **Deploy using Docker Hub images**
    ```bash
@@ -326,6 +347,69 @@ For any issues with Docker Hub images:
 - One command: `docker-compose -f docker-compose.hub.yml up -d`
 - Access at: http://localhost
 - Full documentation: See JUDGES_README.md
+
+---
+
+## 🔒 Security & Credential Management
+
+### Demo Credentials
+
+The Supabase credentials provided in this document are **DEMO credentials** for hackathon evaluation purposes only.
+
+**Security Measures in Place:**
+- ✅ **Row Level Security (RLS)** enabled on all database tables
+- ✅ **User isolation** - Users can only access their own data
+- ✅ **Anonymous key** - Limited permissions, read-only for public data
+- ✅ **JWT authentication** - All API requests require valid tokens
+- ✅ **Password hashing** - bcrypt with salt rounds
+
+### Post-Hackathon Actions
+
+After the hackathon, we will:
+1. ✅ Rotate all API keys
+2. ✅ Update database credentials
+3. ✅ Regenerate JWT secrets
+4. ✅ Review and update RLS policies
+
+### For End Users (Production Deployment)
+
+**DO NOT use the demo credentials for production deployments.**
+
+End users should:
+1. Create their own Supabase account (free at https://supabase.com)
+2. Set up their own database using provided SQL schemas
+3. Generate their own API keys
+4. Create strong JWT secrets
+5. Configure proper RLS policies
+
+**Required Files:**
+- `server/supabase_schema.sql` - Initial database schema
+- `server/recycle_bin_migration.sql` - Recycle bin feature
+
+**Setup Steps:**
+```bash
+# 1. Create Supabase project at https://supabase.com
+
+# 2. Run SQL schemas in Supabase SQL Editor
+# - First: server/supabase_schema.sql
+# - Then: server/recycle_bin_migration.sql
+
+# 3. Get your credentials from Supabase dashboard:
+# - Project Settings → API → URL
+# - Project Settings → API → anon/public key
+
+# 4. Create .env file with YOUR credentials
+SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_ANON_KEY=your-anon-key-here
+JWT_SECRET=your-random-secure-secret-here
+```
+
+### Data Privacy
+
+- ✅ **No data sharing** - Each Supabase instance is isolated
+- ✅ **No backdoors** - Users have full control of their data
+- ✅ **No telemetry** - Application doesn't send usage data
+- ✅ **Local file storage** - Files stored in Docker volumes, not cloud
 
 ---
 
