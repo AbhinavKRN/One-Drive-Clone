@@ -1,29 +1,58 @@
-# Docker Compose file for pulling pre-built images from Docker Hub
+# ============================================================================
+# Universal Docker Compose Configuration for Docker Hub Images
+# ============================================================================
+# Compatible with ALL operating systems and architectures:
+#   ✓ Windows (Intel/AMD)
+#   ✓ macOS Intel (x86_64)
+#   ✓ macOS Apple Silicon (M1/M2/M3 - ARM64)
+#   ✓ Linux (Intel/AMD)
+#   ✓ Linux (ARM64 - Raspberry Pi, AWS Graviton)
+#
 # Usage: docker-compose -f docker-compose.hub.yml up -d
+# ============================================================================
+
+version: '3.8'
 
 services:
+  # ========================================
   # Backend Server
+  # ========================================
   server:
-    # REPLACE 'nara13134' with your actual Docker Hub username
+    # Multi-architecture image: Docker automatically pulls the correct version
+    # - linux/amd64 for Intel/AMD processors
+    # - linux/arm64 for Apple Silicon and ARM processors
     image: nara13134/onedrive-server:latest
+
     container_name: onedrive-server
+
+    # Auto-restart on failure (works on all OSes)
     restart: unless-stopped
+
+    # Port mapping (compatible with all OSes)
     ports:
       - "5001:5001"
+
+    # Environment variables (cross-platform compatible)
     environment:
       - NODE_ENV=production
       - PORT=5001
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
       - JWT_SECRET=${JWT_SECRET}
-      - JWT_EXPIRE=${JWT_EXPIRE}
-      - MAX_FILE_SIZE=${MAX_FILE_SIZE}
+      - JWT_EXPIRE=${JWT_EXPIRE:-7d}
+      - MAX_FILE_SIZE=${MAX_FILE_SIZE:-52428800}
       - UPLOAD_DIR=/app/uploads
-      - FRONTEND_URL=${FRONTEND_URL}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost}
+
+    # Named volume (works on Windows, Mac, Linux)
+    # Data persists across container restarts on all platforms
     volumes:
       - server-uploads:/app/uploads
+
     networks:
       - onedrive-network
+
+    # Health check (cross-platform compatible)
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:5001/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })"]
       interval: 30s
@@ -31,24 +60,81 @@ services:
       retries: 3
       start_period: 40s
 
+    # Resource limits (optional, works on all OSes)
+    # Uncomment if you want to limit resource usage
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '1.0'
+    #       memory: 512M
+    #     reservations:
+    #       cpus: '0.5'
+    #       memory: 256M
+
+  # ========================================
   # Frontend Client
+  # ========================================
   client:
-    # REPLACE 'nara13134' with your actual Docker Hub username
+    # Multi-architecture image: Docker automatically pulls the correct version
+    # - linux/amd64 for Intel/AMD processors
+    # - linux/arm64 for Apple Silicon and ARM processors
     image: nara13134/onedrive-client:latest
+
     container_name: onedrive-client
+
+    # Auto-restart on failure (works on all OSes)
     restart: unless-stopped
+
+    # Port mapping (compatible with all OSes)
+    # Note: Port 80 on Windows may require admin privileges
+    # Alternative: Use "8080:80" if port 80 is blocked
     ports:
       - "80:80"
+
+    # Wait for server to be ready
     depends_on:
-      - server
+      server:
+        condition: service_healthy
+
     networks:
       - onedrive-network
 
+    # Resource limits (optional, works on all OSes)
+    # Uncomment if you want to limit resource usage
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '0.5'
+    #       memory: 256M
+    #     reservations:
+    #       cpus: '0.25'
+    #       memory: 128M
+
+# ========================================
+# Volumes
+# ========================================
+# Named volumes work identically on all platforms
+# Docker handles OS-specific path differences automatically
 volumes:
   server-uploads:
     driver: local
+    # Optional: Specify driver options for better performance
+    # driver_opts:
+    #   type: none
+    #   device: ${PWD}/uploads  # Use this to map to host directory
+    #   o: bind
 
+# ========================================
+# Networks
+# ========================================
+# Bridge network works on all platforms
 networks:
   onedrive-network:
     driver: bridge
+    # Optional: Custom network configuration
+    # driver_opts:
+    #   com.docker.network.bridge.name: onedrive-br0
+    # ipam:
+    #   config:
+    #     - subnet: 172.28.0.0/16
 
