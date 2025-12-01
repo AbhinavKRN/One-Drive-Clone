@@ -22,13 +22,23 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
+    console.log('🌐 CORS Request from origin:', origin)
+    
     // Allow requests with no origin (mobile apps, curl, Postman, etc.)
-    if (!origin) return callback(null, true)
-    // Allow if origin is in allowed list or ends with .vercel.app
-    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+    if (!origin) {
+      console.log('✅ No origin - allowing request')
       return callback(null, true)
     }
-    callback(new Error('Not allowed by CORS'))
+    
+    // Allow if origin is in allowed list or ends with .vercel.app
+    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      console.log('✅ Origin allowed:', origin)
+      return callback(null, true)
+    }
+    
+    console.log('❌ Origin blocked:', origin)
+    console.log('Allowed origins:', allowedOrigins)
+    callback(null, false)
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
